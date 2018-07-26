@@ -1,0 +1,970 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+# Linear Regression {#linearregression}
+
+
+The general form in which we specify regression models in R: 
+
+```{r}
+## response ~ terms
+## 
+## y ~ age + sex            # age + sex main effects
+## y ~ age + sex + age:sex  # add second-order interaction
+## y ~ age*sex              # second-order interaction +
+##                          # all main effects
+## y ~ (age + sex + pressure)^2
+##                          # age+sex+pressure+age:sex+age:pressure...
+## y ~ (age + sex + pressure)^2 - sex:pressure
+##                          # all main effects and all 2nd order
+##                          # interactions except sex:pressure
+## y ~ (age + race)*sex     # age+race+sex+age:sex+race:sex
+## y ~ treatment*(age*race + age*sex) # no interact. with race,sex
+## sqrt(y) ~ sex*sqrt(age) + race
+## # functions, with dummy variables generated if
+## # race is an R factor (classification) variable
+## y ~ sex + poly(age,2)    # poly generates orthogonal polynomials
+## race.sex <- interaction(race,sex)
+## y ~ age + race.sex       # for when you want dummy variables for
+##                          # all combinations of the factors
+```
+
+
+## Simple Linear Regression
+
+We start off with a simple OLS Regression. We will work with multiple data sources: 
+
+- Data from @wooldridge2015introductory : Introductory Econometrics: A Modern Approch. 
+- *More datasources in the future*
+
+To load the dataset and necessary functions: 
+
+
+```{r, echo=TRUE, results=FALSE}
+# This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
+PACKAGES<-c("wooldridge",  # Wooldrige Datasets
+            "tidyverse",  # for data manipulation and ggplots
+            "broom",  # Tidy regression output
+            "ggpubr",  # Multiple ggplots on a page. Note that, the installation of ggpubr will automatically install the gridExtra and the cowplot package; so you don’t need to re-install them. 
+            "ggfortify") # Simple ggplot recipe for lm objects)
+inst<-match(PACKAGES, .packages(all=TRUE))
+need<-which(is.na(inst))
+if (length(need)>0) install.packages(PACKAGES[need])
+lapply(PACKAGES, require, character.only=T)
+```
+
+
+Classic examples of quantities modeled with simple linear regression:
+
+
+  * College GPA ∼ SAT scores $\beta > 0$
+  * Change in GDP ∼ change in unemployment $\beta < 0$
+  * House price ∼ number of bedrooms $\beta > 0$
+  * Species heart weight ∼ species body weight  $\beta > 0$
+  * Fatalities per year ∼ speed limit  $\beta < 0$
+
+
+Notice that these simple linear regressions are simplifications of
+more complex relationships between the variables in question.
+
+In this exercise we use the dataset *ceosal1*. Let us analyse the dataset first
+
+```{r}
+data("ceosal1")
+help("ceosal1")
+?ceosal1
+```
+
+As we see from the R documentation the *ceosal1* dataset contain of a random sample of data reported in the May 6, 1991 issue of Businessweek. 
+
+
+
+To get a first look at the data you can use the `View()` function inside R Studio. 
+
+```{r, eval=FALSE}
+View(ceosal1)
+```
+
+
+
+We could also take a look at the variable names, the dimension of the data frame, and some sample observations with `str()`.
+
+```{r}
+str(ceosal1)
+```
+
+
+As we have seen before in the general R tutorial, there are a number of additional functions to access some of this information directly.
+
+
+```{r}
+dim(ceosal1)
+```
+
+
+```{r}
+nrow(ceosal1)
+```
+
+
+```{r}
+ncol(ceosal1)
+```
+
+
+```{r}
+summary(ceosal1)
+```
+
+
+The interesting task here is to determine how far a high the CEO salary is, for a given return on equity. 
+
+
+---
+
+**Your turn**
+
+
+What sign would be expect of $\beta$ (the slope)?
+
+
+A: Without seeing the data **my** prior is that $\beta > 0$. 
+
+---
+
+**Note**
+
+A simple linear model as assumes that the mean of each $y_{i}$ conditioned on $x_{i}$
+is a linear function of $x_{i}$. But notice that simple linear regressions are simplifications of
+more complex relationships between the variables in question.
+
+--- 
+
+
+```{r ceosal1, fig.cap="Relationship between ROE and Salary", }
+# Use ggplot style
+ggplot(ceosal1, aes(x = roe, y = salary)) +
+  geom_point()
+```
+
+
+Consider a simple regression model
+
+$salary = \beta_0 + \beta_1roe + u$
+
+We are concerned with the population parameter $\beta_{0}$ and $\beta_{1}$. The general form of the model. 
+
+\begin{equation}
+\hat{\beta}_{0} = \bar{y} - \hat{\beta}_{1}\bar{x}
+(\#eq:populationparameterBeta0)
+\end{equation}
+
+
+The ordinary least squares (OLS) estimators are
+
+\begin{equation}
+\hat{\beta}_{0} = \bar{y} - \hat{\beta}_{1}\bar{x}
+(\#eq:OLSestimator)
+\end{equation}
+
+Ingredients for the OLS formulas
+
+
+```{r}
+attach(ceosal1)
+cov(roe, salary)
+```
+
+```{r}
+var(roe)
+```
+
+
+```{r}
+mean(salary)
+```
+
+Manual calculation of the OLS coefficients
+
+```{r}
+b1hat <- cov(roe,salary)/var(roe)
+```
+
+```{r}
+b0hat <- mean(salary) - b1hat * mean(roe)
+```
+
+Or use the `lm()` function
+
+```{r}
+lm(salary ~ roe, data=ceosal1)
+lm1_ceosal1 <- lm(salary ~ roe, data=ceosal1) 
+```
+
+
+
+```{r}
+unique(ceosal1$roe)
+```
+
+Plot the linear regression fit the *base* r way. 
+
+```{r fig1, fig.cap='OLS regression base Rstyle', out.width='80%', fig.asp=.75, fig.align='center'}
+plot(salary~ roe, data = ceosal1,
+     xlab = "Return on equity",
+     ylab = "Salary",
+     main = "Salary vs return on equity",
+     pch  = 20,
+     cex  = 2,
+     col  = "grey")
+abline(lm1_ceosal1, lwd = 3, col = "darkorange")
+```
+
+
+Or use ggplot 
+
+
+```{r fig2, fig.cap='OLS regression ggplot2 style', out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(ceosal1, aes(x = roe, y = salary)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red")
+```
+
+Determine the names of the elements of the list using the `names()` command.
+
+```{r}
+names(lm1_ceosal1)
+```
+
+Extract one element, for example the residuals from the list object
+
+```{r}
+head(lm1_ceosal1$residuals) # head() just prints out the first 6 residual values
+```
+
+
+Another way to access stored information in *lm1_ceosal1* are the `coef()`, `resid()`, and `fitted()` functions. These return the coefficients, residuals, and fitted values, respectively.
+
+
+```{r}
+coef(lm1_ceosal1)
+```
+
+The function `summary()` is useful in many situations. We see that when it is called on our model, it returns a good deal of information.
+
+```{r}
+summary(lm1_ceosal1)
+```
+
+
+The `summary()` command also returns a list, and we can again use `names()` to learn what about the elements of this list.
+
+
+```{r}
+names(summary(lm1_ceosal1))
+```
+
+So, for example, if we wanted to directly access the value of $R^2$, instead of copy and pasting it out of the printed statement from `summary()`, we could do so.
+
+```{r}
+summary(lm1_ceosal1)$r.squared
+```
+
+---
+
+**Your turn**
+
+
+Recall that the residual sum of squares (SSR) is 
+
+\begin{equation}
+R^2 = \frac{Var(\hat{y})}{Var(y)} = 1 - \frac{Var(\hat{u})}{Var(y)} 
+\end{equation}
+
+Calculate $R^2$ manually: 
+
+```{r}
+var(fitted(lm1_ceosal1))/var(ceosal1$salary)
+```
+
+
+```{r}
+1 - var(residuals(lm1_ceosal1))/var(ceosal1$salary)
+```
+
+----
+
+Another useful function is the `predict()` function.
+
+
+```{r}
+set.seed(123)
+roe_sample <-sample(ceosal1$roe, 1)
+```
+
+Let’s make a prediction for salary when the return on equity is `r roe_sample`. 
+
+```{r}
+b0hat_sample <- mean(salary) - b1hat * roe_sample 
+```
+
+We are not restricted to observed values of the explanatory variable. Instead we can supply also our own predictor values
+
+```{r}
+predict(lm1_ceosal1, newdata = data.frame(roe = 30))
+```
+
+The above code reads “predict the salary when the return on equity is 30 using the  *lm1_ceosal1* model.”
+
+### Regression through the Origin and Regression on a Constant
+
+Regression without intercept (through origin)
+
+```{r}
+lm2 <- lm(salary ~  0 + roe, data = ceosal1)
+```
+
+
+Regression without slope
+
+```{r}
+lm3 <- lm(salary ~ 1, data = ceosal1)
+```
+
+
+```{r fig3, fig.cap='Regression through the Origin and on a Constant', out.width='80%', fig.asp=.75, fig.align='center'}
+plot(salary~ roe, data = ceosal1,
+     xlab = "Return on equity",
+     ylab = "Salary",
+     main = "Salary vs return on equity",
+     pch  = 20,
+     cex  = 2,
+     col  = "grey")
+abline(lm1_ceosal1, lwd = 3, lty = 1, col = "darkorange")
+abline(lm2,lwd = 3,  lty = 2,   col = "darkblue")
+abline(lm3, lwd = 3,  lty = 3,   col = "black")
+legend("topleft", 
+       c("full", 
+         "through origin", 
+         "constant only"), 
+       lwd =2, 
+       lty = 1:3)
+```
+
+
+### Simulating SLR
+
+##### Expected Values, Variance, and Standard Errors
+
+The **Gauss–Markov theorem** tells us that when estimating the parameters of the simple linear regression model $\beta_{0}$ and $\beta_{1}$, the $\hat{\beta}_{0}$ and $\hat{\beta}_{1}$ which we derived are the best linear unbiased estimates, or BLUE for short. (The actual conditions for the Gauss–Markov theorem are more relaxed than the SLR model.)
+
+In short those assumptions are: 
+
+- SLR.1 Linear population regression function   $y = \beta_0  + \beta_{1} \times x + u$
+- SLR.2 Random sampling of x and y from the population   
+- SLR.3 Variation in the sample values:   $x_{1}, \dots , x_{n}$ 
+- SLR.4 Zero conditional mean: $\mathbf{E}(u|x) = 0$
+- SLR.5 Homeskedasticity:   $Var(u|x) = \sigma^2$
+
+
+Recall that under **SLR.1 - SLR.4** the OLS parameter estimators are unbiased. Under **SLR.1 - SLR.4** the OLS parameter estimators have a specific sampling variance. 
+
+
+Simulating a model is an important concept. In practice you will almost never have a true model, and you will use data to attempt to recover information about the unknown true model. With simulation, we decide the true model and simulate data from it. Then, we apply a method to the data, in this case least squares. Now, since we know the true model, we can assess how well it did.
+
+Simulation also helps to grasp the concepts of estimators, estimates, unbiasedness, the sampling variance of the estimators, and the consequences of violated assumptions. 
+
+Sample size
+
+```{r}
+n <- 200
+```
+
+True parameters
+
+```{r}
+b0<- 1
+b1 <- 0.5
+sigma <- 2 # standard deviation of the error term u 
+x1 <- 5
+```
+
+Determine the distribution of the independent variable
+
+```{r}
+yhat1 <- b0 + b1 * x1 #  Note that we do not include the error term 
+```
+
+Plot a Gaussian distribution of the dependent variable based on the parameters
+
+
+```{r}
+curve(dnorm(x, mean = yhat1, sd = sigma), -5, 15, col = "blue")
+abline(v = yhat1, col = "blue", lty = 2)
+legend("topright", legend = c("f(y|x = 5)"), lty = 1, col = c("blue"))
+```
+
+This represent the theoretical (true) probability distribution of $y$, given $x$
+
+We can calculate the variance of $b_{1}$ and plot the corresponding density function. 
+
+\begin{equation}
+var(b_2) = \frac{\sigma^2}{\sum{}{}(x_1 - \bar{x})}
+(\#eq:variancebeta)
+\end{equation}
+
+Assume that $x_{2}$ represents a second possible predictor of $y$
+
+
+```{r}
+x2 <- 18
+
+x <- c(rep(x1, n/2), rep(x2, n/2))
+xbar <- mean(x)
+
+sumxbar <- sum((x-xbar)^2)
+varb <- (sigma^2)/sumxbar
+sdb <-sqrt(varb)
+leftlim <- b1-3*sdb
+rightlim <- b1+3*sdb
+```
+
+
+
+```{r fig4, fig.cap='The theoretical (true) probability density function of b1', out.width='80%', fig.asp=.75, fig.align='center'}
+curve(dnorm(x, mean = b1, sd = sdb), leftlim, rightlim,)
+abline(v = b1, col = "blue", lty = 2)
+```
+
+Draw sample of size $n$
+
+```{r}
+x <- rnorm(n, 4, sigma)
+# Another way is to assume that the values for x are fixed and know
+# x= seq(from = 0, to = 10, length.out = n)
+```
+
+
+```{r}
+u <- rnorm(n, 0, sigma)
+```
+
+
+```{r}
+y <- b0 + b1 * x + u
+```
+
+Estimate parameter by OLS
+
+```{r}
+olsreg <- lm(y ~x )
+```
+
+
+```{r}
+simulation.df <- data.frame(x,y)
+population.df <- data.frame(b0, b1)
+```
+
+
+```{r fig5, fig.cap='Simulated Sample and OLS Regression Line', out.width='80%', fig.asp=.75, fig.align='center'}
+plot(simulation.df, 
+     xlab = "x",
+     ylab = "y",
+     # main = "Simulate least squares regression",
+     pch  = 20,
+     cex  = 2,
+     col  = "grey")
+abline(olsreg, lwd = 3, lty = 1, col = "darkorange")
+abline(b0, b1,  lwd = 3,  lty = 2,   col = "darkblue")
+legend("topleft", 
+       c("OLS regression function", 
+         "Population regression function"), 
+       lwd =2, 
+       lty = 1:2)
+```
+
+
+```{r fig6, fig.cap='Simulated Sample and OLS Regression Line (gpplot Style)', out.width='80%', fig.asp=.75, fig.align='center'}
+lable1 <- "OLS regression function"
+ggplot(simulation.df, aes(x = x,  y = y)) +
+  geom_point() +
+  geom_abline(aes(intercept=b0,slope=b1,colour="Population regression function"), linetype ="dashed", show.legend  = TRUE)+
+  stat_smooth(aes(colour ="OLS regression function"), method = "lm",se=FALSE, show.legend =TRUE)+
+  labs(colour = "Regression functions" 
+       # , title = "Simulate least squares regression"
+       ) +
+  theme_bw()
+```
+
+
+Since the expected values and variances of our estimators are defined over separate random samples from the same population, it makes sense to  repeat our simulation exercise over many simulated samples. 
+
+```{r, cache=TRUE}
+# Set the random seed
+set.seed(1234567)
+
+# set sample size and number of simulations
+n<-1000; r<-10000
+
+# set true parameters: betas and sd of u
+b0<-1.0; b1<-0.5; sigma<-2
+
+# initialize b0hat and b1hat to store results later:
+b0hat <- numeric(r)
+b1hat <- numeric(r)
+
+# Draw a sample of x, fixed over replications:
+x <- rnorm(n,4,1)
+
+# repeat r times:
+for(j in 1:r) {
+  # Draw a sample of y:
+  u <- rnorm(n,0,sigma)
+  y <- b0 + b1*x + u
+  
+  # estimate parameters by OLS and store them in the vectors
+  bhat <- coefficients( lm(y~x) )
+  b0hat[j] <- bhat["(Intercept)"]
+  b1hat[j] <- bhat["x"]
+}
+
+```
+
+```{r}
+# MC estimate of the expected values:
+mean(b0hat)
+mean(b1hat)
+
+# MC estimate of the variances:
+var(b0hat)
+var(b1hat)
+
+```
+
+```{r fig7, fig.cap='Population and Simulated OLS Regression Lines', out.width='80%', fig.asp=.75, fig.align='center'}
+# Initialize empty plot
+plot( NULL, xlim=c(0,8), ylim=c(0,6), xlab="x", ylab="y")
+# add OLS regression lines
+for (j in 1:10) abline(b0hat[j],b1hat[j],col="gray")
+# add population regression line
+abline(b0,b1,lwd=2)
+# add legend
+legend("topleft",c("Population","OLS regressions"),
+       lwd=c(2,1),col=c("black","gray"))
+
+```
+
+
+Even though the loop solution is transparent, let us take a look at a different, more *modern* approach.  
+
+```{r, cache=TRUE}
+# define a function the returns the alpha -- its point estimate, standard error, etc. -- from the OLS
+x <- rnorm(n,4,1) # NOTE 1: Although a normal distribution is usually defined by its mean and variance, 'rnorm()' requires the standard deviation as input for the second moment.
+# NOTE 2: We use the same values for x in all samples since we draw them outside of the loop. 
+
+iteration <- function() {
+  u <- rnorm(n,0,sigma)
+  y <- b0 + b1*x + u
+  
+  lm(y~x) %>% 
+    broom::tidy() # %>% 
+  # filter(term == 'x') # One could only extract the slope
+}
+
+# 1000 iterations of the above simulation
+MC_coef<- map_df(1:1000, ~iteration()) 
+str(MC_coef)
+```
+
+Instead of plotting simulated and true parameter regression lines we can take a look at the kernel density of the simulated parameter estimates
+
+Figure \@ref(fig:fig8) shows the simulated distribution of $\beta_{0}$ and $\beta_{1}$ the theoretical one. 
+
+```{r}
+# plot the results
+str(MC_coef)
+MC_coef<- MC_coef %>%
+  mutate(OLScoeff =  ifelse(term == "x", "b1hat", "b0hat")) %>%  # rename the x to b1hat and (Intercept) to b0hat and create a new column 
+  mutate(Simulated = ifelse(term == "x", "b1", "b0")) #  %>% 
+```
+
+```{r fig8, fig.cap='Histogram b0 and b1 and true parameter', out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(data= MC_coef, aes(estimate)) + 
+  geom_histogram() + 
+  geom_vline(data = filter(MC_coef, OLScoeff == "b0hat"), aes(xintercept=b0), colour="pink") +
+  geom_vline(data = filter(MC_coef, OLScoeff == "b1hat"), aes(xintercept=b1), colour="darkgreen") + 
+  geom_text(data=MC_coef[3,], mapping=aes(x=estimate, y=8, label=paste("True parameter: ", MC_coef[3,7])), colour = "pink") +
+  geom_text(data=MC_coef[4,], mapping=aes(x=estimate, y=8, label=paste("True parameter: ", MC_coef[4,7])), colour = "darkgreen") +
+  facet_wrap( ~ OLScoeff, scales = "free")   +
+  labs(
+    title = "Histogram Monte Carlo Simulations and True population parameters") +
+  theme_bw()
+
+```
+
+
+```{r}
+b1_sim <- MC_coef %>% 
+  filter(Simulated == "b1")
+
+mean(b1_sim$estimate)
+var(b1_sim$estimate) == (sd(b1_sim$estimate))^2
+all.equal(var(b1_sim$estimate) , (sd(b1_sim$estimate))^2) # Floating point arithmetic!
+```
+
+```{r fig9, fig.cap='Simulated and theoretical distributions of b1', out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(data= b1_sim, aes(estimate)) +  
+  geom_density(aes(fill = Simulated), alpha = 0.2) + # computes and draws the kernel density, which is the smoothed version of the histogram
+  # stat_function(fun = dnorm, args = list(mean = mean(b1_sim$estimate), sd = sd(b1_sim$estimate)), aes(colour = "true")) +
+  stat_function(fun = dnorm, args = list(mean = 0.5, sd = sd(b1_sim$estimate)), aes(colour = "true")) +
+  # labs(
+   #  title = "Kernel Density Monte Carlo Simulations vs. True population parameters"
+    # ) +
+  scale_color_discrete(name="") + 
+  theme_bw()
+
+```
+
+
+
+**Rework this section** might have mixed up what is simulated and what is biased
+
+##### Violation of SLR.4
+
+To implement a violation of **SLR.4** (zero conditional mean) consider a case where in the population $u$ is not mean independent of $x$, for example 
+
+$$
+\mathbf{E}(u|x) = \frac{x-4}{5}
+$$
+
+
+```{r, cache=TRUE}
+# Set the random seed
+set.seed(1234567)
+
+# set sample size and number of simulations
+n<-1000; r<-10000
+
+# set true parameters: betas and sd of u
+b0<-1; b1<-0.5; su<-2
+
+# initialize b0hat and b1hat to store results later:
+b0hat <- numeric(r)
+b1hat <- numeric(r)
+
+# Draw a sample of x, fixed over replications:
+x <- rnorm(n,4,1)
+
+# repeat r times:
+for(j in 1:r) {
+# Draw a sample of y:
+u <- rnorm(n, (x-4)/5, su) # this is where manipulate the assumption of zero conditional mean
+y <- b0 + b1*x + u
+
+# estimate parameters by OLS and store them in the vectors
+bhat <- coefficients( lm(y~x) )
+b0hat[j] <- bhat["(Intercept)"]
+b1hat[j] <- bhat["x"]
+}
+```
+
+OLS coefficients
+
+```{r}
+# MC estimate of the expected values:
+mean(b0hat)
+mean(b1hat)
+
+# MC estimate of the variances:
+var(b0hat)
+var(b1hat)
+```
+
+
+The average estimates are far from the population parameters $\beta_0=1$ and $\beta_1 = 0.5$!
+
+
+##### Violation of SLR.5
+
+Homoskedasticity is not required for unbiasedness but for it is a requirement for the theorem of sampling variance. Consider the following heteroskedastic behavior of $u$ given $x$. 
+
+```{r, cache=TRUE}
+# Set the random seed
+set.seed(1234567)
+
+# set sample size and number of simulations
+n<-1000; r<-10000
+
+# set true parameters: betas and sd of u
+b0<-1; b1<-0.5; su<-2
+
+# initialize b0hat and b1hat to store results later:
+b0hat <- numeric(r)
+b1hat <- numeric(r)
+
+# Draw a sample of x, fixed over replications:
+x <- rnorm(n,4,1)
+
+# repeat r times:
+for(j in 1:r) {
+  # Draw a sample of y:
+  varu <- 4/exp(4.5) * exp(x)
+  u <- rnorm(n, 0, sqrt(varu) )
+  y <- b0 + b1*x + u
+  
+  # estimate parameters by OLS and store them in the vectors
+  lm_heterosced <- lm(y~x)
+  
+  bhat <- coefficients( lm(y~x) )
+  b0hat[j] <- bhat["(Intercept)"]
+  b1hat[j] <- bhat["x"]
+}
+```
+
+
+```{r}
+summary(lm_heterosced) # just the last sample of the MC-simulation
+```
+
+Plot the residual against the regressor suspected of creating heteroskedasticity, or more generally, the fitted values of the regression.
+
+```{r}
+res <- residuals(lm_heterosced)
+yhat <- fitted(lm_heterosced)
+```
+
+```{r fig10, fig.cap='Heteroskedasticity in the simulated data', out.width='80%', fig.asp=.75, fig.align='center'}
+par(mfrow = c(1,2))
+plot(x, res, ylab = "residuals")
+plot(yhat, res, xlab = "fitted values", ylab = "residuals")
+```
+
+
+```{r}
+# MC estimate of the expected values:
+mean(b0hat)
+mean(b1hat)
+
+# MC estimate of the variances:
+var(b0hat)
+var(b1hat)
+```
+
+Unbiasedness is provided but sampling variance is incorrect (compared to the results provided above). 
+
+### Nonlinearities
+
+Sometimes the scatter plot diagram or some theoretical considerations suggest a non-linear relationship. The most popular non-linear relationships involve logarithms of the dependent or independent variables and polynomial functions.
+
+We will use a new dataset,  *wage1*, for this section. A detailed exploratory analysis of the dataset is left to the reader. 
+
+```{r}
+data("wage1")
+attach(wage1)
+```
+
+#### Predicated variable transformation
+
+A common variance stabilizing transformation (VST) when we see increasing variance in a fitted versus residuals plot is $log(Y)$.  
+
+Related, to use the *log* of an independent variable is to make its distribution closer to the normal distribution. 
+
+```{r}
+# wage1$logwage <- log(wage1$wage) # one could also create a new variable 
+
+p1_wagehisto <- ggplot(wage1)  +
+  geom_histogram(aes(x = wage), fill = "red", alpha = 0.6) +
+  theme_bw()
+
+
+p2_wagehisto <- ggplot(wage1)  +
+  geom_histogram(aes(x = wage),  fill = "blue", alpha = 0.6) +
+  scale_x_continuous(trans='log2', "Log Wage") + # instead of creating a new variable with simply define that the x-scale undergoes a logarithmic transformation
+  theme_bw()
+
+```
+
+
+```{r fig11, fig.cap='Histogram of wage and log(wage)', out.width='80%', fig.asp=.75, fig.align='center'}
+ggarrange(p1_wagehisto, p2_wagehisto,  
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+```
+
+
+
+A model with a log transformed response: 
+
+
+\begin{equation}
+log(Y_{i}) = \beta_{0} + \beta_{1} \times x_{i} + \epsilon_{i}
+\end{equation}
+
+
+
+```{r}
+lm_wage <- lm(wage ~ educ, data = wage1)
+lm_wage1 <- lm(log(wage)~ educ, data =  wage1)
+summary(lm_wage)
+summary(lm_wage1)
+```
+
+
+Plotting Diagnostics for Linear Models
+
+```{r fig12, fig.cap='Regression diagnostics plot base R - Linear Relationship', out.width='80%', fig.asp=.75, fig.align='center'}
+plot(lm_wage)
+```
+
+
+
+```{r fig13, fig.cap='Regression diagnostics autoplot(ggplot) - Linear Relationship', out.width='80%', fig.asp=.75, fig.align='center'}
+autoplot(lm_wage, which = 1:6, colour = 'dodgerblue3',
+         smooth.colour = 'red', smooth.linetype = 'dashed',
+         ad.colour = 'blue',
+         label = FALSE,
+         label.size = 3, label.n = 5, label.colour = 'blue',
+         ncol = 3) +
+  theme_bw()
+```
+
+
+```{r fig14, fig.cap='Regression diagnostics - Non-Linear Relationship', out.width='80%', fig.asp=.75, fig.align='center'}
+autoplot(lm_wage1, which = 1:6, colour = 'dodgerblue3',
+         smooth.colour = 'red', smooth.linetype = 'dashed',
+         ad.colour = 'blue',
+         label = FALSE,
+         label.size = 3, label.n = 5, label.colour = 'blue',
+         ncol = 3) +
+  theme_bw()
+```
+
+
+
+```{r}
+p1_nonlinearities <- ggplot(wage1, aes(x = educ, y = wage )) +
+  geom_point()   + 
+  scale_y_continuous(trans='log2', "Log Wage") + 
+  stat_smooth(aes(fill="Linear Model"),size=1,method = "lm" ,span =0.3, se=F) + 
+  guides(fill = guide_legend("Model Type")) + 
+  theme_bw()
+```
+
+Note that if we re-scale the model from a log scale back to the original scale of the data, we now have 
+
+\begin{equation}
+Y_{i} = exp(\beta_{0} + \beta_{1} \times x_{i})  \times exp(\epsilon_{i})
+\end{equation}
+
+which has errors entering in a multiplicative fashion.  
+
+```{r}
+log.model.df <- data.frame(x = wage1$educ,
+                           y = exp(fitted(lm_wage1))) # This is essentially exp(b0_wage1 + b1_wage1 * wage1$educ) 
+```
+
+```{r}
+p2_nonlinearities <- ggplot(wage1, aes(x = educ, y = wage))  +
+  geom_point()   +
+  geom_line(data = log.model.df, aes(x, y, color = "Log Model"), size = 1, linetype = 2)  +
+  guides(color = guide_legend("Model Type")) + 
+  theme_bw()
+```
+
+
+
+```{r fig15, fig.cap='Wages by Education - Different transformations', out.width='80%', fig.asp=.75, fig.align='center'}
+ggarrange(p1_nonlinearities, p2_nonlinearities,  
+          labels = c("A", "B"),
+          ncol = 2, nrow = 1)
+```
+
+A: Plotting the data on the transformed log scale and adding the fitted line, the relationship again appears linear, and the variation about the fitted line looks more constant. 
+
+B: By plotting the data on the original scale, and adding the fitted regression, we see an exponential relationship. However, this is still a *linear* model, since the new transformed response, $log(Y_{i}$, is still a *linear* combination of the predictors. In other words, only $\beta$ needs to be linear, not the $x$ values. 
+
+
+*NOTE:* 
+
+The example comes from the Wooldrige book but the variable educ looks more like count data. A Poisson GLM might seems like a better choice. 
+
+
+**Quadratic Model**
+
+
+\begin{equation}
+Y_{i} = \beta_{0} + \beta_{1} \times x^2_{i})  \times \epsilon_{i}
+\end{equation}
+
+
+New dataset from Wooldrige: Collected from the real estate pages of the Boston Globe during 1990. These are homes that sold in the Boston, MA area.
+
+```{r}
+data("hprice1")
+attach(hprice1)
+```
+
+In R, independent variables involving mathematical operators can be included in regression equation with the function `I()`
+
+```{r}
+lm_hprice <- lm(price ~ sqrft, data  = hprice1)
+lm_hprice1 <- lm(price ~ sqrft + I(sqrft^2), data  = hprice1)
+```
+
+Alternatively use the `poly()` function. Be careful of the additional argument `raw`. 
+
+```{r}
+lm_hprice2 <- lm(price ~ poly(sqrft, degree = 2),  data  = hprice1) 
+lm_hprice3 <- lm(price ~ poly(sqrft, degree = 2, raw = TRUE),  data  = hprice1) # if true, use raw and not orthogonal polynomials.
+```
+
+```{r}
+unname(coef(lm_hprice1))
+unname(coef(lm_hprice2))
+unname(coef(lm_hprice3))
+
+all.equal(unname(coef(lm_hprice1)), unname(coef(lm_hprice2)))
+all.equal(unname(coef(lm_hprice1)), unname(coef(lm_hprice3)))
+
+all.equal(fitted(lm_hprice1), fitted(lm_hprice2))
+all.equal(fitted(lm_hprice1), fitted(lm_hprice3))
+```
+
+
+###  Inference for Simple Linear Regression
+
+
+> "There are three types of lies: lies, damn lies, and statistics"
+*Benjamin Disraeli*
+
+
+## Multiple Linear Regression
+
+---
+
+**Note**
+
+
+A **(general) linear model** is similar to the simple variant, but with a multivariate $x \epsilon \!R^{\rho}$ and a mean given by a hyperplane in place of a single line.
+
+  * General principles are the same as the simple case
+  * Math is more difficult because we need to use matrices
+  * Interpretation is more difficult because the $\beta_{j}$ are effects conditional on the other variables
+
+Many would retain the same signs as the simple linear regression, but the magnitudes would be smaller. In some cases, it is possible for
+the relationship to flip directions when a second (highly correlated) variable is added.  
+
+--- 
+
+The file was creating using `R` version ``r paste0(version$major, ".", version$minor)``. 
+

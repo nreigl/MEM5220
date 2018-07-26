@@ -1,0 +1,33 @@
+--- 
+title: "MEM52220 - Applied Econometrics"
+author: "Nicolas Reigl"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [MEM5220.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+description: "This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology"
+---
+
+# Introduction 
+
+Welcome to MEM5220 - Applied Econometrics. This handout was originally (and currently) designed for the use with MEM5220 - Applied Econometrics at Tallinn University of Technology. Note that this workbook is still under heavy development!  
+
+## Prerequisites
+
+A basic knowledge of the R [@team2013r] programming language  is required. 
+
+
+## Resources
+
+Our primary resource is @heiss2016using ^[Heiss (2016) builds on the popular Introductory Econometrics by Wooldridge (2016) and demonstrates how to replicate the applications discussed therein using R.]
+. For theoretical concepts see @wooldridge2015introductory. 
+
+
+## Acknowledgements
+
+I thank Kadri Männasoo and Juan Carlos Cuestas for proofreading and their useful comments.
+
+
+

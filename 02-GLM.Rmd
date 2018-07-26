@@ -1,0 +1,4 @@
+# Binary limited dependent variable models {#binarymodels}
+
+
+In this section we discuss probit and logit models
