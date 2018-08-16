@@ -1,4 +1,453 @@
-# Binary limited dependent variable models {#binarymodels}
+# Qualitative and LDV Models {#binarymodels}
+
+## Binary responses
+
+Binary dependent variables are frequently studied in applied economics. Because a dummy variable $y$ can only take values 0 and 1, its (conditional) expected value is equal to the (conditional) probability that $y=1$: 
 
 
-In this section we discuss probit and logit models
+$E(y|x) = 0 \times P(y = 0|x) + 1 \times P(y = 1|x) = P(y=1|x)$
+
+An important class of models specifies the success probability as
+
+$P(y = 1 | x) = G(\beta_0 + \beta_1 + \dots \beta_k x_k) = G(\boldsymbol{x} \boldsymbol{\beta})$
+
+
+
+The following table summarizes three examples of a generalized linear model:
+
+|                 |Linear Regression | Poisson Regression | Logistic Regression |
+|-----------------|------------------|--------------------|---------------------|
+| $Y \mid {\bf X} = {\bf x}$ | $N(\mu({\bf x}), \sigma^2)$    | $\text{Pois}(\lambda({\bf x}))$          | $\text{Bern}(p({\bf x}))$                                              |
+| **Distribution Name**                           | Normal                         | Poisson                                  | Bernoulli (Binomial)                                                   |
+| $\text{E}[Y \mid {\bf X} = {\bf x}]$            | $\mu({\bf x})$                 | $\lambda({\bf x})$                       | $p({\bf x})$                                                           |
+| **Support**                                     | Real: $(-\infty, \infty)$      | Integer: $0, 1, 2, \ldots$               | Integer: $0, 1$                                                        |
+| **Usage**                                       | Numeric Data                   | Count (Integer) Data                     | Binary (Class ) Data                                            |
+| **Link Name**                                   | Identity                       | Log                                      | Logit                                                                  |
+| **Link Function**                               | $\eta({\bf x}) = \mu({\bf x})$ | $\eta({\bf x}) = \log(\lambda({\bf x}))$ | $\eta({\bf x}) = \log \left(\frac{p({\bf x})}{1 - p({\bf x})} \right)$          |
+| **Mean Function**                               | $\mu({\bf x}) = \eta({\bf x})$ | $\lambda({\bf x}) = e^{\eta({\bf x})}$   | $p({\bf x}) = \frac{e^{\eta({\bf x})}}{1 + e^{\eta({\bf x})}} = \frac{1}{1 + e^{-\eta({\bf x})}}$ |
+
+Like ordinary linear regression, we will seek to "fit" the model by estimating the $\beta$ parameters. To do so, we will use the method of maximum likelihood.
+
+Note that a Bernoulli distribution is a specific case of a binomial distribution where the $n$ parameter of a binomial is $1$. Binomial regression is also possible, but we'll focus on the much more popular Bernoulli case.
+
+So, in general, GLMs relate the mean of the response to a linear combination of the predictors, $\eta({\bf x})$, through the use of a link function, $g()$. That is,
+
+$$
+\eta({\bf x}) = g\left(\text{E}[Y \mid {\bf X} = {\bf x}]\right).
+$$
+
+The mean is then
+
+$$
+\text{E}[Y \mid {\bf X} = {\bf x}] = g^{-1}(\eta({\bf x})).
+$$
+
+
+
+
+### Linear probability models
+
+
+If a dummy variable is used as the dependent variable $y$, we can still use OLS to estimate its relation to the regressors $x$. 
+
+
+```{r}
+library(wooldridge)
+library(car)
+library(stargazer)
+library(lmtest)
+library(tidyverse)
+library(scales)
+library(knitr)
+data("mroz", package = "wooldridge")
+# Estimate linear probability model
+linprob <- lm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,data=mroz)
+# Regression table with heteroscedasticity-robust SE and t tests:
+coeftest(linprob,vcov=hccm)
+```
+
+
+The estimated coefficient *educ* can be interpreted as: an additional year of schooling increases the probability that a woman is in the labor force *ceteris paribus* by `r percent(coef(linprob)["educ"])`. 
+
+One problem with linear probability models is that $P(y=1|x)$ is specified as a linear function of the regressors. By construction, there are more or less realistic combinations of regressor values that yield $\hat{y} <	0$ or $\hat{y} >	1$.   
+
+
+### Logit and Probit Models: Estimation
+
+
+For binary response models, the most widely used specification for G are
+
+ - the **probit** model with $G(z) = \phi(z)$, the standard cdf and 
+ - the **logit** model with $G(z) = \Lambda(z) = \frac{exp(z)}{1+ exp(z)}$, the cdf of the logistic distribution. 
+ 
+ 
+ In R  many generalized linear models can be estimated by the **glm** command. It accepts the additional option 
+ 
+  - **family = binomial (link = logit)** for the logit model or 
+  - **family = binomial (link = probit)** for the probit model 
+  
+```{r}
+# Estimate logit model
+logitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
+                                family=binomial(link=logit),data=mroz)
+# Summary of results:
+summary(logitres)
+# Log likelihood value:
+logLik(logitres) 
+# McFadden's pseudo R2:
+1 - logitres$deviance/logitres$null.deviance
+```
+
+#### Multinomial Logit
+
+A relatively common R function that fits multinomial logit models is **multinom** from package **nnet**. Let us use the dataset *nels_small* for an example of how multinom works. The variable grades in this dataset is an index, with best grades represented by lower values of grade. We try to explain the choice of a secondary institution (psechoice) only by the high school grade. The variable pschoice
+
+can take one of three values:
+
+ - psechoice = 1 no college,
+ - psechoice = 2 two year college
+ - psechoice = 3 four year college
+
+```{r}
+library(nnet)
+data("nels_small", package="PoEdata")
+```
+
+```{r}
+nels.multinom <- multinom(psechoice~grades, data=nels_small)
+summary(nels.multinom)
+```
+
+
+The output from function multinom gives coefficient estimates for each level of the response variable psechoice, except for the first level, which is the benchmark.
+
+
+```{r}
+medGrades <- median(nels_small$grades)
+fifthPercentileGrades <- quantile(nels_small$grades, .05)
+newdat <- data.frame(grades=c(medGrades, fifthPercentileGrades))
+pred <- predict(nels.multinom, newdat, "probs")
+pred
+```
+
+#### The Conditional Logit Model
+
+In the multinomial logit model all individuals faced the same external conditions and each individual’s choice is only determined by an individual’s circumstances or preferences. The conditional logit model allows for individuals to face individual-specific external conditions, such as the price of a product.
+
+Suppose we want to study the effect of price on an individual’s decision about choosing one of three brands of soft drinks:
+
+ - pepsi
+ - sevenup
+ - coke
+
+
+
+R offers several alternatives that allow fitting conditional logit models, one of which is the function MCMCmnl() from the package MCMCpack (others are, for instance, clogit() in the survival package and mclogit() in the mclogit package). The following code is adapted from @Adkins2014.
+
+```{r}
+library(MCMCpack)
+data("cola", package="PoEdata")
+N <- nrow(cola)
+N3 <- N/3
+price1 <- cola$price[seq(1,N,by=3)]
+price2 <- cola$price[seq(2,N,by=3)]
+price3 <- cola$price[seq(3,N,by=3)]
+
+bchoice <- rep("1", N3)
+for (j in 1:N3){
+    if(cola$choice[3*j-1]==1) bchoice[j] <- "2"
+    if(cola$choice[3*j]==1) bchoice[j] <- "3"
+ }
+cola.clogit <- MCMCmnl(bchoice ~
+    choicevar(price1, "b2", "1")+
+    choicevar(price2, "b2", "2")+
+    choicevar(price3, "b2", "3"),
+    baseline="3", mcmc.method="IndMH")
+```
+
+
+```{r}
+sclogit <- summary(cola.clogit)
+tabMCMC <- as.data.frame(sclogit$statistics)[,1:2]
+row.names(tabMCMC)<- c("b2","b11","b12")
+kable(tabMCMC, digits=4, align="c",
+caption="Conditional logit estimates for the 'cola' problem")
+```
+
+#### Ordered Choice Models
+
+The order of choices in these models is meaningful, unlike the multinomial and conditional logit model we have studied so far. The following example explains the choice of higher education, when the choice variable is psechoice and the only regressor is grades; the dataset, nels_small , is already known to us.
+
+The R package MCMCpack is again used here, with its function MCMCoprobit().
+
+```{r}
+library(MCMCpack)
+nels.oprobit <- MCMCoprobit(psechoice ~ grades, 
+                data=nels_small, mcmc=10000)
+sOprobit <- summary(nels.oprobit)
+tabOprobit <- sOprobit$statistics[, 1:2]
+kable(tabOprobit, digits=4, align="c",
+caption="Ordered probit estimates for the 'nels' problem")
+```
+
+
+The results from MCMCoprobit can be translated into the textbook notations as follows:
+
+ -  $\mu_1$ =− (Intercept)
+ - $\beta$ = grades
+- $\mu_2$ = gamma2 − (Intercept)
+
+The probabilities for each choice can be calculated as in the next code fragment:
+
+```{r}
+mu1 <- -tabOprobit[1]
+b <- tabOprobit[2]
+mu2 <- tabOprobit[3]-tabOprobit[1]
+xGrade <- c(mean(nels_small$grades), 
+            quantile(nels_small$grades, 0.05))
+
+# Probabilities:
+prob1 <- pnorm(mu1-b*xGrade)
+prob2 <- pnorm(mu2-b*xGrade)-pnorm(mu1-b*xGrade)
+prob3 <- 1-pnorm(mu2-b*xGrade)
+
+# Marginal effects:
+Dp1DGrades <- -pnorm(mu1-b*xGrade)*b
+Dp2DGrades <- (pnorm(mu1-b*xGrade)-pnorm(mu2-b*xGrade))*b
+Dp3DGrades <- pnorm(mu2-b*xGrade)*b
+```
+
+For instance, the marginal effect of grades on the probability of attending a four-year college for a student with average grade and for a student in the top 5 percent are, respectively, `r round(Dp3DGrades[1], digits = 3)` and `r round(Dp3DGrades[[2]], digits = 3)`.
+
+
+Probit model 
+
+```{r}
+# Estimate probit model
+probitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
+                                family=binomial(link=probit),data=mroz)
+# Summary of results:
+summary(probitres)
+# Log likelihood value:
+logLik(probitres) 
+# McFadden's pseudo R2:
+1 - probitres$deviance/probitres$null.deviance
+```
+
+### Inference
+
+We can implement the test for overall significance for the probit model using both manual and automatic calculations. 
+
+
+```{r}
+################################################################
+# Test of overall significance:
+# Manual calculation of the LR test statistic:
+probitres$null.deviance - probitres$deviance
+
+# Automatic calculations including p-values,...:
+lrtest(probitres)
+
+################################################################
+# Test of H0: experience and age are irrelevant
+restr <- glm(inlf~nwifeinc+educ+ kidslt6+kidsge6, 
+                          family=binomial(link=logit),data=mroz)
+lrtest(restr,probitres)
+
+```
+
+### Predictions
+
+The command **predict** can calculate predicted values for the estimation sample or arbitrary sets of regressor values. 
+
+We can calcualte 
+
+
+```{r}
+# predictions for two "extreme" women (run Example-17-1-1.R first!):
+xpred <- list(nwifeinc=c(100,0),educ=c(5,17),exper=c(0,30),
+              age=c(20,52),kidslt6=c(2,0),kidsge6=c(0,0))
+# Predictions from linear probability, probit and logit model:
+# (run 17-1-1.R through 17-1-4.R first to define the variables!)
+predict(linprob,  xpred,type = "response")
+predict(logitres, xpred,type = "response")
+predict(probitres,xpred,type = "response")
+```
+
+```{r}
+# Simulated data
+set.seed(12345)
+y <- rbinom(100, 1, 0.5)
+x <- rnorm(100) + 2 * y
+
+# Estimation 
+linpr.res <- lm(y~x)
+logit.res <-glm(y ~x, family = binomial(link = logit))
+probit.res <-glm(y ~x, family = binomial(link = probit))
+
+# Prediction from a regular grid of x values
+xp <- seq(from= min(x), to=max(x), length=50)
+linpr.p <- predict(linpr.res, list(x = xp), type = "response")
+logit.p <- predict(logit.res, list(x = xp), type = "response")
+probit.p <- predict(probit.res, list(x = xp), type = "response")
+```
+
+
+
+```{r fig20, fig.cap='Predictions from binary response models (simulated data)', out.width='80%', fig.asp=.75, fig.align='center'}
+plot(x,y)
+lines(xp, linpr.p, lwd=2, lty = 1)
+lines(xp, logit.p, lwd=2, lty = 2)
+lines(xp, probit.p, lwd=1, lty = 1)
+legend("topleft", 
+       c("linear prob.", "logit", "probit"), 
+       lwd = c(2,2,1), lty = c(1,2,1))
+```
+
+
+### Marginal (partial) effects
+
+Several packages provide estimates of marginal effects for different types of models. Among these are car, alr3, mfx, erer, among others. Unfortunately, none of these packages implement marginal effects correctly (i.e., correctly account for interrelated variables such as interaction terms (e.g., a:b) or power terms (e.g., I(a^2)) and the packages all implement quite different interfaces for different types of models. The **margins** and **prediction** packages are a combined effort to calculate marginal effects that include complex terms and provide a uniform interface for doing those calculations.
+
+
+To know how much a variable influences the labour force participation, one has to use `margins()` command:
+
+```{r}
+library(margins)
+library(prediction)
+effects_logit_participation <- margins(logitres) 
+summary(effects_logit_participation)
+```
+
+If one desires subgroup effects, simply pass a subset of data to the data argument:
+
+```{r}
+summary(margins(logitres, data = subset(mroz, kidslt6 == 0))) # no kids < 6 years
+```
+
+
+```{r fig21, fig.cap='Logit effect plot', out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(data = summary(effects_logit_participation)) +
+  geom_point(aes(factor, AME)) +
+  geom_errorbar(aes(x = factor, ymin = lower, ymax = upper)) +
+  geom_hline(yintercept = 0, color="lightgrey") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+You can also extract the marginal effects of a single variable, with `dydx`:
+
+```{r}
+head(dydx(mroz, logitres, "educ"))
+```
+
+The function **cplot()** provides the commonly needed visual summaries of predictions or average marginal effects conditional on a covariate.
+
+```{r fig22, fig.cap='Marginal effects for logit model', out.width='80%', fig.asp=.75, fig.align='center'}
+cplot(logitres, x = "educ", se.type = "shade")
+```
+
+
+### Count data: The Poisson Regression Model 
+
+Instead of just 0/1-coded binary data, count data can take any non-negative integer $0, 1, 2, \dots$. If they take very large numbers (like the number of students in a school), they can be approximated reasonably well as contiouns variables in a linear models and estimated using OLS. If the numbers are relativly small, this approximation might not work well. 
+
+The Poisson regression model is the most basic and convenient model explicitly model explicitly designed for count data. 
+
+Poisson regression models can be estimated in R via the **glm** function with the specification **family= poisson**
+
+Estimating the model with **quasipoisson** is to adjust for potential vioalations of the Poisson distribution. 
+
+```{r}
+data(crime1, package='wooldridge')
+
+# Estimate linear model
+lm.res      <-  lm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                    black+hispan+born60, data=crime1)
+# Estimate Poisson model
+Poisson.res <- glm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                    black+hispan+born60, data=crime1, family=poisson)
+# Quasi-Poisson model
+QPoisson.res<- glm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                    black+hispan+born60, data=crime1, family=quasipoisson)
+```
+
+
+```{r}
+stargazer(lm.res,Poisson.res,QPoisson.res,type="text",keep.stat="n")
+```
+
+By construction, the parameter estiamtes are the same but the standard errors are larger for teh QMLE. 
+
+
+### Corner Solution Response: The Tobit Model
+
+Corner solutions describe situations where the variable of interest is continous but restricted in range. Typically, it cannot be negative. 
+
+The package **censReg** offers the command **censReg** for estimating a Tobit model. 
+
+
+We have already estimated labor supply mdoeld for the women in the dataset *mroz*, ignoring the fact that the hours worked is necessarily non-negative. 
+
+```{r}
+# Estimate Tobit model using censReg:
+library(censReg)
+TobitRes <- censReg(hours~nwifeinc+educ+exper+I(exper^2)+ 
+                                    age+kidslt6+kidsge6, data=mroz )
+summary(TobitRes)
+
+# Partial Effects at the average x:
+margEff(TobitRes)
+```
+
+Another alternative for estimating Tobit models is the command **survreg** from the package survival. It is less straightforward to use but more flexible. 
+
+```{r}
+# Estimate Tobit model using survreg:
+library(survival)
+res <- survreg(Surv(hours, hours>0, type="left") ~ nwifeinc+educ+exper+
+             I(exper^2)+age+kidslt6+kidsge6, data=mroz, dist="gaussian")
+summary(res)
+```
+
+
+
+### Censored and Truncated Regression Models
+
+Censored regression models are closely related to Tobit models. In the basic Tobit model we observe $y = y^*$ in the "uncensored" cases with $y^* > 0$ and we only know an upper bound for $y^* \le 0$ if we observe $y 0 = $.  
+
+
+In this example we are are interested in criminal prognosis of individuals released from prison. 
+
+
+```{r}
+data(recid, package='wooldridge')
+
+# Define Dummy for UNcensored observations
+recid$uncensored <- recid$cens==0
+# Estimate censored regression model:
+res<-survreg(Surv(log(durat),uncensored, type="right") ~ workprg+priors+
+                     tserved+felon+alcohol+drugs+black+married+educ+age, 
+                     data=recid, dist="gaussian")
+# Output:
+summary(res)
+
+```
+
+### The Heckman, or Sample Selection Model
+
+The models are useful when the sample selection is not random, but whehter an individual is in the sample depends on individual characteristics. For example, when studying wage determination for married women, some women are not in the labour force, therefore their wages are zero.
+
+The Heckit procedure involves two steps, estimating both the selection equation and the equation of interest. Function selection() in the sampleSelection package performs both steps; therefore, it needs both equations among its arguments. (The selection equation is, in fact, a probit model.)
+
+
+```{r}
+library(sampleSelection)
+data("mroz", package='wooldridge')
+
+wage.heckit <- selection(inlf~age+educ+I(kidslt6+kidsge6)+mtr,
+                         log(wage)~educ+exper, 
+                         data=mroz, method="ml")
+summary(wage.heckit)
+```
+

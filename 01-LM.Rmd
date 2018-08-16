@@ -55,7 +55,20 @@ PACKAGES<-c("wooldridge",  # Wooldrige Datasets
             "tidyverse",  # for data manipulation and ggplots
             "broom",  # Tidy regression output
             "ggpubr",  # Multiple ggplots on a page. Note that, the installation of ggpubr will automatically install the gridExtra and the cowplot package; so you don’t need to re-install them. 
-            "ggfortify") # Simple ggplot recipe for lm objects)
+            "ggfortify", # Simple ggplot recipe for lm objects) 
+            "plot3D",  #  3D graphs
+            "car", # Companion to applied regression
+            "knitr", # knit functions
+            # "kableExtra", # extended knit functions for objects exported from other packages
+            "huxtable", #  Regression tables, broom compatible
+            "stargazer", # Regression tables
+            "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
+            "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+          "summarytools", # Report regression summary tables
+          "MCMCpack", # Contains functions to perform Bayesian inference using posterior simulation for a number of ssatistical models.
+          "sampleSelection", # Two-step and maximum likelihood estimation of Heckman-type sample selection models
+           "scales", # scale helper functions such as percent 
+            "magrittr") #  pipes
 inst<-match(PACKAGES, .packages(all=TRUE))
 need<-which(is.na(inst))
 if (length(need)>0) install.packages(PACKAGES[need])
@@ -66,11 +79,11 @@ lapply(PACKAGES, require, character.only=T)
 Classic examples of quantities modeled with simple linear regression:
 
 
-  * College GPA ∼ SAT scores $\beta > 0$
-  * Change in GDP ∼ change in unemployment $\beta < 0$
-  * House price ∼ number of bedrooms $\beta > 0$
-  * Species heart weight ∼ species body weight  $\beta > 0$
-  * Fatalities per year ∼ speed limit  $\beta < 0$
+* College GPA ∼ SAT scores $\beta > 0$
+* Change in GDP ∼ change in unemployment $\beta < 0$
+* House price ∼ number of bedrooms $\beta > 0$
+* Species heart weight ∼ species body weight  $\beta > 0$
+* Fatalities per year ∼ speed limit  $\beta < 0$
 
 
 Notice that these simple linear regressions are simplifications of
@@ -502,7 +515,7 @@ ggplot(simulation.df, aes(x = x,  y = y)) +
   stat_smooth(aes(colour ="OLS regression function"), method = "lm",se=FALSE, show.legend =TRUE)+
   labs(colour = "Regression functions" 
        # , title = "Simulate least squares regression"
-       ) +
+  ) +
   theme_bw()
 ```
 
@@ -628,8 +641,8 @@ ggplot(data= b1_sim, aes(estimate)) +
   # stat_function(fun = dnorm, args = list(mean = mean(b1_sim$estimate), sd = sd(b1_sim$estimate)), aes(colour = "true")) +
   stat_function(fun = dnorm, args = list(mean = 0.5, sd = sd(b1_sim$estimate)), aes(colour = "true")) +
   # labs(
-   #  title = "Kernel Density Monte Carlo Simulations vs. True population parameters"
-    # ) +
+  #  title = "Kernel Density Monte Carlo Simulations vs. True population parameters"
+  # ) +
   scale_color_discrete(name="") + 
   theme_bw()
 
@@ -667,14 +680,14 @@ x <- rnorm(n,4,1)
 
 # repeat r times:
 for(j in 1:r) {
-# Draw a sample of y:
-u <- rnorm(n, (x-4)/5, su) # this is where manipulate the assumption of zero conditional mean
-y <- b0 + b1*x + u
-
-# estimate parameters by OLS and store them in the vectors
-bhat <- coefficients( lm(y~x) )
-b0hat[j] <- bhat["(Intercept)"]
-b1hat[j] <- bhat["x"]
+  # Draw a sample of y:
+  u <- rnorm(n, (x-4)/5, su) # this is where manipulate the assumption of zero conditional mean
+  y <- b0 + b1*x + u
+  
+  # estimate parameters by OLS and store them in the vectors
+  bhat <- coefficients( lm(y~x) )
+  b0hat[j] <- bhat["(Intercept)"]
+  b1hat[j] <- bhat["x"]
 }
 ```
 
@@ -957,14 +970,1014 @@ all.equal(fitted(lm_hprice1), fitted(lm_hprice3))
 
 A **(general) linear model** is similar to the simple variant, but with a multivariate $x \epsilon \!R^{\rho}$ and a mean given by a hyperplane in place of a single line.
 
-  * General principles are the same as the simple case
-  * Math is more difficult because we need to use matrices
-  * Interpretation is more difficult because the $\beta_{j}$ are effects conditional on the other variables
+* General principles are the same as the simple case
+* Math is more difficult because we need to use matrices
+* Interpretation is more difficult because the $\beta_{j}$ are effects conditional on the other variables
 
 Many would retain the same signs as the simple linear regression, but the magnitudes would be smaller. In some cases, it is possible for
 the relationship to flip directions when a second (highly correlated) variable is added.  
 
 --- 
+
+\begin{equation}
+y = \beta_{0} + \beta_{1}x_{1} +  \beta_{2}x_{2} + \dots + \beta_{k}x_{k} + u   
+(\#eq:multipleregression)
+\end{equation}
+
+The next example from Wooldrige relates the college GPA (*cloGPA*) to the high school GPA ("hsGPA") and achievment test score (*ACT*) for a sample of 141 students.
+
+```{r}
+data("gpa1")
+attach(gpa1)
+```
+
+
+Obtain parameter estimates
+```{r}
+GPAres <- lm(colGPA ~ hsGPA + ACT, data = gpa1)
+summary(GPAres)
+coef(GPAres)[[1]]
+
+```
+
+In the multiple linear regression setting, some of the interpretations of the coefficients change slightly. Here, $\hat\beta_{0} =$ `r coef(GPAres)[[1]]` is our estimate for $\beta_{0}$ when all of the predictors are 0. In this example this makes sense but think of the following example: 
+
+---
+
+**Your turn**
+
+Assume the following model: 
+
+```{r}
+mpg_model = lm(hp ~ wt + cyl, data = mtcars)
+coef(mpg_model)
+```
+
+How do you interpret the intercept coefficient estimate? 
+
+
+A: Here, $\hat\beta_{0} =$ `r coef(mpg_model)[[1]]` is our estimate for $\beta_{0}$, the mean gross horsepower for a car that weights 0 pounds and has 0 cylinders. We see our estimate here is negative, which is a physical impossibility. However, this isn’t unexpected, as we shouldn’t expect our model to be accurate for cars which weight 0 pounds and have no cylinders to propel the engine. 
+
+---
+
+
+```{r fig16, fig.cap='College GPA  High School GPA + Achievment test score', out.width='80%', fig.asp=.75, fig.align='center'}
+with (gpa1, {
+  # find min-max seq for grid construction
+  min_hsGPA <- min(gpa1$hsGPA)
+  max_hsGPA <- max(gpa1$hsGPA)
+  min_ACT <- min(gpa1$ACT)
+  max_ACT <- max(gpa1$ACT)
+  
+  
+  # linear regression
+  fit <- lm(colGPA ~ hsGPA + ACT)
+  
+  # predict values on regular xy grid
+  hsGPA.pred <- seq(min_hsGPA, max_hsGPA, length.out = 30)
+  ACT.pred <- seq(min_ACT, max_ACT, length.out = 30)
+  xy <- expand.grid(hsGPA = hsGPA.pred, 
+                    ACT = ACT.pred)
+  
+  colGPA.pred <- matrix (nrow = 30, ncol = 30, 
+                         data = predict(fit, newdata = data.frame(xy), 
+                                        interval = "prediction"))
+  
+  # fitted points for droplines to surface
+  fitpoints <- predict(fit) 
+  
+  scatter3D(z = colGPA, x = hsGPA, y = ACT, pch = 18, cex = 2, 
+            theta = 20, phi = 20, ticktype = "detailed",
+            xlab = "hsGPA", ylab = "ACT", zlab = "colGPA",  
+            surf = list(x = hsGPA.pred, y = ACT.pred, z = colGPA.pred,  
+                        facets = NA, fit = fitpoints),
+            main = "colGPA")
+  
+})
+```
+
+
+The data points ($x_{i1}$,$x_{i2}$,$y_{i}$) now exist in 3-dimensional space, so instead of fitting a line to the data, we will fit a plane.
+
+### Ceteris Paribus Interpretation and Omitted Variable bias
+
+
+Consider a regression with two explanatory variables
+
+
+\begin{equation}
+\hat{y} = \hat{\beta}_{0} + \hat{\beta}_{1}x_{1} +  \hat{\beta}_{2}x_{2}    
+(\#eq:lmtwoexplanatory)
+\end{equation}
+
+
+```{r}
+# Parameter estimates for full and simple model:
+beta.hat <- coef( lm(colGPA ~ ACT+hsGPA, data=gpa1) )
+beta.hat
+```
+
+Now, lets ommit one variable in the regression
+
+\begin{equation}
+\hat{y} = \hat{\beta}_{0} + \hat{\beta}_{1}x_{1}    
+(\#eq:lmomitted)
+\end{equation}
+
+
+
+```{r}
+# Relation between regressors:
+delta.tilde <- coef( lm(hsGPA ~ ACT, data=gpa1) )
+delta.tilde
+```
+
+
+
+The parameter $\hat\beta_1$ is the estimated effect of increasing $x_1$ by one unit (and **NOT** keeping $x_2$ fixed). It can be related to $\hat\beta_1$ using the formula
+
+\begin{equation}
+\hat{y} = \hat{\beta}_{0} + \hat{\beta}_{1} x_{1} +  \hat{\beta}_{2}  \tilde\delta_{1}
+(\#eq:lmommited)
+\end{equation}
+
+
+where
+
+\begin{equation}
+\hat{x}_2 = \tilde\delta_{0} + \tilde\delta_{1} x_{1}
+(\#eq:lmomitted2)
+\end{equation}
+
+
+
+```{r}
+
+# Omitted variables formula for beta1.tilde:
+beta.hat["ACT"] + beta.hat["hsGPA"]*delta.tilde["ACT"]
+
+# Actual regression with hsGPA omitted:
+lm(colGPA ~ ACT, data=gpa1)
+
+```
+
+In this example, the indirect effect is actually stronger than the direct effect. *ACT* predicts *colGPA* mainly because it is related to *hsGPA* which in turn is strongly related to *colGPA*. 
+
+
+### Standard errors, Multicollinearity and VIF
+
+We know already how we can extract the standard errors  
+```{r}
+GPAres <- lm(colGPA ~ hsGPA + ACT, data = gpa1)
+SER<-summary(GPAres)$sigma
+```
+
+
+The variance inflation factor,  **VIF**, accounts for (imperfect) multicollinearity.If $x_t$ is highly related to the other regressors, $R^2_j$ and therefore also $VIF_j$ and the variance of $\hat\beta_j$ are large. 
+
+
+\begin{equation}
+\frac{1}{1-R^2_j}
+(\#eq:VIF)
+\end{equation}
+
+```{r}
+# regressing hsGPA on ACT for calculation of R2 & VIF
+( R2.hsGPA  <- summary( lm(hsGPA~ACT, data=gpa1) )$r.squared )
+( VIF.hsGPA <- 1/(1-R2.hsGPA) )
+```
+
+The **car** package implements the command `vif()` for each regressor
+
+
+```{r}
+vif(GPAres)
+```
+
+
+### Multiple Regression Analysis: OLS Asymptotics
+
+
+**Note**: Should we cover this? Most has been covered in SLR
+
+
+
+### Reporting Regression Results 
+
+As we start moving towards the comparing different regression models this section provides a discussion on how to report regression reports in `R`. Depending on your script (R scripts, R Markdown, bookdown) and what your desired output format is (LaTeX, word, html) the exact approach might differ. There are multiple packages to format regression or table output, most notabley *stargazer*^[Stargazer supports ton of options, including theming the LaTex output to journal styles. However, stargazer was written before R Markdown was really a thing, so it has excellent support for HTML and LaTeX output, but that’s it. Including stargazer tables in an R Markdown document is a hassle. *huxtable* on the the contrary plays really nice with *broom* and the *tidyverse*. For more info see Andrew Heiss [blog](https://www.andrewheiss.com/blog/2018/03/08/amelia-broom-huxtable/)], *huxtable* , *Hmisc* and *xtable*. One can also tidy the the regression output as well as tables with *broom* or *summarytool*. The wrapper `knitr::kable()` is a support function that renders the table in an R Markdown in a pretty way. 
+
+
+
+
+#### Table
+
+
+
+```{r}
+knitr::kable(
+  head(gpa1[,1:8], 10), booktabs = TRUE, 
+  caption = "A table of the first eight columns and ten rows of the gpa1 data."
+)
+```
+
+
+
+Reporting summary statistics (transposed)
+```{r}
+descr(gpa1[,1:3], stats = c("mean", "sd", "min", "med", "max"), transpose = TRUE, 
+      omit.headings = TRUE, style = "rmarkdown")
+```
+
+Including the `knitr::kable()` wrapper
+
+```{r}
+knitr::kable(
+  descr(gpa1[,1:3], stats = c("mean", "sd", "min", "med", "max"), transpose = TRUE, 
+        omit.headings = TRUE, style = "rmarkdown")
+)
+```
+
+
+
+```{r}
+model1 <- lm(colGPA ~ hsGPA , data = gpa1)
+model2 <- lm(colGPA ~ hsGPA + ACT, data = gpa1)
+model3 <- lm(colGPA ~ hsGPA + ACT + age, data = gpa1)
+```
+
+
+```{r, is_latex_output = TRUE, results='asis'}
+invisible(stargazer(
+    list(model1, 
+         model2,
+         model3)
+    ,keep.stat = c("n", "rsq"), type = "latex", header = FALSE))# to have number of observations and R^2 reported
+```
+
+```{r, is_html_output = TRUE, results='asis'}
+stargazer(
+    list(model1, 
+         model2,
+         model3)
+    ,keep.stat = c("n", "rsq"), type = "html", header = FALSE) # to have number of observations and R^2 reported
+```
+
+
+### Model Formulae
+
+#### Arithmetic operations within a formula
+
+A model relating to birth weight to cigarette smoking of the mother during pregnancy and the family income. 
+
+```{r}
+data("bwght")
+attach(bwght)
+```
+
+```{r}
+lm1 <- lm(bwght ~ cigs + faminc, data = bwght)
+# Weights in pounds, direct way
+lm2 <- lm(I(bwght/16) ~ cigs + faminc, data = bwght)
+# Packs of cigarettes
+lm3 <- lm(bwght ~ I(cigs/20) + faminc, data = bwght)
+```
+
+See table \@ref(tab:foo).
+
+```{r eval=is_html_output()}
+huxreg(lm1, lm2, lm3) %>%  
+    set_caption('(#tab:foo) Foo') 
+
+```
+
+
+```{r eval=is_latex_output(), results='asis'}
+invisible(stargazer(
+    list(lm1, 
+         lm2,
+         lm3)
+    ,keep.stat = c("n", "rsq"), type = "latex", header = FALSE))# to have number of observations and R^2 reported}
+
+```
+
+
+Deviding the dependent variable by 16 changes all coefficients by the same facor $\frac{1}{16}$ and deviding the regressor by 20 changes its coefficients by the factor 20. Other statistics like $R^2$ are uneffected. 
+
+
+#### Standardization: Beta coefficients
+
+
+The standardized dependent variable $y$ and regressor $x_1$ are
+
+
+\begin{equation}
+z_y=\frac{y-\bar{y}}{sd(y)}
+\end{equation}
+
+
+and 
+
+
+\begin{equation}
+z_{x1}=\frac{x_{1}-\bar{x}_{x1}}{sd(x_{1})}
+\end{equation}
+
+They measure by how many *standard deviations* $y$ changes as the respective indepdent variable increases by *one standard deviation*. 
+
+
+The model does not include a constant because all averages are removed in the standardization. 
+
+
+```{r}
+data(hprice2)
+```
+
+```{r}
+lm(scale(price)~0 +  scale(crime) +  scale(rooms) + scale(dist) +  scale(stratio), data = hprice2)
+```
+
+#### Logarithms, Quadratics and Polynomials
+
+The model for houseprices as in Wooldrige: 
+
+\begin{equation}
+log(price) = \beta_0 +  \beta_1 log(nox) + \beta_2 log(dist) + \beta_3 rooms + \beta_4 rooms^{2} + \beta_5 stratio + u 
+\end{equation}
+
+
+```{r}
+lm_hprice2 <- lm(log(price)~  log(nox) +  log(dist) + rooms + I(rooms^2) + stratio, data = hprice2)
+summary(lm_hprice2)
+```
+
+ - The quadratic term of rooms significantly positive coefficient $\hat\beta_4$  implying that the semi-elasticity increases with more rooms
+ - The negative coefficient for rooms indicates that for small number of rooms the price decreases and 
+ - the positive coefficient for $rooms^2$ implies that for "large" value of rooms the price increases
+ - The number of rooms implying the smallest price can be found as
+ 
+ 
+\begin{equation}
+rooms^{\star} = \frac{-\beta_3}{2\beta_4} \approx 4.4
+\end{equation}
+
+
+```{r}
+beta3 <- lm_hprice2$coefficients[[4]]
+beta4 <- lm_hprice2$coefficients[[5]]
+-beta3 / (2 * beta4)
+```
+
+#### Interaction terms
+
+
+Consider the following model,
+
+
+\begin{equation}
+Y = {\beta}_{0} + {\beta}_{1}x_{1} +  {\beta}_{2}x_{2} + {\beta}_{3}x_{1}x_{2} + u    
+(\#eq:interactionterm)
+\end{equation}
+
+where $x_1$,  $x_2$, and $Y$ are the same as before, but we have added a new interaction term $x_1x_2$ which multiplies $x_1$ and $x_2$, so we also have an additional $\beta$ parameter $\beta_3$. 
+
+This model essentially creates two slopes and two intercepts, $\beta_2$ being the difference in intercepts and $\beta_3$ being the difference in slopes.
+
+Recall that R reads **x1**x**x2** as $y ~ x_1+x_2+x_1x_2$ and **x_1:x_2** as $y ~ x_1x_2$.
+
+```{r}
+data("attend")
+```
+
+
+```{r}
+# Estimate model with interaction effect:
+(myres<-lm(stndfnl~atndrte*priGPA+ACT+I(priGPA^2)+I(ACT^2), data=attend))
+
+# Estimate for partial effect at priGPA=2.59:
+b <- coef(myres)
+b["atndrte"] + 2.59*b["atndrte:priGPA"] 
+
+# Test partial effect for priGPA=2.59:
+library(car)
+linearHypothesis(myres,c("atndrte+2.59*atndrte:priGPA"))
+```
+
+### MLR Prediction
+
+```{r}
+data(gpa2)
+```
+
+```{r}
+# Regress and report coefficients
+reg <- lm(colgpa~sat+hsperc+hsize+I(hsize^2),data=gpa2)
+reg
+
+# Generate data set containing the regressor values for predictions
+cvalues <- data.frame(sat=1200, hsperc=30, hsize=5)
+
+# Point estimate of prediction
+predict(reg, cvalues)
+
+# Point estimate and 95% confidence interval
+predict(reg, cvalues, interval = "confidence")
+
+# Define three sets of regressor variables
+cvalues <- data.frame(sat=c(1200,900,1400), hsperc=c(30,20,5), 
+                                                 hsize=c(5,3,1))
+cvalues
+# Point estimates and 99% confidence intervals for these
+predict(reg, cvalues, interval = "confidence", level=0.99)
+```
+
+
+#### Prediction intervals
+
+```{r}
+# Regress (as before)
+reg <- lm(colgpa~sat+hsperc+hsize+I(hsize^2),data=gpa2)
+
+# Define three sets of regressor variables (as before)
+cvalues <- data.frame(sat=c(1200,900,1400), hsperc=c(30,20,5), 
+                                                 hsize=c(5,3,1))
+
+# Point estimates and 95% prediction intervals for these
+predict(reg, cvalues, interval = "prediction")
+```
+
+---
+
+Not covered 
+
+ - 6.2.3 Effect Plots for Nonlinear Specification
+
+---
+
+
+## MLR Analysis with Qualitative Regressors
+
+### Dummy variabes
+
+```{r}
+data(wage1)
+
+```
+
+```{r}
+
+lm1_wage1 <- lm(wage ~ female+educ+exper+tenure, data=wage1)
+summary(lm1_wage1)
+
+```
+
+On average a woman makes \$ `r -1 * round(coefficients(lm_wage1)[[2]])` per less than a man with the *same* education, experience, and tenure. 
+
+```{r}
+lm2_wage1 <- lm(log(wage)~married*female+educ+exper+I(exper^2)+tenure+I(tenure^2), data=wage1)
+summary(lm2_wage1)
+```
+
+
+
+---
+
+**Your turn**
+
+  1. What is the refernce group in this model? 
+  2. Ceteris paribus, how much more wage do single males make relative to the reference group?
+  3. Ceteris paribus, how much more wage do single females make relative to the reference group?
+  4. Ceteris paribus, how much less do married females make than single females?
+  5. Do the results make sense economically. What socio-economic factors could explain the results? 
+
+```{r}
+df_lm2_wage1 <- tidy(lm2_wage1)
+# Singe male
+marriedmale <- df_lm2_wage1 %>%
+  filter(term == "married") %>% 
+  dplyr::select(estimate) %>% 
+  pull() # pull out the single coefficient value of the dataframe
+# Single female
+singlefemale <- df_lm2_wage1 %>%
+  filter(term == "female") %>% 
+  dplyr::select(estimate) %>% 
+  pull() # pull out the single coefficient value of the dataframe
+marriedfemale <- df_lm2_wage1 %>%
+  filter(term == "married:female") %>% 
+  dplyr::select(estimate) %>% 
+  pull() # pull out the single coefficient value of the dataframe
+married<- df_lm2_wage1 %>%
+  filter(term == "married") %>% #  
+  dplyr::select(estimate) %>% 
+  pull() # pull out the single coefficient value of the dataframe
+```
+
+
+A: 
+ 
+ 1. Reference group: *single* and *male*
+ 2. Cp. married males make `r percent(marriedmale)` more than single males. 
+ 3. Cp. a single female makes `r percent(singlefemale)` less than the reference group. 
+ 3. Married females make `r percent(abs(marriedfemale) - abs(married))` less than single females. 
+ 4. There seems to be a marriage premium for men but for women the marriage premium is negative. 
+ 
+---
+
+### Logical variables
+
+```{r}
+# replace "female" with logical variable
+wage1$female <- as.logical(wage1$female)
+table(wage1$female)
+  
+# regression with logical variable
+lm(wage ~ female+educ+exper+tenure, data=wage1)
+```
+
+
+### Factor variables
+
+As discussed in the R introduction, categorial variables encoded as factors are special *animals* in R. They are immensely useful in a regression when you have a categorical variable with many levels (e.g. “Very Bad”, “Bad”, “Good”, “Very Good”) but can create  a set of subtile issues. Here, we discuss the base R way and the more robust tidyverse way of dealing with factors in the area of regression modelling.    
+
+Factor variables can be directly added to the list of regressors. R is clever enough to implicitly add $g-1$ dummy variables if the factor has $g$ outcomes. 
+
+```{r}
+data(CPS1985,package="AER")
+str(CPS1985)
+# Table of categories and frequencies for two factor variables:
+table(CPS1985$gender)
+table(CPS1985$occupation)
+levels(CPS1985$occupation)
+levels(CPS1985$gender)
+```
+
+
+```{r}
+# Directly using factor variables in regression formula:
+lm(log(wage) ~ education+experience+gender+occupation, data=CPS1985)
+
+# Fragile method (base R)
+# Manually redefine the  reference category: 
+CPS1985$gender <- relevel(CPS1985$gender,"female")
+CPS1985$occupation <- relevel(CPS1985$occupation,"management")
+
+# Rerun regression:
+lm(log(wage) ~ education+experience+gender+occupation, data=CPS1985)
+```
+
+```{r}
+# Robust method (tidyverse)
+# Manually redefine the  reference category (back to default): 
+CPS1985 <- CPS1985 %>% 
+  mutate(gender = fct_relevel(gender, "female")) %>% 
+  mutate(occupation = fct_relevel(occupation, "worker"))
+
+lm(log(wage) ~ education+experience+gender+occupation, data=CPS1985)
+```
+
+#### Breaking a numeric variable into categories
+
+```{r}
+data(lawsch85)
+str(lawsch85$rank)
+# Define cut points for the rank
+cutpts <- c(0,10,25,40,60,100,175)
+
+# Create factor variable containing ranges for the rank
+lawsch85$rankcat <- cut(lawsch85$rank, cutpts)
+
+# Display frequencies
+table(lawsch85$rankcat)
+
+# Choose reference category
+lawsch85$rankcat <- relevel(lawsch85$rankcat,"(100,175]")
+
+# Run regression
+(res <- lm(log(salary)~rankcat+LSAT+GPA+log(libvol)+log(cost), data=lawsch85))
+
+# ANOVA table
+car::Anova(res)
+```
+
+The regression results imply that graduates from the top 100 schools collect a starting salary which is around 70% higher than those of the schools below rank 100. This approximation is inaccurate with these large numbers and the coefficient of 0.7 actually implies a difference of ex(0.7-1) = 1.103 or 101.3%. 
+
+### Interactions and differences in regression functions across groups
+
+Dummy variables and factor variables can be interacted just like any other variable 
+
+ - Use the **subset** option of `lm` to directly define the estimation sample
+ - The dummy variable *female* is interacted with all other regressor
+ - The *F* test for all interaction effects is performed using the function `linearHypothesis` from the **car** package
+ 
+```{r}
+data(gpa3)
+
+# Model with full interactions with female dummy (only for spring data)
+reg<-lm(cumgpa~female*(sat+hsperc+tothrs), data=gpa3, subset=(spring==1))
+summary(reg)
+
+# F-Test from package "car". H0: the interaction coefficients are zero
+# matchCoefs(...) selects all coeffs with names containing "female"
+
+linearHypothesis(reg, matchCoefs(reg, "female"))
+```
+
+#### Visualizing coefficients
+
+```{r}
+treg <- tidy(reg, conf.int = TRUE)
+```
+
+```{r fig17, fig.cap='Coefficient plots', out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(treg, aes(estimate, term, color = term)) +
+    geom_point() +
+    geom_errorbarh(aes(xmin = conf.low, xmax = conf.high))  +
+    geom_vline(xintercept = 0, color = "grey")
+```
+
+
+
+## Heteroskedasticity
+
+The homoskedasticity assumptions SLR.5 and MLR.5 require that the variance of the error term is unrelated to the regressors, i.e.
+
+\begin{equation}
+Var(u|x_1, \dots , x_n) = \sigma^2  
+\end{equation}
+
+Unbiasedness and consistency do not depend on this assumption, but the sampling distribution does. If homoskedasticity is violated, the standard errors are invalid and all inferencences from $t$, $F$, and other tests based on them are unreliable.  
+
+There are various ways of dealing with heteroskedasticity in R. The **car** package provides linear hypothesis. 
+For high-dimensional fixed effects the **lfe** package is a good alternative. It also allows to specify clusters as part of the formula. 
+A good balance between functionality and ease of use is provided by the **sandwich** package @Zeileis2017.
+
+### Spotting Heteroskedasticity in Scatter Plots
+
+
+```{r fig18, fig.cap='Heteroskedasticity in the ‘food’ data', out.width='80%', fig.asp=.75, fig.align='center'}
+data("food",package="PoEdata")
+mod1 <- lm(food_exp~income, data=food)
+plot(food$income,food$food_exp, type="p",
+     xlab="income", ylab="food expenditure")
+abline(mod1)
+```
+
+Another useful method to visualize possible heteroskedasticity is to plot the residuals against the regressors suspected of creating heteroskedasticity, or, more generally, against the fitted values of the regression. 
+
+```{r fig19, fig.cap='Residual plots in the ‘food’ model ', out.width='80%', fig.asp=.75, fig.align='center'}
+res <- residuals(mod1)
+yhat <- fitted(mod1)
+plot(food$income,res, xlab="income", ylab="residuals")
+plot(yhat,res, xlab="fitted values", ylab="residuals")
+```
+
+### Heteroskedasticity Tests
+
+```{r}
+data(gpa3, package='wooldridge')
+
+
+# Estimate model (only for spring data)
+reg <- lm(cumgpa~sat+hsperc+tothrs+female+black+white, 
+                                     data=gpa3, subset=(spring==1))
+
+
+# Breusch-Pagan (BP) Test
+
+bptest(reg)
+```
+
+
+The R function that does this job is hccm(), which is part of the car package and yields a heteroskedasticity-robust coefficient covariance matrix. This matrix can then be used with other functions, such as coeftest() (instead of summary), waldtest() (instead of anova), or linearHypothesis() to perform hypothesis testing. The function hccm() takes several arguments, among which is the model for which we want the robust standard errors and the type of standard errors we wish to calculate.
+
+```{r}
+# Usual SE:
+coeftest(reg)
+
+# Refined White heteroscedasticity-robust SE:
+coeftest(reg, vcov=hccm)
+cov3 <- hccm(reg, type="hc3") # hc3 is the standard method
+ref.HC3 <- coeftest(reg, vcov.=cov3)
+
+# Supply other White corrections
+cov1 <- hccm(reg, type="hc1")
+ref.HC1 <- coeftest(reg, vcov.=cov1)
+```
+
+
+
+
+Another way of dealing with heteroskedasticity is to use the lmrob() function from the {robustbase} package^[This example has been adapted from the blogpost of @Rodrigues]. This package is quite interesting, and offers quite a lot of functions for robust linear, and nonlinear, regression models. Running a robust linear regression is just the same as with lm():
+
+
+```{r}
+library(robustbase)
+regrobfit <- lmrob(cumgpa~sat+hsperc+tothrs+female+black+white, 
+                                     data=gpa3, subset=(spring==1))
+
+summary(regrobfit)
+```
+
+
+This however, gives you different estimates than when fitting a linear regression model. The estimates should be the same, only the standard errors should be different. This is because the estimation method is different, and is also robust to outliers (at least that’s my understanding, I haven’t read the theoretical papers behind the package yet).
+
+Finally, it is also possible to bootstrap the standard errors. For this I will use the bootstrap() function from the {modelr} package:
+
+```{r}
+resamples <- 100
+
+boot_gpa3 <- gpa3 %>% 
+ modelr::bootstrap(resamples)
+boot_gpa3
+```
+
+
+The column strap contains resamples of the original data. I will run my linear regression from before on each of the resamples:
+
+```{r}
+(
+    boot_lin_reg <- boot_gpa3 %>% 
+        mutate(regressions = 
+                   map(strap, 
+                       ~lm(cumgpa~sat+hsperc+tothrs+female+black+white, 
+                                     data= . , subset=(spring==1)))
+        ))
+```
+
+
+We have added a new column called regressions which contains the linear regressions on each bootstrapped sample. Now, I will create a list of tidied regression results:
+
+```{r}
+(
+    tidied <- boot_lin_reg %>% 
+        mutate(tidy_lm = 
+                   map(regressions, broom::tidy))
+)
+```
+
+```{r}
+tidied$tidy_lm[[1]]
+```
+
+```{r}
+list_mods <- tidied %>% 
+    pull(tidy_lm)
+```
+
+```{r}
+mods_df <- map2_df(list_mods, 
+                   seq(1, resamples), 
+                   ~mutate(.x, resample = .y))
+```
+
+
+```{r}
+head(mods_df, 25)
+```
+
+
+```{r}
+(
+    r.std.error <- mods_df %>% 
+        group_by(term) %>% 
+        summarise(r.std.error = sd(estimate))
+)
+```
+
+
+```{r}
+reg %>% 
+    broom::tidy()   %>% 
+    full_join(r.std.error)
+```
+
+
+## Weighted least squares
+
+Weighted Least Squares (WLS) attempts to provide a more efficient alternative to OLS. It is a special version of a feasbile generalized least squares (FGLS) estimator. 
+
+
+```{r}
+library(wooldridge)
+```
+
+
+```{r}
+data("k401k")
+
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+# OLS (only for singles: fsize==1)
+lm(nettfa ~ inc + I((age-25)^2) + male + e401k, 
+                                        data=k401ksubs, subset=(fsize==1))
+
+```
+
+Following Wooldrige, we assume that the variance is proportional to the income variable *inc.*. Therefore, the optimal weight is  $\frac{1}{inc}$ hwich is given as **weight** in the **lm** call. 
+
+```{r}
+# WLS
+lm(nettfa ~ inc + I((age-25)^2) + male + e401k, weight=1/inc, 
+                                        data=k401ksubs, subset=(fsize==1))
+
+```
+
+We can also use heteroscedasticity-robust statistics to account for the fact that our variance function might be misspecified. 
+
+
+```{r}
+library(car)
+library(lmtest)
+```
+https://stackoverflow.com/questions/4385436/regression-with-heteroskedasticity-corrected-standard-errors
+
+```{r}
+# WLS
+wlsreg <- lm(nettfa ~ inc + I((age-25)^2) + male + e401k, 
+                    weight=1/inc, data=k401ksubs, subset=(fsize==1))
+
+# non-robust results
+library(lmtest); library(car); library(sandwich)
+coeftest(wlsreg)
+
+# robust results (Refined White SE:)
+coeftest(wlsreg,hccm)
+
+coeftest(wlsreg, vcov. = vcovHC)
+
+mySummary <- function(model, VCOV) {
+    print(coeftest(model, vcov. = VCOV))
+    print(waldtest(model, vcov = VCOV))
+}
+mySummary(wlsreg, VCOV = vcovHAC)
+```
+
+The asumption that the variance is proportional to a regressor is usually  hard to justify. Typically, we do not know the variance function; we have to estimate it. We can estiamte the relation between variance and regressors using a linear regression of the log of the squared residuals from an initial OlS regression $log(\hat{u}^{2})$ as the dependent variable. 
+
+Wooldrige suggests two version for the selection of regressors: 
+
+ - the regressors $x_1, \dots ,  x_k$ from the original model similar to the BP test
+ - $\hat{y}$ and $\hat{y}^{2}$ from the original model similar to the White test
+ 
+ 
+```{r}
+data("smoke")
+# OLS
+olsreg<-lm(cigs~log(income)+log(cigpric)+educ+age+I(age^2)+restaurn, 
+                                                            data=smoke)
+olsreg
+
+# BP test
+library(lmtest)
+bptest(olsreg)
+
+# FGLS: estimation of the variance function
+logu2 <- log(resid(olsreg)^2)
+varreg<-lm(logu2~log(income)+log(cigpric)+educ+age+I(age^2)+restaurn, 
+                                                            data=smoke)
+
+# FGLS: WLS
+w <- 1/exp(fitted(varreg))
+lm(cigs~log(income)+log(cigpric)+educ+age+I(age^2)+restaurn, 
+                                                  weight=w ,data=smoke)
+```
+
+ 
+
+
+## Model specification and Parameter Heterogeneity
+
+### Functional Form Misspecifcation 
+
+
+We have seen many ways to specifiy the relation between the dependent variable and the regressors. An obvious question is to ask whether or not a given specification is "correct". 
+
+#### RESET
+
+The Regresion Equation Specification Error Test (RESET) is a convient tool to test the null hypothesis that the functional form is adequate. 
+
+
+We can run the test ourselves or use the boxed routine **resettest** from the package **lmtest**. 
+
+
+```{r}
+data("hprice1")
+# original linear regression
+orig <- lm(price ~ lotsize+sqrft+bdrms, data=hprice1)
+
+# regression for RESET test
+RESETreg <- lm(price ~ lotsize+sqrft+bdrms+I(fitted(orig)^2)+ 
+                                        I(fitted(orig)^3), data=hprice1)
+RESETreg
+
+# RESET test. H0: all coeffs including "fitted" are=0 
+library(car)
+linearHypothesis(RESETreg, matchCoefs(RESETreg,"fitted"))
+```
+
+
+Automatic routine: 
+
+
+```{r}
+# original linear regression
+orig <- lm(price ~ lotsize+sqrft+bdrms, data=hprice1)
+
+# RESET test
+library(lmtest)
+resettest(orig)
+```
+
+
+Wooldrige (2016, Section 9.2) also disucsses tests of non-nested models. We can use the **encomptest** function from the package **lmtest**. 
+
+
+Two alternative models for the housing price 
+
+
+$price = \beta_0 + \beta_1 lotsize  +\beta_2 sqrft  +\beta_3 bdrms  + u $
+
+
+$price = \beta_0 + \beta_1 log(lotsize)  +\beta_2 log(sqrft)  +\beta_3 log(bdrms)  + u $
+
+
+
+```{r}
+# two alternative models
+model1 <- lm(price ~     lotsize  +     sqrft  + bdrms, data=hprice1)
+model2 <- lm(price ~ log(lotsize) + log(sqrft) + bdrms, data=hprice1)
+
+# Test against comprehensive model
+library(lmtest)
+encomptest(model1,model2, data=hprice1)
+```
+
+The ouput shows the "encompassing model " $E$ with all variables. Both models are rejected against this comprehensive model. 
+
+
+#### Outlying observations 
+
+
+Dealing with outliers is a tricky business. R offers different pacakges to test and ajust for outliers. But outliers can be a matter of opinion and not all outlier dedection methods give the same results. With the **OutliersO3** package we can compare different outlier dedection methods. 
+
+```{r, cache= TRUE}
+data(rdchem)
+
+library(OutliersO3)
+s3 <- O3prep(rdchem, method=c("HDo", "adjOut", "DDC"))
+O3s3 <- O3plotM(s3)
+print(O3s3$nOut)
+O3s3$gO3
+```
+
+
+An O3 plot of stackloss using the methods HDoutliers,  adjOutlyingness
+ and DectectDeviatingCells. The darker the cell, the more methods agree. If they all agree, the cell is coloured red and if all but one agree then orange.
+
+We use functions from the **car** package to obtain a table of different measures of leverage and influence for all observations. 
+
+```{r}
+# Regression
+reg <- lm(rdintens~sales+profmarg, data=rdchem)
+
+# Studentized residuals for all observations:
+studres <- rstudent(reg)
+
+# Display extreme values:
+min(studres)
+max(studres)
+
+# Histogram (and overlayed density plot):
+hist(studres, freq=FALSE)
+lines(density(studres), lwd=2)
+```
+
+#### Least absolute Deviations (LAD)  Estimation
+
+
+As an alterantive to OLS, the least absolute deviations (LAD) is less sensitive to outliers. Instead of minimizing the sum of *squared* residuals, it minimizes the sum of the *absolute values* of the residuals. 
+
+In R, general quantile regression (and LAD as the default special case) can easily be implemented with the command **rq** from the **quantreg** package. 
+
+
+```{r}
+# OLS Regression
+ols <- lm(rdintens ~ I(sales/1000) +profmarg, data=rdchem)
+# LAD Regression
+library(quantreg)
+lad <- rq(rdintens ~ I(sales/1000) +profmarg, data=rdchem)
+
+# regression table
+library(stargazer)
+stargazer(ols,lad,  type = "text")
+```
+
+Note: LAD inferences are only valid asymptotically, so the results in this example with $n =32$ should be taken with caution. 
+
 
 The file was creating using `R` version ``r paste0(version$major, ".", version$minor)``. 
 
