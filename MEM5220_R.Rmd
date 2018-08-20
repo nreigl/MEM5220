@@ -1,3 +1,87 @@
+--- 
+title: "MEM52220 - Applied Econometrics"
+author: "Nicolas Reigl"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [MEM5220.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+description: "This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology"
+---
+
+# Introduction {-}
+
+
+```{r fig.align='center', echo=FALSE, include=identical(knitr:::pandoc_to(), 'html'), fig.cap="Normal and simulated Gaussian densities on a regression line",  fig.link='https://stackoverflow.com/questions/31794876/ggplot2-how-to-curve-small-gaussian-densities-on-a-regression-line'}
+knitr::include_graphics('images/cover.jpeg', dpi = NA)
+```
+
+
+Welcome to MEM5220 - Applied Econometrics. This handout is designed for the use with MEM5220 - Applied Econometrics at Tallinn University of Technology. Note that this workbook is still under heavy development!  
+
+## Prerequisites {-}
+
+A basic knowledge of the R [@team2013r] programming language  is required. 
+
+
+In order to reproduce the examples in this script You need the statistical software package R. Additionally we recommend using the <a href="https://www.rstudio.com/">RStudio</a> integrated developer environment (IDE) which will improve Your R working experience.
+
+### Installation of R and RStudio  {-}
+
+Go to the following webpages and download the software adequate for Your operating system:
+
+
+1. <b>The Statistical Software Package R:</b> <a href="http://cran.r-project.org/">http://cran.r-project.org</a><br>
+<br>
+2. <b>The GUI RStudio</b>: <a href="http://www.rstudio.com/products/rstudio/download/">http://www.rstudio.com/products/rstudio/download/</a> <br>
+
+
+Install R first and then procede with RStudio. Afterwards start RStudio.
+
+
+## Resources {-}
+
+
+Our primary resource is @heiss2016using ^[Heiss (2016) builds on the popular Introductory Econometrics by Wooldridge (2016) and demonstrates how to replicate the applications discussed therein using R.]. The book is availabe as free [online](http://www.urfie.net/read.html) version. For theoretical concepts I refer to @wooldridge2015introductory^[[Introductory Econometrics: A Modern Approach](https://books.google.ee/books/about/Introductory_Econometrics_A_Modern_Appro.html?id=wUF4BwAAQBAJ&source=kp_cover&redir_esc=y).].  
+
+**Standing on the shoulders of giants**
+
+This lecture material would not possible without many other open-source econometrics teaching materials and of course the R package developers. In addition to the main resources, examples and code of this workbook have been drawn from a number of free econometrics ebooks, blogs, R-vignette help pages and other researchers teaching materials. 
+
+### Attribution {-}
+
+Chapter 1 Introduction to R is copied almost entirely from appliedstats by David Dalpiaz. I added a couple of practical tasks and made some minor edits.
+Chapter 2 is partly based on appliedstats, but only up to scatterplots.
+
+
+- [Using R for Introduction to Econometrics](https://emwikts1970.github.io/URFITE-Bookdown/)
+- [Applied Statistics with R](https://daviddalpiaz.github.io/appliedstats/), @dalpiaz2016
+- [Principles of Econometrics with R](https://bookdown.org/ccolonescu/RPoE4/)
+- [Introduction to Econometrics with R](https://scpoecon.github.io/ScPoEconometrics/), @oswald2018introduction
+
+
+
+## Software information and conventions {-}
+
+
+The R session information when compiling this book is shown below:
+
+```{r}
+sessionInfo()
+```
+
+I do not add prompts (`>` and `+`) to R source code in this book, and I comment out the text output with two hashes `##` by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out). Package names are in bold text (e.g., **rmarkdown**), and inline code and filenames are formatted in a typewriter font (e.g., `knitr::knit('foo.Rmd')`). Function names are followed by parentheses (e.g., `bookdown::render_book()`), function arguments are given without parentheses (e.g. `config_file = `). The double-colon operator `::` means accessing an object from a package. 
+
+## Acknowledgements {-}
+
+I thank Kadri Männasoo and Juan Carlos Cuestas for proofreading and their useful comments.
+
+
+
+
+<!--chapter:end:index.Rmd-->
+
 ---
 output:
   pdf_document: default
@@ -16,8 +100,6 @@ theme_update(panel.background = element_rect(fill = "transparent", colour = NA),
 knitr::opts_chunk$set(dev.args=list(bg="transparent"))
 ```
 
-
-# Linear Regression {#linearregression}
 
 
 To load the dataset and necessary functions: 
@@ -55,6 +137,8 @@ lapply(PACKAGES, require, character.only=T)
 
 
 
+# Linear Regression {#linearregression}
+
 
 The general form in which we specify regression models in R: 
 
@@ -86,7 +170,7 @@ The general form in which we specify regression models in R:
 
 We start off with a simple OLS Regression. We will work with multiple data sources: 
 
-- Data from @wooldridge2015introductory : Introductory Econometrics: A Modern Approach. 
+- Data from @wooldridge2015introductory : Introductory Econometrics: A Modern Approch. 
 - R data sets for "Principles of Econometrics" by @hill2008principles
 - Build in examples such as the `airquality` dataset
 
@@ -994,7 +1078,7 @@ y = \beta_{0} + \beta_{1}x_{1} +  \beta_{2}x_{2} + \dots + \beta_{k}x_{k} + u
 (\#eq:multipleregression)
 \end{equation}
 
-The next example from Wooldrige relates the college GPA (*cloGPA*) to the high school GPA ("hsGPA") and achievement test score (*ACT*) for a sample of 141 students.
+The next example from Wooldrige relates the college GPA (*cloGPA*) to the high school GPA ("hsGPA") and achievment test score (*ACT*) for a sample of 141 students.
 
 ```{r}
 data("gpa1", package = "wooldridge")
@@ -1086,7 +1170,7 @@ beta.hat <- coef( lm(colGPA ~ ACT+hsGPA, data=gpa1) )
 beta.hat
 ```
 
-Now, lets omit one variable in the regression
+Now, lets ommit one variable in the regression
 
 \begin{equation}
 \hat{y} = \hat{\beta}_{0} + \hat{\beta}_{1}x_{1}    
@@ -1173,7 +1257,7 @@ vif(GPAres)
 
 ### Reporting Regression Results 
 
-As we start moving towards the comparing different regression models this section provides a discussion on how to report regression reports in `R`. Depending on your script (R scripts, R Markdown, bookdown) and what your desired output format is (LaTeX, word, html) the exact approach might differ. There are multiple packages to format regression or table output, most notably **stargazer**^[Stargazer supports ton of options, including theming the LaTex output to journal styles. However, stargazer was written before R Markdown was really a thing, so it has excellent support for HTML and LaTeX output, but that’s it. Including stargazer tables in an R Markdown document is a hassle. **huxtable** on the the contrary plays really nice with **broom** and the **tidyverse**. For more info see Andrew Heiss [blog](https://www.andrewheiss.com/blog/2018/03/08/amelia-broom-huxtable/).], **huxtable** , **Hmisc** and **xtable**. One can also tidy the the regression output as well as tables with **broom** or **summarytool**. The wrapper `knitr::kable()` is a support function that renders the table in an R Markdown in a pretty way. 
+As we start moving towards the comparing different regression models this section provides a discussion on how to report regression reports in `R`. Depending on your script (R scripts, R Markdown, bookdown) and what your desired output format is (LaTeX, word, html) the exact approach might differ. There are multiple packages to format regression or table output, most notabley **stargazer**^[Stargazer supports ton of options, including theming the LaTex output to journal styles. However, stargazer was written before R Markdown was really a thing, so it has excellent support for HTML and LaTeX output, but that’s it. Including stargazer tables in an R Markdown document is a hassle. **huxtable** on the the contrary plays really nice with **broom** and the **tidyverse**. For more info see Andrew Heiss [blog](https://www.andrewheiss.com/blog/2018/03/08/amelia-broom-huxtable/).], **huxtable** , **Hmisc** and **xtable**. One can also tidy the the regression output as well as tables with **broom** or **summarytool**. The wrapper `knitr::kable()` is a support function that renders the table in an R Markdown in a pretty way. 
 
 
 
@@ -1272,7 +1356,7 @@ invisible(stargazer( # invisible supresses additional output such as the package
 ```
 
 
-Dividing the dependent variable by 16 changes all coefficients by the same factor $\frac{1}{16}$ and dividing the regressor by 20 changes its coefficients by the factor 20. Other statistics like $R^2$ are unaffected. 
+Deviding the dependent variable by 16 changes all coefficients by the same factor $\frac{1}{16}$ and deviding the regressor by 20 changes its coefficients by the factor 20. Other statistics like $R^2$ are uneffected. 
 
 
 #### Standardization: Beta coefficients
@@ -1293,7 +1377,7 @@ and
 z_{x1}=\frac{x_{1}-\bar{x}_{x1}}{sd(x_{1})}
 \end{equation}
 
-They measure by how many *standard deviations* $y$ changes as the respective independent variable increases by *one standard deviation*. 
+They measure by how many *standard deviations* $y$ changes as the respective indepdent variable increases by *one standard deviation*. 
 
 
 The model does not include a constant because all averages are removed in the standardization. 
@@ -1309,7 +1393,7 @@ lm(scale(price)~0 +  scale(crime) +  scale(rooms) + scale(dist) +  scale(stratio
 
 #### Logarithms, Quadratics and Polynomials
 
-The model for house prices as in Wooldrige: 
+The model for houseprices as in Wooldrige: 
 
 \begin{equation}
 log(price) = \beta_0 +  \beta_1 log(nox) + \beta_2 log(dist) + \beta_3 rooms + \beta_4 rooms^{2} + \beta_5 stratio + u 
@@ -1457,7 +1541,7 @@ summary(lm2_wage1)
 
 **Your turn**
 
-1. What is the reference group in this model? 
+1. What is the refernce group in this model? 
 2. Ceteris paribus, how much more wage do single males make relative to the reference group?
 3. Ceteris paribus, how much more wage do single females make relative to the reference group?
 4. Ceteris paribus, how much less do married females make than single females?
@@ -1510,7 +1594,7 @@ lm(wage ~ female+educ+exper+tenure, data=wage1)
 
 ### Factor variables
 
-As discussed in the R introduction, categorical variables encoded as factors are special *animals* in R. They are immensely useful in a regression when you have a categorical variable with many levels (e.g. “Very Bad”, “Bad”, “Good”, “Very Good”) but can create  a set of subtle issues. Here, we discuss the base R way and the more robust tidyverse way of dealing with factors in the area of regression modelling.    
+As discussed in the R introduction, categorial variables encoded as factors are special *animals* in R. They are immensely useful in a regression when you have a categorical variable with many levels (e.g. “Very Bad”, “Bad”, “Good”, “Very Good”) but can create  a set of subtile issues. Here, we discuss the base R way and the more robust tidyverse way of dealing with factors in the area of regression modelling.    
 
 Factor variables can be directly added to the list of regressors. R is clever enough to implicitly add $g-1$ dummy variables if the factor has $g$ outcomes. 
 
@@ -1622,7 +1706,7 @@ The homoskedasticity assumptions SLR.5 and MLR.5 require that the variance of th
 Var(u|x_1, \dots , x_n) = \sigma^2  
 \end{equation}
 
-Unbiasedness and consistency do not depend on this assumption, but the sampling distribution does. If homoskedasticity is violated, the standard errors are invalid and all inferences from $t$, $F$, and other tests based on them are unreliable.  
+Unbiasedness and consistency do not depend on this assumption, but the sampling distribution does. If homoskedasticity is violated, the standard errors are invalid and all inferencences from $t$, $F$, and other tests based on them are unreliable.  
 
 There are various ways of dealing with heteroskedasticity in R. The **car** package provides linear hypothesis. 
 For high-dimensional fixed effects the **lfe** package is a good alternative. It also allows to specify clusters as part of the formula. 
@@ -1685,7 +1769,7 @@ ref.HC1 <- coeftest(reg, vcov.=cov1)
 
 
 
-Another way of dealing with heteroskedasticity is to use the `lmrob()` function from the **robustbase** package^[This example has been adapted from the blog post of @Rodrigues]. This package is quite interesting, and offers quite a lot of functions for robust linear, and nonlinear, regression models. Running a robust linear regression is just the same as with `lm()`:
+Another way of dealing with heteroskedasticity is to use the `lmrob()` function from the **robustbase** package^[This example has been adapted from the blogpost of @Rodrigues]. This package is quite interesting, and offers quite a lot of functions for robust linear, and nonlinear, regression models. Running a robust linear regression is just the same as with `lm()`:
 
 
 
@@ -1699,7 +1783,7 @@ summary(regrobfit)
 
 
 
-This however, gives you different estimates than when fitting a linear regression model. The estimates should be the same, only the standard errors should be different. This is because the estimation method is different, and is also robust to outlines (at least that’s my understanding, I haven’t read the theoretical papers behind the package yet).
+This however, gives you different estimates than when fitting a linear regression model. The estimates should be the same, only the standard errors should be different. This is because the estimation method is different, and is also robust to outliers (at least that’s my understanding, I haven’t read the theoretical papers behind the package yet).
 
 Finally, it is also possible to bootstrap the standard errors. For this I will use the `bootstrap()` function from the modelr package:
 
@@ -1771,7 +1855,7 @@ Using the whole bootstrapping procedure is longer than simply using either one o
 
 ## Weighted least squares
 
-Weighted Least Squares (WLS) attempts to provide a more efficient alternative to OLS. It is a special version of a feasible generalized least squares (FGLS) estimator. 
+Weighted Least Squares (WLS) attempts to provide a more efficient alternative to OLS. It is a special version of a feasbile generalized least squares (FGLS) estimator. 
 
 
 ```{r}
@@ -1820,7 +1904,7 @@ mySummary <- function(model, VCOV) {
 mySummary(wlsreg, VCOV = vcovHAC)
 ```
 
-The assumption that the variance is proportional to a regressor is usually  hard to justify. Typically, we do not know the variance function; we have to estimate it. We can estimate the relation between variance and regressors using a linear regression of the log of the squared residuals from an initial OlS regression $log(\hat{u}^{2})$ as the dependent variable. 
+The asumption that the variance is proportional to a regressor is usually  hard to justify. Typically, we do not know the variance function; we have to estimate it. We can estiamte the relation between variance and regressors using a linear regression of the log of the squared residuals from an initial OlS regression $log(\hat{u}^{2})$ as the dependent variable. 
 
 Wooldrige suggests two version for the selection of regressors: 
 
@@ -1858,11 +1942,11 @@ lm(cigs~log(income)+log(cigpric)+educ+age+I(age^2)+restaurn,
 ### Functional Form Misspecifcation 
 
 
-We have seen many ways to specify the relation between the dependent variable and the regressors. An obvious question is to ask whether or not a given specification is "correct". 
+We have seen many ways to specifiy the relation between the dependent variable and the regressors. An obvious question is to ask whether or not a given specification is "correct". 
 
 #### RESET
 
-The Regression Equation Specification Error Test (RESET) is a convenient tool to test the null hypothesis that the functional form is adequate. 
+The Regresion Equation Specification Error Test (RESET) is a convient tool to test the null hypothesis that the functional form is adequate. 
 
 
 We can run the test ourselves or use the boxed routine `resettest()` from the package **lmtest**. 
@@ -1894,7 +1978,7 @@ resettest(orig)
 ```
 
 
-Wooldrige (2016, Section 9.2) also discusses tests of non-nested models. We can use the `encomptest()` function from the package **lmtest**. 
+Wooldrige (2016, Section 9.2) also disucsses tests of non-nested models. We can use the `encomptest()` function from the package **lmtest**. 
 
 
 Two alternative models for the housing price 
@@ -1920,13 +2004,13 @@ model2 <- lm(price ~ log(lotsize) + log(sqrft) + bdrms, data=hprice1)
 encomptest(model1,model2, data=hprice1)
 ```
 
-The output shows the "encompassing model " $E$ with all variables. Both models are rejected against this comprehensive model. 
+The ouput shows the "encompassing model " $E$ with all variables. Both models are rejected against this comprehensive model. 
 
 
 #### Outlying observations 
 
 
-Dealing with outliers is a tricky business. R offers different packages to test and adjust for outliers. But outliers can be a matter of opinion and not all outlier detection methods give the same results. With the **OutliersO3** package we can compare different outlier detection methods. 
+Dealing with outliers is a tricky business. R offers different pacakges to test and ajust for outliers. But outliers can be a matter of opinion and not all outlier dedection methods give the same results. With the **OutliersO3** package we can compare different outlier dedection methods. 
 
 ```{r, cache= TRUE}
 data(rdchem)
@@ -1968,7 +2052,7 @@ Missing values in data is a common phenomenon in real world problems. In R, miss
 - **NaN** (not a number) indicates that the value is not defined, for example when we take the log of a negative number
 
 
-Base R offers many functions to detect missing observations. Sometimes using **mice** and **VIM** package for looking at missing data pattern and imputing missing data is even easier. 
+Base R offers many functions to dedect missing observations. Sometimes using **mice** and **VIM** package for looking at missing data pattern and imputing missing data is even easier. 
 
 ```{r}
 data("lawsch85", package = "wooldridge" )
@@ -2031,7 +2115,7 @@ summary(tempData)
 ## Least absolute Deviations (LAD)  Estimation
 
 
-As an alternative to OLS, the least absolute deviations (LAD) is less sensitive to outliers. Instead of minimizing the sum of *squared* residuals, it minimizes the sum of the *absolute values* of the residuals. 
+As an alterantive to OLS, the least absolute deviations (LAD) is less sensitive to outliers. Instead of minimizing the sum of *squared* residuals, it minimizes the sum of the *absolute values* of the residuals. 
 
 In R, general quantile regression (and LAD as the default special case) can easily be implemented with the command `reg()` from the **quantreg** package. 
 
@@ -2052,4 +2136,481 @@ Note: LAD inferences are only valid asymptotically, so the results in this examp
 
 
 
+
+
+<!--chapter:end:01-LM.Rmd-->
+
+# Qualitative and LDV Models {#binarymodels}
+
+
+To load the dataset and necessary functions: 
+
+
+```{r, echo=TRUE, message=FALSE, results='hide'}
+# This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
+PACKAGES<-c("wooldridge",  # Wooldrige Datasets
+            "tidyverse",  # for data manipulation and ggplots
+            "broom",  # Tidy regression output
+            "car", # Companion to applied regression
+            "knitr", # knit functions
+            # "kableExtra", # extended knit functions for objects exported from other packages
+            "huxtable", #  Regression tables, broom compatible
+            "stargazer", # Regression tables
+            "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
+            "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+            "MCMCpack", # Contains functions to perform Bayesian inference using posterior simulation for a number of ssatistical models.
+            "sampleSelection", # Two-step and maximum likelihood estimation of Heckman-type sample selection models
+            "scales", # scale helper functions such as percent 
+            "lmtest", 
+            "margins", # Stata like margin functions
+            "prediction", # Type stable predictions
+            "nnet", # Multinomial logit
+            "survival", # Survival Analysis
+            "sampleSelection", # Heckman type sample selection
+            "censReg", # Censored Regression models
+            "magrittr") #  pipes
+inst<-match(PACKAGES, .packages(all=TRUE))
+need<-which(is.na(inst))
+if (length(need)>0) install.packages(PACKAGES[need])
+lapply(PACKAGES, require, character.only=T)
+```
+
+
+Binary dependent variables are frequently studied in applied economics. Because a dummy variable $y$ can only take values 0 and 1, its (conditional) expected value is equal to the (conditional) probability that $y=1$: 
+
+
+$E(y|x) = 0 \times P(y = 0|x) + 1 \times P(y = 1|x) = P(y=1|x)$
+
+An important class of models specifies the success probability as
+
+$P(y = 1 | x) = G(\beta_0 + \beta_1 + \dots \beta_k x_k) = G(\boldsymbol{x} \boldsymbol{\beta})$
+
+
+
+The following table is taken from @dalpiaz2016 and summarizes three examples of a generalized linear model:
+
+|                 |Linear Regression | Poisson Regression | Logistic Regression |
+|-----------------|------------------|--------------------|---------------------|
+| $Y \mid {\bf X} = {\bf x}$ | $N(\mu({\bf x}), \sigma^2)$    | $\text{Pois}(\lambda({\bf x}))$          | $\text{Bern}(p({\bf x}))$                                              |
+| **Distribution Name**                           | Normal                         | Poisson                                  | Bernoulli (Binomial)                                                   |
+| $\text{E}[Y \mid {\bf X} = {\bf x}]$            | $\mu({\bf x})$                 | $\lambda({\bf x})$                       | $p({\bf x})$                                                           |
+| **Support**                                     | Real: $(-\infty, \infty)$      | Integer: $0, 1, 2, \ldots$               | Integer: $0, 1$                                                        |
+| **Usage**                                       | Numeric Data                   | Count (Integer) Data                     | Binary (Class ) Data                                            |
+| **Link Name**                                   | Identity                       | Log                                      | Logit                                                                  |
+| **Link Function**                               | $\eta({\bf x}) = \mu({\bf x})$ | $\eta({\bf x}) = \log(\lambda({\bf x}))$ | $\eta({\bf x}) = \log \left(\frac{p({\bf x})}{1 - p({\bf x})} \right)$          |
+| **Mean Function**                               | $\mu({\bf x}) = \eta({\bf x})$ | $\lambda({\bf x}) = e^{\eta({\bf x})}$   | $p({\bf x}) = \frac{e^{\eta({\bf x})}}{1 + e^{\eta({\bf x})}} = \frac{1}{1 + e^{-\eta({\bf x})}}$ |
+
+Like ordinary linear regression, we will seek to "fit" the model by estimating the $\beta$ parameters. To do so, we will use the method of maximum likelihood.
+
+Note that a Bernoulli distribution is a specific case of a binomial distribution where the $n$ parameter of a binomial is $1$. Binomial regression is also possible, but we'll focus on the much more popular Bernoulli case.
+
+So, in general, GLMs relate the mean of the response to a linear combination of the predictors, $\eta({\bf x})$, through the use of a link function, $g()$. That is,
+
+$$
+\eta({\bf x}) = g\left(\text{E}[Y \mid {\bf X} = {\bf x}]\right).
+$$
+
+The mean is then
+
+$$
+\text{E}[Y \mid {\bf X} = {\bf x}] = g^{-1}(\eta({\bf x})).
+$$
+
+
+
+
+## Linear probability models
+
+
+If a dummy variable is used as the dependent variable $y$, we can still use OLS to estimate its relation to the regressors $x$. 
+
+
+```{r}
+data("mroz", package = "wooldridge")
+# Estimate linear probability model
+linprob <- lm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,data=mroz)
+# Regression table with heteroscedasticity-robust SE and t tests:
+coeftest(linprob,vcov=hccm)
+```
+
+
+The estimated coefficient *educ* can be interpreted as: an additional year of schooling increases the probability that a woman is in the labor force *ceteris paribus* by `r percent(coef(linprob)["educ"])`. 
+
+One problem with linear probability models is that $P(y=1|x)$ is specified as a linear function of the regressors. By construction, there are more or less realistic combinations of regressor values that yield $\hat{y} <	0$ or $\hat{y} >	1$.   
+
+
+## Logit and Probit Models: Estimation
+
+
+For binary response models, the most widely used specification for G are
+
+- the **probit** model with $G(z) = \phi(z)$, the standard cdf and 
+- the **logit** model with $G(z) = \Lambda(z) = \frac{exp(z)}{1+ exp(z)}$, the cdf of the logistic distribution. 
+
+
+In R  many generalized linear models can be estimated by the `glm()` command. It accepts the additional option 
+
+- `family = binomial (link = logit)` for the logit model or 
+- `family = binomial (link = probit)` for the probit model 
+
+```{r}
+# Estimate logit model
+logitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
+              family=binomial(link=logit),data=mroz)
+# Summary of results:
+summary(logitres)
+# Log likelihood value:
+logLik(logitres) 
+# McFadden's pseudo R2:
+1 - logitres$deviance/logitres$null.deviance
+```
+
+### Multinomial Logit
+
+A relatively common R function that fits multinomial logit models is `multinom()` from package **nnet**. Let us use the dataset *nels_small* for an example of how multinom works. The variable grades in this dataset is an index, with best grades represented by lower values of grade. We try to explain the choice of a secondary institution (psechoice) only by the high school grade. The variable pschoice
+
+can take one of three values:
+
+- psechoice = 1 no college,
+- psechoice = 2 two year college
+- psechoice = 3 four year college
+
+```{r}
+data("nels_small", package="PoEdata")
+```
+
+```{r}
+nels.multinom <- multinom(psechoice~grades, data=nels_small)
+summary(nels.multinom)
+```
+
+
+The output from function multinom gives coefficient estimates for each level of the response variable psechoice, except for the first level, which is the benchmark.
+
+
+```{r}
+medGrades <- median(nels_small$grades)
+fifthPercentileGrades <- quantile(nels_small$grades, .05)
+newdat <- data.frame(grades=c(medGrades, fifthPercentileGrades))
+pred <- predict(nels.multinom, newdat, "probs")
+pred
+```
+
+### The Conditional Logit Model
+
+In the multinomial logit model all individuals faced the same external conditions and each individual’s choice is only determined by an individual’s circumstances or preferences. The conditional logit model allows for individuals to face individual-specific external conditions, such as the price of a product.
+
+Suppose we want to study the effect of price on an individual’s decision about choosing one of three brands of soft drinks:
+
+- pepsi
+- sevenup
+- coke
+
+R offers several alternatives that allow fitting conditional logit models, one of which is the function `MCMCmnl()` from the package **MCMCpack** (others are, for instance, `clogit()` in the **survival** package and `mclogit()` in the **mclogit** package). The following code is adapted from @Adkins2014.
+
+```{r}
+data("cola", package="PoEdata")
+N <- nrow(cola)
+N3 <- N/3
+price1 <- cola$price[seq(1,N,by=3)]
+price2 <- cola$price[seq(2,N,by=3)]
+price3 <- cola$price[seq(3,N,by=3)]
+
+bchoice <- rep("1", N3)
+for (j in 1:N3){
+  if(cola$choice[3*j-1]==1) bchoice[j] <- "2"
+  if(cola$choice[3*j]==1) bchoice[j] <- "3"
+}
+cola.clogit <- MCMCmnl(bchoice ~
+                         choicevar(price1, "b2", "1")+
+                         choicevar(price2, "b2", "2")+
+                         choicevar(price3, "b2", "3"),
+                       baseline="3", mcmc.method="IndMH")
+```
+
+
+```{r}
+sclogit <- summary(cola.clogit)
+tabMCMC <- as.data.frame(sclogit$statistics)[,1:2]
+row.names(tabMCMC)<- c("b2","b11","b12")
+kable(tabMCMC, digits=4, align="c",
+      caption="Conditional logit estimates for the 'cola' problem")
+```
+
+### Ordered Choice Models
+
+The order of choices in these models is meaningful, unlike the multinomial and conditional logit model we have studied so far. The following example explains the choice of higher education, when the choice variable is psechoice and the only regressor is grades; the dataset, *nels_small* , is already known to us.
+
+The R package **MCMCpack** is again used here, with its function `MCMCoprobit()`.
+
+```{r}
+nels.oprobit <- MCMCoprobit(psechoice ~ grades, 
+                            data=nels_small, mcmc=10000)
+sOprobit <- summary(nels.oprobit)
+tabOprobit <- sOprobit$statistics[, 1:2]
+kable(tabOprobit, digits=4, align="c",
+      caption="Ordered probit estimates for the 'nels' problem")
+```
+
+
+The results from MCMCoprobit can be translated into the textbook notations as follows:
+
+- $\mu_1$ =− (Intercept)
+- $\beta$ = grades
+- $\mu_2$ = gamma2 − (Intercept)
+
+The probabilities for each choice can be calculated as in the next code fragment:
+
+```{r}
+mu1 <- -tabOprobit[1]
+b <- tabOprobit[2]
+mu2 <- tabOprobit[3]-tabOprobit[1]
+xGrade <- c(mean(nels_small$grades), 
+            quantile(nels_small$grades, 0.05))
+
+# Probabilities:
+prob1 <- pnorm(mu1-b*xGrade)
+prob2 <- pnorm(mu2-b*xGrade)-pnorm(mu1-b*xGrade)
+prob3 <- 1-pnorm(mu2-b*xGrade)
+
+# Marginal effects:
+Dp1DGrades <- -pnorm(mu1-b*xGrade)*b
+Dp2DGrades <- (pnorm(mu1-b*xGrade)-pnorm(mu2-b*xGrade))*b
+Dp3DGrades <- pnorm(mu2-b*xGrade)*b
+```
+
+For instance, the marginal effect of grades on the probability of attending a four-year college for a student with average grade and for a student in the top 5 percent are, respectively, `r round(Dp3DGrades[1], digits = 3)` and `r round(Dp3DGrades[[2]], digits = 3)`.
+
+
+### Probit model 
+
+```{r}
+# Estimate probit model
+probitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
+               family=binomial(link=probit),data=mroz)
+# Summary of results:
+summary(probitres)
+# Log likelihood value:
+logLik(probitres) 
+# McFadden's pseudo R2:
+1 - probitres$deviance/probitres$null.deviance
+```
+
+### Inference
+
+We can implement the test for overall significance for the probit model using both manual and automatic calculations. 
+
+
+```{r}
+# Test of overall significance:
+# Manual calculation of the LR test statistic:
+probitres$null.deviance - probitres$deviance
+
+# Automatic calculations including p-values,...:
+lrtest(probitres)
+
+# Test of H0: experience and age are irrelevant
+restr <- glm(inlf~nwifeinc+educ+ kidslt6+kidsge6, 
+             family=binomial(link=logit),data=mroz)
+lrtest(restr,probitres)
+
+```
+
+### Predictions
+
+The command `predict()` can calculate predicted values for the estimation sample or arbitrary sets of regressor values. 
+
+We can calculate 
+
+
+```{r}
+# predictions for two "extreme" women:
+xpred <- list(nwifeinc=c(100,0),educ=c(5,17),exper=c(0,30),
+              age=c(20,52),kidslt6=c(2,0),kidsge6=c(0,0))
+# Predictions from linear probability, probit and logit model:
+predict(linprob,  xpred,type = "response")
+predict(logitres, xpred,type = "response")
+predict(probitres,xpred,type = "response")
+```
+
+```{r}
+# Simulated data
+set.seed(12345)
+y <- rbinom(100, 1, 0.5)
+x <- rnorm(100) + 2 * y
+
+# Estimation 
+linpr.res <- lm(y~x)
+logit.res <-glm(y ~x, family = binomial(link = logit))
+probit.res <-glm(y ~x, family = binomial(link = probit))
+
+# Prediction from a regular grid of x values
+xp <- seq(from= min(x), to=max(x), length=50)
+linpr.p <- predict(linpr.res, list(x = xp), type = "response")
+logit.p <- predict(logit.res, list(x = xp), type = "response")
+probit.p <- predict(probit.res, list(x = xp), type = "response")
+```
+
+
+
+```{r fig21, fig.cap='Predictions from binary response models (simulated data)', out.width='80%', fig.asp=.75, fig.align='center'}
+plot(x,y)
+lines(xp, linpr.p, lwd=2, lty = 1)
+lines(xp, logit.p, lwd=2, lty = 2)
+lines(xp, probit.p, lwd=1, lty = 1)
+legend("topleft", 
+       c("linear prob.", "logit", "probit"), 
+       lwd = c(2,2,1), lty = c(1,2,1))
+```
+
+
+### Marginal (partial) effects
+
+Several packages provide estimates of marginal effects for different types of models. Among these are **car**, **alr3**, **mfx**, **erer**, among others. Unfortunately, none of these packages implement marginal effects correctly (i.e., correctly account for interrelated variables such as interaction terms (e.g., a:b) or power terms (e.g., I(a^2)) and the packages all implement quite different interfaces for different types of models. The **margins** and **prediction** packages are a combined effort to calculate marginal effects that include complex terms and provide a uniform interface for doing those calculations.
+
+
+To know how much a variable influences the labour force participation, one has to use `margins()` command:
+
+```{r}
+effects_logit_participation <- margins(logitres) 
+summary(effects_logit_participation)
+```
+
+If one desires subgroup effects, simply pass a subset of data to the data argument:
+
+```{r}
+summary(margins(logitres, data = subset(mroz, kidslt6 == 0))) # no kids < 6 years
+```
+
+
+```{r fig22, fig.cap='Logit effect plot', out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(data = summary(effects_logit_participation)) +
+  geom_point(aes(factor, AME)) +
+  geom_errorbar(aes(x = factor, ymin = lower, ymax = upper)) +
+  geom_hline(yintercept = 0, color="lightgrey") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+You can also extract the marginal effects of a single variable, with `dydx`:
+
+```{r}
+head(dydx(mroz, logitres, "educ"))
+```
+
+The function `cplot()` provides the commonly needed visual summaries of predictions or average marginal effects conditional on a covariate.
+
+```{r fig23, fig.cap='Marginal effects for logit model', out.width='80%', fig.asp=.75, fig.align='center'}
+cplot(logitres, x = "educ", se.type = "shade")
+```
+
+
+## Count data: The Poisson Regression Model 
+
+Instead of just 0/1-coded binary data, count data can take any non-negative integer $0, 1, 2, \dots$. If they take very large numbers (like the number of students in a school), they can be approximated reasonably well as contiouns variables in a linear models and estimated using OLS. If the numbers are relativly small, this approximation might not work well. 
+
+The Poisson regression model is the most basic and convenient model explicitly model explicitly designed for count data. 
+
+Poisson regression models can be estimated in R via the `glm()` function with the specification **family= poisson**
+
+Estimating the model with **quasipoisson** is to adjust for potential vioalations of the Poisson distribution. 
+
+```{r}
+data(crime1, package='wooldridge')
+
+# Estimate linear model
+lm.res      <-  lm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                     black+hispan+born60, data=crime1)
+# Estimate Poisson model
+Poisson.res <- glm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                     black+hispan+born60, data=crime1, family=poisson)
+# Quasi-Poisson model
+QPoisson.res<- glm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                     black+hispan+born60, data=crime1, family=quasipoisson)
+```
+
+
+```{r}
+stargazer(lm.res,Poisson.res,QPoisson.res,type="text",keep.stat="n")
+```
+
+By construction, the parameter estiamtes are the same but the standard errors are larger for the QMLE. 
+
+
+### Corner Solution Response: The Tobit Model
+
+Corner solutions describe situations where the variable of interest is continous but restricted in range. Typically, it cannot be negative. 
+
+The package **censReg** offers the command `censReg()` for estimating a Tobit model. 
+
+
+We have already estimated labor supply mdoeld for the women in the dataset *mroz*, ignoring the fact that the hours worked is necessarily non-negative. 
+
+```{r}
+# Estimate Tobit model using censReg:
+TobitRes <- censReg(hours~nwifeinc+educ+exper+I(exper^2)+ 
+                      age+kidslt6+kidsge6, data=mroz )
+summary(TobitRes)
+
+# Partial Effects at the average x:
+margEff(TobitRes)
+```
+
+Another alternative for estimating Tobit models is the command **survreg** from the package survival. It is less straightforward to use but more flexible. 
+
+```{r}
+# Estimate Tobit model using survreg:
+res <- survreg(Surv(hours, hours>0, type="left") ~ nwifeinc+educ+exper+
+                 I(exper^2)+age+kidslt6+kidsge6, data=mroz, dist="gaussian")
+summary(res)
+```
+
+
+
+## Censored and Truncated Regression Models
+
+Censored regression models are closely related to Tobit models. In the basic Tobit model we observe $y = y^*$ in the "uncensored" cases with $y^* > 0$ and we only know an upper bound for $y^* \le 0$ if we observe $y 0 = $.  
+
+
+In this example we are are interested in criminal prognosis of individuals released from prison to reoffend.  
+
+
+```{r}
+data(recid, package='wooldridge')
+
+# Define Dummy for UNcensored observations
+recid$uncensored <- recid$cens==0
+# Estimate censored regression model:
+res<-survreg(Surv(log(durat),uncensored, type="right") ~ workprg+priors+
+               tserved+felon+alcohol+drugs+black+married+educ+age, 
+             data=recid, dist="gaussian")
+# Output:
+summary(res)
+```
+
+### The Heckman, or Sample Selection Model
+
+The models are useful when the sample selection is not random, but whehter an individual is in the sample depends on individual characteristics. For example, when studying wage determination for married women, some women are not in the labour force, therefore their wages are zero.
+
+The Heckit procedure involves two steps, estimating both the selection equation and the equation of interest. Function `selection()` in the **sampleSelection** package performs both steps; therefore, it needs both equations among its arguments. (The selection equation is, in fact, a probit model.)
+
+
+```{r}
+data("mroz", package='wooldridge')
+
+wage.heckit <- selection(inlf~age+educ+I(kidslt6+kidsge6)+mtr,
+                         log(wage)~educ+exper, 
+                         data=mroz, method="ml")
+summary(wage.heckit)
+```
+
+
+
+<!--chapter:end:02-GLM.Rmd-->
+
+`r if (knitr::is_html_output()) '
+# References {-}
+'`
+
+<!--chapter:end:03-references.Rmd-->
 

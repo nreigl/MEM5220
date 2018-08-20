@@ -10,22 +10,70 @@ link-citations: yes
 description: "This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology"
 ---
 
-# Introduction 
+# Introduction {-}
 
-Welcome to MEM5220 - Applied Econometrics. This handout was originally (and currently) designed for the use with MEM5220 - Applied Econometrics at Tallinn University of Technology. Note that this workbook is still under heavy development!  
 
-## Prerequisites
+```{r fig.align='center', echo=FALSE, include=identical(knitr:::pandoc_to(), 'html'), fig.cap="Normal and simulated Gaussian densities on a regression line",  fig.link='https://stackoverflow.com/questions/31794876/ggplot2-how-to-curve-small-gaussian-densities-on-a-regression-line'}
+knitr::include_graphics('images/cover.jpeg', dpi = NA)
+```
+
+
+Welcome to MEM5220 - Applied Econometrics. This handout is designed for the use with MEM5220 - Applied Econometrics at Tallinn University of Technology. Note that this workbook is still under heavy development!  
+
+## Prerequisites {-}
 
 A basic knowledge of the R [@team2013r] programming language  is required. 
 
 
-## Resources
+In order to reproduce the examples in this script You need the statistical software package R. Additionally we recommend using the <a href="https://www.rstudio.com/">RStudio</a> integrated developer environment (IDE) which will improve Your R working experience.
 
-Our primary resource is @heiss2016using ^[Heiss (2016) builds on the popular Introductory Econometrics by Wooldridge (2016) and demonstrates how to replicate the applications discussed therein using R.]
-. For theoretical concepts see @wooldridge2015introductory. 
+### Installation of R and RStudio  {-}
+
+Go to the following webpages and download the software adequate for Your operating system:
 
 
-## Acknowledgements
+1. <b>The Statistical Software Package R:</b> <a href="http://cran.r-project.org/">http://cran.r-project.org</a><br>
+<br>
+2. <b>The GUI RStudio</b>: <a href="http://www.rstudio.com/products/rstudio/download/">http://www.rstudio.com/products/rstudio/download/</a> <br>
+
+
+Install R first and then proceed with RStudio. Afterwards start RStudio.
+
+
+## Resources {-}
+
+
+Our primary resource is @heiss2016using ^[Heiss (2016) builds on the popular Introductory Econometrics by Wooldridge (2016) and demonstrates how to replicate the applications discussed therein using R.]. The book is available as free [online](http://www.urfie.net/read.html) version. For theoretical concepts I refer to @wooldridge2015introductory^[[Introductory Econometrics: A Modern Approach](https://books.google.ee/books/about/Introductory_Econometrics_A_Modern_Appro.html?id=wUF4BwAAQBAJ&source=kp_cover&redir_esc=y).].  
+
+**Standing on the shoulders of giants**
+
+This lecture material would not possible without many other open-source econometrics teaching materials and of course the R package developers. In addition to the main resources, examples and code of this workbook have been drawn from a number of free econometrics eBooks, blogs, R-vignette help pages and other researchers teaching materials. 
+
+### Attribution {-}
+
+Chapter 1 Introduction to R is copied almost entirely from appliedstats by David Dalpiaz. I added a couple of practical tasks and made some minor edits.
+Chapter 2 is partly based on appliedstats, but only up to scatterplots.
+
+
+- [Using R for Introduction to Econometrics](https://emwikts1970.github.io/URFITE-Bookdown/)
+- [Applied Statistics with R](https://daviddalpiaz.github.io/appliedstats/), @dalpiaz2016
+- [Principles of Econometrics with R](https://bookdown.org/ccolonescu/RPoE4/)
+- [Introduction to Econometrics with R](https://scpoecon.github.io/ScPoEconometrics/), @oswald2018introduction
+
+
+
+## Software information and conventions {-}
+
+
+The R session information when compiling this book is shown below:
+
+```{r}
+sessionInfo()
+```
+
+I do not add prompts (`>` and `+`) to R source code in this book, and I comment out the text output with two hashes `##` by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out). Package names are in bold text (e.g., **rmarkdown**), and inline code and function arguments are formatted in a typewriter font (e.g., `knitr::knit('foo.Rmd')`). Function names are followed by parentheses (e.g., `bookdown::render_book()`). The double-colon operator `::` means accessing an object from a package. 
+
+## Acknowledgements {-}
 
 I thank Kadri Männasoo and Juan Carlos Cuestas for proofreading and their useful comments.
 
