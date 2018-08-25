@@ -6,7 +6,8 @@ To load the dataset and necessary functions:
 
 ```{r, echo=TRUE, message=FALSE, results='hide'}
 # This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
-PACKAGES<-c("wooldridge",  # Wooldrige Datasets
+devtools::install_github("ccolonescu/PoEdata")
+PACKAGES<-c(
             "tidyverse",  # for data manipulation and ggplots
             "broom",  # Tidy regression output
             "car", # Companion to applied regression
@@ -16,6 +17,7 @@ PACKAGES<-c("wooldridge",  # Wooldrige Datasets
             "stargazer", # Regression tables
             "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
             "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+            "wooldridge",  # Wooldrige Datasets
             "MCMCpack", # Contains functions to perform Bayesian inference using posterior simulation for a number of ssatistical models.
             "sampleSelection", # Two-step and maximum likelihood estimation of Heckman-type sample selection models
             "scales", # scale helper functions such as percent 
@@ -243,6 +245,9 @@ For instance, the marginal effect of grades on the probability of attending a fo
 ### Probit model 
 
 ```{r}
+detach("package:PoEdata", unload=TRUE)
+data("mroz", package='wooldridge')
+attach(mroz)
 # Estimate probit model
 probitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
                family=binomial(link=probit),data=mroz)
@@ -253,6 +258,24 @@ logLik(probitres)
 # McFadden's pseudo R2:
 1 - probitres$deviance/probitres$null.deviance
 ```
+
+
+Take a boostrap sample for the 95% confidence interval for each parameter. 
+
+
+```{r, cache=TRUE}
+data("mroz", package='wooldridge')
+
+boot_probitres <- mroz %>% 
+  bootstrap(500) %>% 
+  do(tidy(glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
+               family=binomial(link=probit),.)))
+boot_probitres %>% 
+  group_by(term) %>% 
+  dplyr::summarise(low = quantile(estimate, .025), 
+                   high = quantile(estimate, .0975))
+```
+
 
 ### Inference
 
@@ -455,7 +478,6 @@ The Heckit procedure involves two steps, estimating both the selection equation 
 
 ```{r}
 data("mroz", package='wooldridge')
-
 wage.heckit <- selection(inlf~age+educ+I(kidslt6+kidsge6)+mtr,
                          log(wage)~educ+exper, 
                          data=mroz, method="ml")

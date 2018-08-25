@@ -25,7 +25,7 @@
 <meta name="author" content="Nicolas Reigl">
 
 
-<meta name="date" content="2018-08-20">
+<meta name="date" content="2018-08-25">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -211,32 +211,42 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="linearregression" class="section level1">
 <h1><span class="header-section-number">Chapter 1</span> Linear Regression</h1>
-<p>The general form in which we specify regression models in R:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## response ~ terms</span>
-<span class="co">## </span>
-<span class="co">## y ~ age + sex            # age + sex main effects</span>
-<span class="co">## y ~ age + sex + age:sex  # add second-order interaction</span>
-<span class="co">## y ~ age*sex              # second-order interaction +</span>
-<span class="co">##                          # all main effects</span>
-<span class="co">## y ~ (age + sex + pressure)^2</span>
-<span class="co">##                          # age+sex+pressure+age:sex+age:pressure...</span>
-<span class="co">## y ~ (age + sex + pressure)^2 - sex:pressure</span>
-<span class="co">##                          # all main effects and all 2nd order</span>
-<span class="co">##                          # interactions except sex:pressure</span>
-<span class="co">## y ~ (age + race)*sex     # age+race+sex+age:sex+race:sex</span>
-<span class="co">## y ~ treatment*(age*race + age*sex) # no interact. with race,sex</span>
-<span class="co">## sqrt(y) ~ sex*sqrt(age) + race</span>
-<span class="co">## # functions, with dummy variables generated if</span>
-<span class="co">## # race is an R factor (classification) variable</span>
-<span class="co">## y ~ sex + poly(age,2)    # poly generates orthogonal polynomials</span>
-<span class="co">## race.sex &lt;- interaction(race,sex)</span>
-<span class="co">## y ~ age + race.sex       # for when you want dummy variables for</span>
-<span class="co">##                          # all combinations of the factors</span></code></pre>
+<p>To load the dataset and necessary functions:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace</span>
+devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;ccolonescu/PoEdata&quot;</span>)
+PACKAGES&lt;-<span class="kw">c</span>(<span class="st">&quot;PoEdata&quot;</span>, <span class="co"># R data sets for &quot;Principles of Econometrics&quot; by Hill, Griffiths, an d Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata</span>
+            <span class="st">&quot;wooldridge&quot;</span>,  <span class="co"># Wooldrige Datasets</span>
+            <span class="st">&quot;tidyverse&quot;</span>,  <span class="co"># for data manipulation and ggplots</span>
+            <span class="st">&quot;broom&quot;</span>,  <span class="co"># Tidy regression output</span>
+            <span class="st">&quot;ggpubr&quot;</span>,  <span class="co"># Multiple ggplots on a page. Note that, the installation of ggpubr will automatically install the gridExtra and the cowplot package; so you don’t need to re-install them. </span>
+            <span class="st">&quot;ggfortify&quot;</span>, <span class="co"># Simple ggplot recipe for lm objects) </span>
+            <span class="st">&quot;plot3D&quot;</span>,  <span class="co">#  3D graphs</span>
+            <span class="st">&quot;car&quot;</span>, <span class="co"># Companion to applied regression</span>
+            <span class="st">&quot;knitr&quot;</span>, <span class="co"># knit functions</span>
+            <span class="co"># &quot;kableExtra&quot;, # extended knit functions for objects exported from other packages</span>
+            <span class="st">&quot;huxtable&quot;</span>, <span class="co">#  Regression tables, broom compatible</span>
+            <span class="st">&quot;mice&quot;</span>,  <span class="co"># multiple imputation</span>
+            <span class="st">&quot;VIM&quot;</span>, <span class="co"># visualizing missing data</span>
+            <span class="st">&quot;stargazer&quot;</span>, <span class="co"># Regression tables</span>
+            <span class="st">&quot;AER&quot;</span>, <span class="co">#  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)</span>
+            <span class="st">&quot;MASS&quot;</span>,  <span class="co">#  Functions and datasets to support Venables and Ripley,  &quot;Modern Applied Statistics with S&quot;</span>
+            <span class="st">&quot;mvtnorm&quot;</span>, <span class="co"># Multivariate Normal and t Distributions </span>
+            <span class="st">&quot;summarytools&quot;</span>, <span class="co"># Report regression summary tables</span>
+            <span class="st">&quot;scales&quot;</span>, <span class="co"># scale helper functions such as percent </span>
+            <span class="st">&quot;OutliersO3&quot;</span>, <span class="co"># Outlier comparison method</span>
+            <span class="st">&quot;robustbase&quot;</span>, <span class="co"># Basic robust statistics</span>
+            <span class="st">&quot;quantreg&quot;</span>, <span class="co"># Quantile regression</span>
+            <span class="st">&quot;modelr&quot;</span>, <span class="co"># model simulation/ boostraping the modern way</span>
+            <span class="st">&quot;magrittr&quot;</span>) <span class="co">#  pipes</span>
+inst&lt;-<span class="kw">match</span>(PACKAGES, <span class="kw">.packages</span>(<span class="dt">all=</span><span class="ot">TRUE</span>))
+need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
+<span class="cf">if</span> (<span class="kw">length</span>(need)<span class="op">&gt;</span><span class="dv">0</span>) <span class="kw">install.packages</span>(PACKAGES[need])
+<span class="kw">lapply</span>(PACKAGES, require, <span class="dt">character.only=</span>T)</code></pre>
 <div id="simple-linear-regression" class="section level2">
 <h2><span class="header-section-number">1.1</span> Simple Linear Regression</h2>
 <p>We start off with a simple OLS Regression. We will work with multiple data sources:</p>
 <ul>
-<li>Data from <span class="citation">Wooldridge (<a href="#ref-wooldridge2015introductory">2015</a>)</span> : Introductory Econometrics: A Modern Approch.</li>
+<li>Data from <span class="citation">Wooldridge (<a href="#ref-wooldridge2015introductory">2015</a>)</span> : Introductory Econometrics: A Modern Approach.</li>
 <li>R data sets for “Principles of Econometrics” by <span class="citation">Hill et al. (<a href="#ref-hill2008principles">2008</a>)</span></li>
 <li>Build in examples such as the <code>airquality</code> dataset</li>
 </ul>
@@ -258,7 +268,7 @@ more complex relationships between the variables in question.</p>
 <p>To get a first look at the data you can use the <code>View()</code> function inside R Studio.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">View</span>(ceosal1) <span class="co"># For the compilation we omit the full View()</span></code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-7">Table 1.1: </span>A table of the first eight columns and ten rows of the ceosal1 data.</caption>
+<caption><span id="tab:unnamed-chunk-6">Table 1.1: </span>A table of the first eight columns and ten rows of the ceosal1 data.</caption>
 <thead>
 <tr class="header">
 <th align="right">salary</th>
@@ -427,7 +437,7 @@ more complex relationships between the variables in question.</p>
 <hr />
 <p><strong>Note</strong></p>
 <p>A simple linear model as assumes that the mean of each <span class="math inline">\(y_{i}\)</span> conditioned on <span class="math inline">\(x_{i}\)</span>
-is a linear function of <span class="math inline">\(x_{i}\)</span>. But notice that simple linear regressions are simplifications of more complex relationships between the variables in question <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016">n.d.</a>)</span>.</p>
+is a linear function of <span class="math inline">\(x_{i}\)</span>. But notice that simple linear regressions are simplifications of more complex relationships between the variables in question <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016">2016</a>)</span>.</p>
 <hr />
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Use ggplot style</span>
 <span class="kw">ggplot</span>(ceosal1, <span class="kw">aes</span>(<span class="dt">x =</span> roe, <span class="dt">y =</span> salary)) <span class="op">+</span>
@@ -440,15 +450,20 @@ Figure 1.1: Relationship between ROE and Salary
 </div>
 <p>Consider a simple regression model</p>
 <p><span class="math inline">\(salary = \beta_0 + \beta_1roe + u\)</span></p>
-<p>We are concerned with the population parameter <span class="math inline">\(\beta_{0}\)</span> and <span class="math inline">\(\beta_{1}\)</span>. The general form of the model.</p>
-<p><span class="math display" id="eq:populationparameterBeta0">\[\begin{equation}
-\hat{\beta}_{0} = \bar{y} - \hat{\beta}_{1}\bar{x}
+<p>In the general form the linear regression model can be written as:</p>
+<p><span class="math display" id="eq:simplelinearregressionmodel">\[\begin{equation}
+y = \beta_{0} + \beta_{1}x + u
 \tag{1.1}
 \end{equation}\]</span></p>
-<p>The ordinary least squares (OLS) estimators are</p>
-<p><span class="math display" id="eq:OLSestimator">\[\begin{equation}
+<p>We are concerned with the population parameter <span class="math inline">\(\beta_{0}\)</span> and <span class="math inline">\(\beta_{1}\)</span>. The ordinary least squares (OLS) estimators are:</p>
+<p><span class="math display" id="eq:populationparameterBeta0">\[\begin{equation}
 \hat{\beta}_{0} = \bar{y} - \hat{\beta}_{1}\bar{x}
 \tag{1.2}
+\end{equation}\]</span></p>
+<p>The ordinary least squares (OLS) estimators are</p>
+<p><span class="math display" id="eq:populationparameterBeta1">\[\begin{equation}
+\hat{\beta}_{1} = \frac{Cov(x,y)}{Var(x)}
+\tag{1.3}
 \end{equation}\]</span></p>
 <p>Ingredients for the OLS formulas</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">attach</span>(ceosal1)
@@ -471,17 +486,6 @@ Figure 1.1: Relationship between ROE and Salary
 ## (Intercept)          roe  
 ##       963.2         18.5</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">lm1_ceosal1 &lt;-<span class="st"> </span><span class="kw">lm</span>(salary <span class="op">~</span><span class="st"> </span>roe, <span class="dt">data=</span>ceosal1) </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">unique</span>(ceosal1<span class="op">$</span>roe)</code></pre>
-<pre><code>##   [1] 14.1 10.9 23.5  5.9 13.8 20.0 16.4 16.3 10.5 26.3 25.9 26.8 14.8 22.3
-##  [15] 56.3 12.6 20.4  1.9 19.9 15.4 38.7 24.4 15.6 14.4 19.0 16.1 12.1 16.2
-##  [29] 18.4 14.2 14.9 12.4 17.1 16.9 18.1 19.3 18.3 13.7 12.7 15.1 16.5 10.2
-##  [43] 19.6 12.8 15.9 17.3  8.5 19.5 19.2 28.1 25.0 15.0 20.3 22.7 13.2 10.3
-##  [57] 17.7 10.0  6.8 13.1 15.8 15.3  0.5 13.0 11.1  8.9 17.5  9.3  9.5 15.5
-##  [71]  8.6 24.6  7.2 11.6 26.4 21.4  9.0  9.4  3.5 22.1 33.3 22.8 20.9  6.7
-##  [85]  7.1 11.8 14.0 10.1  6.4 17.6 23.6 35.7 23.2 44.4  2.1 23.4 25.7 27.0
-##  [99] 43.7 24.8 26.2 44.5 35.1 11.0 19.4 28.5 43.9 15.7 28.2 42.2 21.5 29.5
-## [113] 22.6 22.9  7.8 48.1 18.0 21.7 21.3 26.9 30.5 29.1 40.8 10.8  5.1 12.3
-## [127]  7.4  6.2 10.6  2.9 13.5 10.7 11.9 12.9  7.3 14.6 14.5 14.7</code></pre>
 <p>Plot the linear regression fit the <em>base</em> r way.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(salary<span class="op">~</span><span class="st"> </span>roe, <span class="dt">data =</span> ceosal1,
      <span class="dt">xlab =</span> <span class="st">&quot;Return on equity&quot;</span>,
@@ -550,10 +554,17 @@ Figure 1.3: OLS regression ggplot2 style
 <pre><code>## [1] 0.01318862</code></pre>
 <hr />
 <p><strong>Your turn</strong></p>
-<p>Recall that the residual sum of squares (SSR) is</p>
-<p><span class="math display">\[\begin{equation}
-R^2 = \frac{Var(\hat{y})}{Var(y)} = 1 - \frac{Var(\hat{u})}{Var(y)} 
+<p>Recall that the explained sum of squares (SSE) is</p>
+<p><span class="math display" id="eq:SSE">\[\begin{equation}
+SSE = \sum_{i=1}^{n}(\hat{y}_{i} - \bar{y})^2 = (n-1) \times Var(\hat{y})
+\tag{1.4}
 \end{equation}\]</span></p>
+<p>and the residual sum of squares (SSR) is</p>
+<p><span class="math display" id="eq:SSR">\[\begin{equation}
+R^2 = \frac{Var(\hat{y})}{Var(y)} = 1 - \frac{Var(\hat{u})}{Var(y)} 
+\tag{1.5}
+\end{equation}\]</span></p>
+<p>One can see that the correlation between observed and fitted values is a square root of <span class="math inline">\(R^2\)</span>.</p>
 <p>Calculate <span class="math inline">\(R^2\)</span> manually:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">var</span>(<span class="kw">fitted</span>(lm1_ceosal1))<span class="op">/</span><span class="kw">var</span>(ceosal1<span class="op">$</span>salary)</code></pre>
 <pre><code>## [1] 0.01318862</code></pre>
@@ -570,6 +581,8 @@ roe_sample &lt;-<span class="kw">sample</span>(ceosal1<span class="op">$</span>r
 <pre><code>##        1 
 ## 1518.227</code></pre>
 <p>The above code reads “predict the salary when the return on equity is 30 using the <em>lm1_ceosal1</em> model.”</p>
+<hr />
+<p><strong>Overthinking</strong></p>
 <div id="regression-through-the-origin-and-regression-on-a-constant" class="section level3">
 <h3><span class="header-section-number">1.1.1</span> Regression through the Origin and Regression on a Constant</h3>
 <p>Regression without intercept (through origin)</p>
@@ -598,6 +611,9 @@ roe_sample &lt;-<span class="kw">sample</span>(ceosal1<span class="op">$</span>r
 Figure 1.4: Regression through the Origin and on a Constant
 </p>
 </div>
+<p>In models without the intercept the <span class="math inline">\(R^2\)</span> loses its interpretatation. The reason is that the <span class="math inline">\(R^2\)</span> is the ratio of explained variance to total variance <strong>only</strong> if the intercept is included.</p>
+<hr />
+<p><strong>Overthinking</strong></p>
 </div>
 <div id="simulating-slr" class="section level3">
 <h3><span class="header-section-number">1.1.2</span> Simulating SLR</h3>
@@ -629,12 +645,12 @@ x1 &lt;-<span class="st"> </span><span class="dv">5</span></code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">curve</span>(<span class="kw">dnorm</span>(x, <span class="dt">mean =</span> yhat1, <span class="dt">sd =</span> sigma), <span class="dv">-5</span>, <span class="dv">15</span>, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)
 <span class="kw">abline</span>(<span class="dt">v =</span> yhat1, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="dt">lty =</span> <span class="dv">2</span>)
 <span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend =</span> <span class="kw">c</span>(<span class="st">&quot;f(y|x = 5)&quot;</span>), <span class="dt">lty =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>))</code></pre>
-<p><img src="MEM5220_R_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
+<p><img src="MEM5220_R_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
 <p>This represent the theoretical (true) probability distribution of <span class="math inline">\(y\)</span>, given <span class="math inline">\(x\)</span></p>
 <p>We can calculate the variance of <span class="math inline">\(b_{1}\)</span> and plot the corresponding density function.</p>
 <p><span class="math display" id="eq:variancebeta">\[\begin{equation}
 var(b_2) = \frac{\sigma^2}{\sum{}{}(x_1 - \bar{x})}
-\tag{1.3}
+\tag{1.6}
 \end{equation}\]</span></p>
 <p>Assume that <span class="math inline">\(x_{2}\)</span> represents a second possible predictor of <span class="math inline">\(y\)</span></p>
 <pre class="sourceCode r"><code class="sourceCode r">x2 &lt;-<span class="st"> </span><span class="dv">18</span>
@@ -647,7 +663,7 @@ varb &lt;-<span class="st"> </span>(sigma<span class="op">^</span><span class="d
 sdb &lt;-<span class="kw">sqrt</span>(varb)
 leftlim &lt;-<span class="st"> </span>b1<span class="dv">-3</span><span class="op">*</span>sdb
 rightlim &lt;-<span class="st"> </span>b1<span class="op">+</span><span class="dv">3</span><span class="op">*</span>sdb</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">curve</span>(<span class="kw">dnorm</span>(x, <span class="dt">mean =</span> b1, <span class="dt">sd =</span> sdb), leftlim, rightlim,)
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">curve</span>(<span class="kw">dnorm</span>(x, <span class="dt">mean =</span> b1, <span class="dt">sd =</span> sdb), leftlim, rightlim)
 <span class="kw">abline</span>(<span class="dt">v =</span> b1, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>, <span class="dt">lty =</span> <span class="dv">2</span>)</code></pre>
 <div class="figure" style="text-align: center"><span id="fig:fig4"></span>
 <img src="MEM5220_R_files/figure-html/fig4-1.png" alt="The theoretical (true) probability density function of b1" width="80%" />
@@ -951,14 +967,14 @@ Figure 1.11: Heteroskedasticity in the simulated data
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">var</span>(b1hat)</code></pre>
 <pre><code>## [1] 0.007264373</code></pre>
 <p>Unbiasedness is provided but sampling variance is incorrect (compared to the results provided above).</p>
+<hr />
 </div>
 </div>
 <div id="nonlinearities" class="section level3">
 <h3><span class="header-section-number">1.1.3</span> Nonlinearities</h3>
 <p>Sometimes the scatter plot diagram or some theoretical considerations suggest a non-linear relationship. The most popular non-linear relationships involve logarithms of the dependent or independent variables and polynomial functions.</p>
 <p>We will use a new dataset, <em>wage1</em>, for this section. A detailed exploratory analysis of the dataset is left to the reader.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;wage1&quot;</span>)
-<span class="kw">attach</span>(wage1)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;wage1&quot;</span>)</code></pre>
 <div id="predicated-variable-transformation" class="section level4">
 <h4><span class="header-section-number">1.1.3.1</span> Predicated variable transformation</h4>
 <p>A common variance stabilizing transformation (VST) when we see increasing variance in a fitted versus residuals plot is <span class="math inline">\(log(Y)\)</span>.</p>
@@ -1107,8 +1123,6 @@ Figure 1.16: Wages by Education - Different transformations
 </div>
 <p>A: Plotting the data on the transformed log scale and adding the fitted line, the relationship again appears linear, and the variation about the fitted line looks more constant.</p>
 <p>B: By plotting the data on the original scale, and adding the fitted regression, we see an exponential relationship. However, this is still a <em>linear</em> model, since the new transformed response, <span class="math inline">\(log(Y_{i}\)</span>, is still a <em>linear</em> combination of the predictors. In other words, only <span class="math inline">\(\beta\)</span> needs to be linear, not the <span class="math inline">\(x\)</span> values.</p>
-<p><em>NOTE:</em></p>
-<p>The example comes from the Wooldrige book but the variable educ looks more like count data. A Poisson GLM might seems like a better choice.</p>
 <p><strong>Quadratic Model</strong></p>
 <p><span class="math display">\[\begin{equation}
 Y_{i} = \beta_{0} + \beta_{1} \times x^2_{i}  \times \epsilon_{i}
@@ -1154,13 +1168,13 @@ lm_hprice3 &lt;-<span class="st"> </span><span class="kw">lm</span>(price <span 
 <li>Interpretation is more difficult because the <span class="math inline">\(\beta_{j}\)</span> are effects conditional on the other variables</li>
 </ul>
 <p>Many would retain the same signs as the simple linear regression, but the magnitudes would be smaller. In some cases, it is possible for
-the relationship to flip directions when a second (highly correlated) variable is added <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016">n.d.</a>)</span>.</p>
+the relationship to flip directions when a second (highly correlated) variable is added <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016">2016</a>)</span>.</p>
 <hr />
 <p><span class="math display" id="eq:multipleregression">\[\begin{equation}
 y = \beta_{0} + \beta_{1}x_{1} +  \beta_{2}x_{2} + \dots + \beta_{k}x_{k} + u   
-\tag{1.4}
+\tag{1.7}
 \end{equation}\]</span></p>
-<p>The next example from Wooldrige relates the college GPA (<em>cloGPA</em>) to the high school GPA (“hsGPA”) and achievment test score (<em>ACT</em>) for a sample of 141 students.</p>
+<p>The next example from Wooldrige relates the college GPA (<em>cloGPA</em>) to the high school GPA (“hsGPA”) and achievement test score (<em>ACT</em>) for a sample of 141 students.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;gpa1&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;wooldridge&quot;</span>)
 <span class="kw">attach</span>(gpa1)</code></pre>
 <pre><code>## The following object is masked from package:robustbase:
@@ -1248,17 +1262,17 @@ Figure 1.17: College GPA High School GPA + Achievment test score
 <p>Consider a regression with two explanatory variables</p>
 <p><span class="math display" id="eq:lmtwoexplanatory">\[\begin{equation}
 \hat{y} = \hat{\beta}_{0} + \hat{\beta}_{1}x_{1} +  \hat{\beta}_{2}x_{2}    
-\tag{1.5}
+\tag{1.8}
 \end{equation}\]</span></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Parameter estimates for full and simple model:</span>
 beta.hat &lt;-<span class="st"> </span><span class="kw">coef</span>( <span class="kw">lm</span>(colGPA <span class="op">~</span><span class="st"> </span>ACT<span class="op">+</span>hsGPA, <span class="dt">data=</span>gpa1) )
 beta.hat</code></pre>
 <pre><code>## (Intercept)         ACT       hsGPA 
 ## 1.286327767 0.009426012 0.453455885</code></pre>
-<p>Now, lets ommit one variable in the regression</p>
+<p>Now, lets omit one variable in the regression</p>
 <p><span class="math display" id="eq:lmomitted">\[\begin{equation}
 \hat{y} = \hat{\beta}_{0} + \hat{\beta}_{1}x_{1}    
-\tag{1.6}
+\tag{1.9}
 \end{equation}\]</span></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Relation between regressors:</span>
 delta.tilde &lt;-<span class="st"> </span><span class="kw">coef</span>( <span class="kw">lm</span>(hsGPA <span class="op">~</span><span class="st"> </span>ACT, <span class="dt">data=</span>gpa1) )
@@ -1268,12 +1282,12 @@ delta.tilde</code></pre>
 <p>The parameter <span class="math inline">\(\hat\beta_1\)</span> is the estimated effect of increasing <span class="math inline">\(x_1\)</span> by one unit (and <strong>NOT</strong> keeping <span class="math inline">\(x_2\)</span> fixed). It can be related to <span class="math inline">\(\hat\beta_1\)</span> using the formula</p>
 <p><span class="math display" id="eq:lmommited">\[\begin{equation}
 \hat{y} = \hat{\beta}_{0} + \hat{\beta}_{1} x_{1} +  \hat{\beta}_{2}  \tilde\delta_{1}
-\tag{1.7}
+\tag{1.10}
 \end{equation}\]</span></p>
-<p>where</p>
+<p>where <span class="math inline">\(\tilde\delta_{1}\)</span> is the slope parameters of the linear regression of <span class="math inline">\(x_2\)</span> on <span class="math inline">\(x_1\)</span></p>
 <p><span class="math display" id="eq:lmomitted2">\[\begin{equation}
 \hat{x}_2 = \tilde\delta_{0} + \tilde\delta_{1} x_{1}
-\tag{1.8}
+\tag{1.11}
 \end{equation}\]</span></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Omitted variables formula for beta1.tilde:</span>
 beta.hat[<span class="st">&quot;ACT&quot;</span>] <span class="op">+</span><span class="st"> </span>beta.hat[<span class="st">&quot;hsGPA&quot;</span>]<span class="op">*</span>delta.tilde[<span class="st">&quot;ACT&quot;</span>]</code></pre>
@@ -1292,14 +1306,162 @@ beta.hat[<span class="st">&quot;ACT&quot;</span>] <span class="op">+</span><span
 </div>
 <div id="standard-errors-multicollinearity-and-vif" class="section level3">
 <h3><span class="header-section-number">1.2.2</span> Standard errors, Multicollinearity and VIF</h3>
-<p>We know already how we can extract the standard errors</p>
-<pre class="sourceCode r"><code class="sourceCode r">GPAres &lt;-<span class="st"> </span><span class="kw">lm</span>(colGPA <span class="op">~</span><span class="st"> </span>hsGPA <span class="op">+</span><span class="st"> </span>ACT, <span class="dt">data =</span> gpa1)
-SER&lt;-<span class="kw">summary</span>(GPAres)<span class="op">$</span>sigma</code></pre>
+<p>Multicollinearity means that two or more regressors in a multiple regression model are strongly correlated. If the correlation between two or more regressors is perfect, that is, one regressor can be written as a linear combination of the other(s), we have perfect multicollinearity. While strong multicollinearity in general is unpleasant as it causes the variance of the OLS estimator to be large (we will discuss this in more detail later), the presence of perfect multicollinearity makes it impossible to solve for the OLS estimator, i.e., the model cannot be estimated in the first place.</p>
+<div id="perfect-multicollinearity" class="section level4">
+<h4><span class="header-section-number">1.2.2.1</span> Perfect multicollinearity</h4>
+<p>We will work first with the <em>CAschools</em> data from the <strong>AER</strong> package to simulate an example of perfect multicollinearity</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;CASchools&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;AER&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># define the fraction of English learners        </span>
+CASchools<span class="op">$</span>FracEL &lt;-<span class="st"> </span>CASchools<span class="op">$</span>english <span class="op">/</span><span class="st"> </span><span class="dv">100</span>
+
+<span class="co"># check the correlation between CASchools$FracEL and CASchools$english </span>
+<span class="kw">cor</span>(CASchools<span class="op">$</span>FracEL, CASchools<span class="op">$</span>english)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># estimate the model</span>
+mult.mod &lt;-<span class="st"> </span><span class="kw">lm</span>(read <span class="op">~</span><span class="st"> </span>students <span class="op">+</span><span class="st"> </span>english <span class="op">+</span><span class="st"> </span>FracEL, <span class="dt">data =</span> CASchools) 
+
+<span class="co"># obtain a summary of the model</span>
+<span class="kw">summary</span>(mult.mod)  </code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = read ~ students + english + FracEL, data = CASchools)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -51.077  -9.767  -0.695   9.097  40.005 
+## 
+## Coefficients: (1 not defined because of singularities)
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  6.665e+02  9.771e-01 682.054   &lt;2e-16 ***
+## students     3.326e-04  1.941e-04   1.714   0.0873 .  
+## english     -7.843e-01  4.153e-02 -18.886   &lt;2e-16 ***
+## FracEL              NA         NA      NA       NA    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 14.53 on 417 degrees of freedom
+## Multiple R-squared:  0.4802, Adjusted R-squared:  0.4777 
+## F-statistic: 192.6 on 2 and 417 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>The row <em>FracEL</em> in the coefficients section of the output consists of NA entries since FracEL was excluded from the model.</p>
+<p>Another example of perfect multicollinearity is known as the dummy variable trap. This may occur when multiple dummy variables are used as regressors. A common case for this is when dummies are used to sort the data into mutually exclusive categories. For example, suppose we have spatial information that indicates whether a school is located in the North, West, South or East of California.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># set seed for reproducibility</span>
+<span class="kw">set.seed</span>(<span class="dv">1</span>)
+
+<span class="co"># generate artificial data on location</span>
+CASchools<span class="op">$</span>direction &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">c</span>(<span class="st">&quot;West&quot;</span>, <span class="st">&quot;North&quot;</span>, <span class="st">&quot;South&quot;</span>, <span class="st">&quot;East&quot;</span>), 
+                              <span class="dv">420</span>, 
+                              <span class="dt">replace =</span> T)
+
+<span class="co"># estimate the model</span>
+mult.mod &lt;-<span class="st"> </span><span class="kw">lm</span>(read <span class="op">~</span><span class="st"> </span>students <span class="op">+</span><span class="st"> </span>english <span class="op">+</span><span class="st"> </span>direction, <span class="dt">data =</span> CASchools)
+
+<span class="co"># obtain a model summary</span>
+<span class="kw">summary</span>(mult.mod)   </code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = read ~ students + english + direction, data = CASchools)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -50.518  -9.690  -1.146   8.926  39.698 
+## 
+## Coefficients:
+##                  Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)     6.659e+02  1.547e+00 430.575   &lt;2e-16 ***
+## students        3.177e-04  1.945e-04   1.634    0.103    
+## english        -7.844e-01  4.154e-02 -18.882   &lt;2e-16 ***
+## directionNorth  9.185e-01  1.934e+00   0.475    0.635    
+## directionSouth -1.119e+00  2.081e+00  -0.537    0.591    
+## directionWest   2.436e+00  2.057e+00   1.184    0.237    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 14.53 on 414 degrees of freedom
+## Multiple R-squared:  0.484,  Adjusted R-squared:  0.4778 
+## F-statistic: 77.67 on 5 and 414 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Notice that R solves the problem on its own by generating and including the dummies directionNorth, directionSouth and directionWest but omitting directionEast. Of course, the omission of every other dummy instead would achieve the same. Another solution would be to exclude the constant and to include all dummies instead.</p>
+<p>A last example considers the case where a perfect linear relationship arises from redundant regressors. Suppose we have a regressor<br />
+Spanish speakers, <em>spanish</em>, , the percentage of English speakers in the school where</p>
+<p><span class="math display">\[\begin{equation}
+spanish = 100 - english  
+\end{equation}\]</span></p>
+<p>and both <em>spanish</em> and <em>english</em> are included in a regression model.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Percentage of english speakers </span>
+CASchools<span class="op">$</span>spanish &lt;-<span class="st"> </span><span class="dv">100</span> <span class="op">-</span><span class="st"> </span>CASchools<span class="op">$</span>english
+
+<span class="co"># estimate the model</span>
+mult.mod &lt;-<span class="st"> </span><span class="kw">lm</span>(read <span class="op">~</span><span class="st"> </span>students <span class="op">+</span><span class="st"> </span>english <span class="op">+</span><span class="st"> </span>spanish, <span class="dt">data =</span> CASchools)
+
+<span class="co"># obtain a model summary</span>
+<span class="kw">summary</span>(mult.mod)                                                 </code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = read ~ students + english + spanish, data = CASchools)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -51.077  -9.767  -0.695   9.097  40.005 
+## 
+## Coefficients: (1 not defined because of singularities)
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  6.665e+02  9.771e-01 682.054   &lt;2e-16 ***
+## students     3.326e-04  1.941e-04   1.714   0.0873 .  
+## english     -7.843e-01  4.153e-02 -18.886   &lt;2e-16 ***
+## spanish             NA         NA      NA       NA    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 14.53 on 417 degrees of freedom
+## Multiple R-squared:  0.4802, Adjusted R-squared:  0.4777 
+## F-statistic: 192.6 on 2 and 417 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Once more, <code>lm()</code> refuses to estimate the full model using OLS and excludes spanish.</p>
+</div>
+<div id="impperfect-multicollinearity" class="section level4">
+<h4><span class="header-section-number">1.2.2.2</span> Impperfect multicollinearity</h4>
+<p>As opposed to perfect multicollinearity, imperfect multicollinearity is — to a certain extent — less of a problem. In fact, imperfect multicollinearity is the reason why we are interested in estimating multiple regression models in the first place: the OLS estimator allows us to isolate influences of correlated regressors on the dependent variable. If it was not for these dependencies, there would not be a reason to resort to a multiple regression approach and we could simply work with a single-regressor model. However, this is rarely the case in applications. We already know that ignoring dependencies among regressors which influence the outcome variable has an adverse effect on estimation results.</p>
+<p>Simulation study: imperfect multicollinearity</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># set number of observations</span>
+n &lt;-<span class="st"> </span><span class="dv">50</span>
+
+<span class="co"># initialize vectors of coefficients</span>
+coefs1 &lt;-<span class="st"> </span><span class="kw">cbind</span>(<span class="st">&quot;hat_beta_1&quot;</span> =<span class="st"> </span><span class="kw">numeric</span>(<span class="dv">10000</span>), <span class="st">&quot;hat_beta_2&quot;</span> =<span class="st"> </span><span class="kw">numeric</span>(<span class="dv">10000</span>))
+coefs2 &lt;-<span class="st"> </span>coefs1
+
+<span class="co"># set seed</span>
+<span class="kw">set.seed</span>(<span class="dv">1</span>)
+
+<span class="co"># loop sampling and estimation</span>
+<span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">1000</span>) {
+  
+  <span class="co"># for cov(X_1,X_2) = 0.25</span>
+  X &lt;-<span class="st"> </span><span class="kw">rmvnorm</span>(n, <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">100</span>), <span class="dt">sigma =</span> <span class="kw">cbind</span>(<span class="kw">c</span>(<span class="dv">10</span>, <span class="fl">2.5</span>), <span class="kw">c</span>(<span class="fl">2.5</span>, <span class="dv">10</span>))) <span class="co"># function from the mvtnorm package</span>
+  u &lt;-<span class="st"> </span><span class="kw">rnorm</span>(n, <span class="dt">sd =</span> <span class="dv">5</span>)
+  Y &lt;-<span class="st"> </span><span class="dv">5</span> <span class="op">+</span><span class="st"> </span><span class="fl">2.5</span> <span class="op">*</span><span class="st"> </span>X[, <span class="dv">1</span>] <span class="op">+</span><span class="st"> </span><span class="dv">3</span> <span class="op">*</span><span class="st"> </span>X[, <span class="dv">2</span>] <span class="op">+</span><span class="st"> </span>u
+  coefs1[i, ] &lt;-<span class="st"> </span><span class="kw">lm</span>(Y <span class="op">~</span><span class="st"> </span>X[, <span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>X[, <span class="dv">2</span>])<span class="op">$</span>coefficients[<span class="op">-</span><span class="dv">1</span>]
+  
+  <span class="co"># for cov(X_1,X_2) = 0.85</span>
+  X &lt;-<span class="st"> </span><span class="kw">rmvnorm</span>(n, <span class="kw">c</span>(<span class="dv">50</span>, <span class="dv">100</span>), <span class="dt">sigma =</span> <span class="kw">cbind</span>(<span class="kw">c</span>(<span class="dv">10</span>, <span class="fl">8.5</span>), <span class="kw">c</span>(<span class="fl">8.5</span>, <span class="dv">10</span>)))
+  Y &lt;-<span class="st"> </span><span class="dv">5</span> <span class="op">+</span><span class="st"> </span><span class="fl">2.5</span> <span class="op">*</span><span class="st"> </span>X[, <span class="dv">1</span>] <span class="op">+</span><span class="st"> </span><span class="dv">3</span> <span class="op">*</span><span class="st"> </span>X[, <span class="dv">2</span>] <span class="op">+</span><span class="st"> </span>u
+  imperf_multicol &lt;-<span class="st"> </span><span class="kw">lm</span>(Y <span class="op">~</span><span class="st"> </span>X[, <span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>X[, <span class="dv">2</span>])
+  coefs2[i, ] &lt;-<span class="st"> </span><span class="kw">lm</span>(Y <span class="op">~</span><span class="st"> </span>X[, <span class="dv">1</span>] <span class="op">+</span><span class="st"> </span>X[, <span class="dv">2</span>])<span class="op">$</span>coefficients[<span class="op">-</span><span class="dv">1</span>]
+  
+}
+
+<span class="co"># obtain variance estimates</span>
+<span class="kw">diag</span>(<span class="kw">var</span>(coefs1))</code></pre>
+<pre><code>## hat_beta_1 hat_beta_2 
+##  0.5698281  0.8163287</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">diag</span>(<span class="kw">var</span>(coefs2))</code></pre>
+<pre><code>## hat_beta_1 hat_beta_2 
+##  0.5834243  0.8402187</code></pre>
+<p>We are interested in the variances which are the diagonal elements. We see that due to the high collinearity, the variances of <span class="math inline">\(\hat{\beta}_1\)</span> and <span class="math inline">\(\hat{\beta}_2\)</span> and have more than tripled, meaning it is more difficult to precisely estimate the true coefficients.</p>
 <p>The variance inflation factor, <em>VIF</em>, accounts for (imperfect) multicollinearity.If <span class="math inline">\(x_t\)</span> is highly related to the other regressors, <span class="math inline">\(R^2_j\)</span> and therefore also <span class="math inline">\(VIF_j\)</span> and the variance of <span class="math inline">\(\hat\beta_j\)</span> are large.</p>
 <p><span class="math display" id="eq:VIF">\[\begin{equation}
 \frac{1}{1-R^2_j}
-\tag{1.9}
+\tag{1.12}
 \end{equation}\]</span></p>
+<pre class="sourceCode r"><code class="sourceCode r">GPAres &lt;-<span class="st"> </span><span class="kw">lm</span>(colGPA <span class="op">~</span><span class="st"> </span>hsGPA <span class="op">+</span><span class="st"> </span>ACT, <span class="dt">data =</span> gpa1)
+SER&lt;-<span class="kw">summary</span>(GPAres)<span class="op">$</span>sigma</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># regressing hsGPA on ACT for calculation of R2 &amp; VIF</span>
 ( R2.hsGPA  &lt;-<span class="st"> </span><span class="kw">summary</span>( <span class="kw">lm</span>(hsGPA<span class="op">~</span>ACT, <span class="dt">data=</span>gpa1) )<span class="op">$</span>r.squared )</code></pre>
 <pre><code>## [1] 0.1195815</code></pre>
@@ -1309,6 +1471,10 @@ SER&lt;-<span class="kw">summary</span>(GPAres)<span class="op">$</span>sigma</c
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">vif</span>(GPAres)</code></pre>
 <pre><code>##    hsGPA      ACT 
 ## 1.135823 1.135823</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">vif</span>(imperf_multicol) <span class="co"># from the simulated data</span></code></pre>
+<pre><code>##   X[, 1]   X[, 2] 
+## 4.932864 4.932864</code></pre>
+</div>
 </div>
 <div id="multiple-regression-analysis-ols-asymptotics" class="section level3">
 <h3><span class="header-section-number">1.2.3</span> Multiple Regression Analysis: OLS Asymptotics</h3>
@@ -1316,7 +1482,7 @@ SER&lt;-<span class="kw">summary</span>(GPAres)<span class="op">$</span>sigma</c
 </div>
 <div id="reporting-regression-results" class="section level3">
 <h3><span class="header-section-number">1.2.4</span> Reporting Regression Results</h3>
-<p>As we start moving towards the comparing different regression models this section provides a discussion on how to report regression reports in <code>R</code>. Depending on your script (R scripts, R Markdown, bookdown) and what your desired output format is (LaTeX, word, html) the exact approach might differ. There are multiple packages to format regression or table output, most notabley <strong>stargazer</strong><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>, <strong>huxtable</strong> , <strong>Hmisc</strong> and <strong>xtable</strong>. One can also tidy the the regression output as well as tables with <strong>broom</strong> or <strong>summarytool</strong>. The wrapper <code>knitr::kable()</code> is a support function that renders the table in an R Markdown in a pretty way.</p>
+<p>As we start moving towards the comparing different regression models this section provides a discussion on how to report regression reports in <code>R</code>. Depending on your script (R scripts, R Markdown, bookdown) and what your desired output format is (LaTeX, word, html) the exact approach might differ. There are multiple packages to format regression or table output, most notably <strong>stargazer</strong><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>, <strong>huxtable</strong> , <strong>Hmisc</strong> and <strong>xtable</strong>. One can also tidy the the regression output as well as tables with <strong>broom</strong> or <strong>summarytool</strong>. The wrapper <code>knitr::kable()</code> is a support function that renders the table in an R Markdown in a pretty way.</p>
 <div id="table" class="section level4">
 <h4><span class="header-section-number">1.2.4.1</span> Table</h4>
 <pre class="sourceCode r"><code class="sourceCode r">knitr<span class="op">::</span><span class="kw">kable</span>(
@@ -1324,7 +1490,7 @@ SER&lt;-<span class="kw">summary</span>(GPAres)<span class="op">$</span>sigma</c
   <span class="dt">caption =</span> <span class="st">&quot;A table of the first eight columns and ten rows of the gpa1 data.&quot;</span>
 )</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-73">Table 1.2: </span>A table of the first eight columns and ten rows of the gpa1 data.</caption>
+<caption><span id="tab:unnamed-chunk-77">Table 1.2: </span>A table of the first eight columns and ten rows of the gpa1 data.</caption>
 <thead>
 <tr class="header">
 <th align="right">age</th>
@@ -1875,7 +2041,7 @@ lm3 &lt;-<span class="st"> </span><span class="kw">lm</span>(bwght <span class="
        lm2,
        lm3)
   ,<span class="dt">keep.stat =</span> <span class="kw">c</span>(<span class="st">&quot;n&quot;</span>, <span class="st">&quot;rsq&quot;</span>), <span class="dt">type =</span> <span class="st">&quot;latex&quot;</span>, <span class="dt">header =</span> <span class="ot">FALSE</span>))<span class="co"># to have number of observations and R^2 reported}</span></code></pre>
-<p>Deviding the dependent variable by 16 changes all coefficients by the same factor <span class="math inline">\(\frac{1}{16}\)</span> and deviding the regressor by 20 changes its coefficients by the factor 20. Other statistics like <span class="math inline">\(R^2\)</span> are uneffected.</p>
+<p>Dividing the dependent variable by 16 changes all coefficients by the same factor <span class="math inline">\(\frac{1}{16}\)</span> and dividing the regressor by 20 changes its coefficients by the factor 20. Other statistics like <span class="math inline">\(R^2\)</span> are unaffected.</p>
 </div>
 <div id="standardization-beta-coefficients" class="section level4">
 <h4><span class="header-section-number">1.2.5.2</span> Standardization: Beta coefficients</h4>
@@ -1887,7 +2053,7 @@ z_y=\frac{y-\bar{y}}{sd(y)}
 <p><span class="math display">\[\begin{equation}
 z_{x1}=\frac{x_{1}-\bar{x}_{x1}}{sd(x_{1})}
 \end{equation}\]</span></p>
-<p>They measure by how many <em>standard deviations</em> <span class="math inline">\(y\)</span> changes as the respective indepdent variable increases by <em>one standard deviation</em>.</p>
+<p>They measure by how many <em>standard deviations</em> <span class="math inline">\(y\)</span> changes as the respective independent variable increases by <em>one standard deviation</em>.</p>
 <p>The model does not include a constant because all averages are removed in the standardization.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(hprice2)</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">lm</span>(<span class="kw">scale</span>(price)<span class="op">~</span><span class="dv">0</span> <span class="op">+</span><span class="st">  </span><span class="kw">scale</span>(crime) <span class="op">+</span><span class="st">  </span><span class="kw">scale</span>(rooms) <span class="op">+</span><span class="st"> </span><span class="kw">scale</span>(dist) <span class="op">+</span><span class="st">  </span><span class="kw">scale</span>(stratio), <span class="dt">data =</span> hprice2)</code></pre>
@@ -1902,7 +2068,7 @@ z_{x1}=\frac{x_{1}-\bar{x}_{x1}}{sd(x_{1})}
 </div>
 <div id="logarithms-quadratics-and-polynomials" class="section level4">
 <h4><span class="header-section-number">1.2.5.3</span> Logarithms, Quadratics and Polynomials</h4>
-<p>The model for houseprices as in Wooldrige:</p>
+<p>The model for house prices as in Wooldrige:</p>
 <p><span class="math display">\[\begin{equation}
 log(price) = \beta_0 +  \beta_1 log(nox) + \beta_2 log(dist) + \beta_3 rooms + \beta_4 rooms^{2} + \beta_5 stratio + u 
 \end{equation}\]</span></p>
@@ -1950,7 +2116,7 @@ beta4 &lt;-<span class="st"> </span>lm_hprice2<span class="op">$</span>coefficie
 <p>Consider the following model,</p>
 <p><span class="math display" id="eq:interactionterm">\[\begin{equation}
 Y = {\beta}_{0} + {\beta}_{1}x_{1} +  {\beta}_{2}x_{2} + {\beta}_{3}x_{1}x_{2} + u    
-\tag{1.10}
+\tag{1.13}
 \end{equation}\]</span></p>
 <p>where <span class="math inline">\(x_1\)</span>, <span class="math inline">\(x_2\)</span>, and <span class="math inline">\(Y\)</span> are the same as before, but we have added a new interaction term <span class="math inline">\(x_1x_2\)</span> which multiplies <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>, so we also have an additional <span class="math inline">\(\beta\)</span> parameter <span class="math inline">\(\beta_3\)</span>.</p>
 <p>This model essentially creates two slopes and two intercepts, <span class="math inline">\(\beta_2\)</span> being the difference in intercepts and <span class="math inline">\(\beta_3\)</span> being the difference in slopes.</p>
@@ -2145,7 +2311,7 @@ cvalues &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span c
 <hr />
 <p><strong>Your turn</strong></p>
 <ol style="list-style-type: decimal">
-<li>What is the refernce group in this model?</li>
+<li>What is the reference group in this model?</li>
 <li>Ceteris paribus, how much more wage do single males make relative to the reference group?</li>
 <li>Ceteris paribus, how much more wage do single females make relative to the reference group?</li>
 <li>Ceteris paribus, how much less do married females make than single females?</li>
@@ -2170,6 +2336,15 @@ married&lt;-<span class="st"> </span>df_lm2_wage1 <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">filter</span>(term <span class="op">==</span><span class="st"> &quot;married&quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="co">#  </span>
 <span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(estimate) <span class="op">%&gt;%</span><span class="st"> </span>
 <span class="st">  </span><span class="kw">pull</span>() <span class="co"># pull out the single coefficient value of the dataframe</span></code></pre>
+<p>A:</p>
+<ol style="list-style-type: decimal">
+<li>Reference group: <em>single</em> and <em>male</em></li>
+<li>Cp. married males make 21.3% (<code>percent(marriedmale)</code>) more than single males.</li>
+<li>Cp. a single female makes -11.0% (<code>percent(singlefemale)</code>) less than the reference group.</li>
+<li>Married females make 8.79% (<code>percent(abs(marriedfemale) - abs(married))</code>) less than single females.</li>
+<li>There seems to be a marriage premium for men but for women the marriage premium is negative.</li>
+</ol>
+<hr />
 </div>
 <div id="logical-variables" class="section level3">
 <h3><span class="header-section-number">1.3.2</span> Logical variables</h3>
@@ -2191,7 +2366,7 @@ wage1<span class="op">$</span>female &lt;-<span class="st"> </span><span class="
 </div>
 <div id="factor-variables" class="section level3">
 <h3><span class="header-section-number">1.3.3</span> Factor variables</h3>
-<p>As discussed in the R introduction, categorial variables encoded as factors are special <em>animals</em> in R. They are immensely useful in a regression when you have a categorical variable with many levels (e.g. “Very Bad”, “Bad”, “Good”, “Very Good”) but can create a set of subtile issues. Here, we discuss the base R way and the more robust tidyverse way of dealing with factors in the area of regression modelling.</p>
+<p>As discussed in the R introduction, categorical variables encoded as factors are special <em>animals</em> in R. They are immensely useful in a regression when you have a categorical variable with many levels (e.g. “Very Bad”, “Bad”, “Good”, “Very Good”) but can create a set of subtle issues. Here, we discuss the base R way and the more robust tidyverse way of dealing with factors in the area of regression modelling.</p>
 <p>Factor variables can be directly added to the list of regressors. R is clever enough to implicitly add <span class="math inline">\(g-1\)</span> dummy variables if the factor has <span class="math inline">\(g\)</span> outcomes.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(CPS1985,<span class="dt">package=</span><span class="st">&quot;AER&quot;</span>)
 <span class="kw">str</span>(CPS1985)</code></pre>
@@ -2438,6 +2613,27 @@ reg&lt;-<span class="kw">lm</span>(cumgpa<span class="op">~</span>female<span cl
 Figure 1.18: Coefficient plots
 </p>
 </div>
+<p>To recap, the general form in which we specify regression models in R:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co">## response ~ terms</span>
+<span class="co">## </span>
+<span class="co">## y ~ age + sex            # age + sex main effects</span>
+<span class="co">## y ~ age + sex + age:sex  # add second-order interaction</span>
+<span class="co">## y ~ age*sex              # second-order interaction +</span>
+<span class="co">##                          # all main effects</span>
+<span class="co">## y ~ (age + sex + pressure)^2</span>
+<span class="co">##                          # age+sex+pressure+age:sex+age:pressure...</span>
+<span class="co">## y ~ (age + sex + pressure)^2 - sex:pressure</span>
+<span class="co">##                          # all main effects and all 2nd order</span>
+<span class="co">##                          # interactions except sex:pressure</span>
+<span class="co">## y ~ (age + race)*sex     # age+race+sex+age:sex+race:sex</span>
+<span class="co">## y ~ treatment*(age*race + age*sex) # no interact. with race,sex</span>
+<span class="co">## sqrt(y) ~ sex*sqrt(age) + race</span>
+<span class="co">## # functions, with dummy variables generated if</span>
+<span class="co">## # race is an R factor (classification) variable</span>
+<span class="co">## y ~ sex + poly(age,2)    # poly generates orthogonal polynomials</span>
+<span class="co">## race.sex &lt;- interaction(race,sex)</span>
+<span class="co">## y ~ age + race.sex       # for when you want dummy variables for</span>
+<span class="co">##                          # all combinations of the factors</span></code></pre>
 </div>
 </div>
 </div>
@@ -2447,7 +2643,7 @@ Figure 1.18: Coefficient plots
 <p><span class="math display">\[\begin{equation}
 Var(u|x_1, \dots , x_n) = \sigma^2  
 \end{equation}\]</span></p>
-<p>Unbiasedness and consistency do not depend on this assumption, but the sampling distribution does. If homoskedasticity is violated, the standard errors are invalid and all inferencences from <span class="math inline">\(t\)</span>, <span class="math inline">\(F\)</span>, and other tests based on them are unreliable.</p>
+<p>Unbiasedness and consistency do not depend on this assumption, but the sampling distribution does. If homoskedasticity is violated, the standard errors are invalid and all inferences from <span class="math inline">\(t\)</span>, <span class="math inline">\(F\)</span>, and other tests based on them are unreliable.</p>
 <p>There are various ways of dealing with heteroskedasticity in R. The <strong>car</strong> package provides linear hypothesis.
 For high-dimensional fixed effects the <strong>lfe</strong> package is a good alternative. It also allows to specify clusters as part of the formula.
 A good balance between functionality and ease of use is provided by the <strong>sandwich</strong> package <span class="citation">Zeileis et al. (<a href="#ref-Zeileis2017">2017</a>)</span>.</p>
@@ -2587,7 +2783,7 @@ ref.HC1 &lt;-<span class="st"> </span><span class="kw">coeftest</span>(reg, <spa
 ## compute.outlier.stats 
 ##                  &quot;SM&quot; 
 ## seed : int(0)</code></pre>
-<p>This however, gives you different estimates than when fitting a linear regression model. The estimates should be the same, only the standard errors should be different. This is because the estimation method is different, and is also robust to outliers (at least that’s my understanding, I haven’t read the theoretical papers behind the package yet).</p>
+<p>This however, gives you different estimates than when fitting a linear regression model. The estimates should be the same, only the standard errors should be different. This is because the estimation method is different, and is also robust to outlines (at least that’s my understanding, I haven’t read the theoretical papers behind the package yet).</p>
 <p>Finally, it is also possible to bootstrap the standard errors. For this I will use the <code>bootstrap()</code> function from the modelr package:</p>
 <pre class="sourceCode r"><code class="sourceCode r">resamples &lt;-<span class="st"> </span><span class="dv">100</span>
 
@@ -2605,7 +2801,7 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 <span class="st">  </span><span class="kw">mutate</span>(<span class="dt">tidy_lm =</span> 
            <span class="kw">map</span>(regressions, broom<span class="op">::</span>tidy))</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">tidied<span class="op">$</span>tidy_lm[[<span class="dv">1</span>]]</code></pre>
-<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 97.7777777777778%; margin-left: 0%; margin-right: auto; ">
+<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 98.8888888888889%; margin-left: 0%; margin-right: auto; ">
 <col><col><col><col><col><tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">term</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">estimate</td>
@@ -2615,52 +2811,52 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">(Intercept)</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.43&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.247&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5.8&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.43e-08</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.228&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">6.59&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.53e-10</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">sat</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000946</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000193</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">4.91&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">1.39e-06</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000925</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000179</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">5.17&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">3.78e-07</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">hsperc</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.00908&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00131&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-6.91&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.08e-11</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.00786&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00121&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-6.52&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.36e-10</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">tothrs</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.00452&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000737</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">6.13&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">2.23e-09</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.003&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000726</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">4.13&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">4.54e-05</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">female</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.222&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.062&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.59&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.000379</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.291&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0572&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5.08&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">6.08e-07</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">black</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.0733&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.164&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.447</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.655&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.0371&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.143&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.258</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.796&nbsp;&nbsp;&nbsp;</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">white</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.063&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.16&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.395</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.693&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0946&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.133&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.71&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.478&nbsp;&nbsp;&nbsp;</td>
 </tr>
 </table>
 
@@ -2670,7 +2866,7 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
                    <span class="kw">seq</span>(<span class="dv">1</span>, resamples), 
                    <span class="op">~</span><span class="kw">mutate</span>(.x, <span class="dt">resample =</span> .y))</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(mods_df, <span class="dv">5</span>)</code></pre>
-<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 98.8888888888889%; margin-left: 0%; margin-right: auto; ">
+<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 97.7777777777778%; margin-left: 0%; margin-right: auto; ">
 <col><col><col><col><col><col><tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">term</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">estimate</td>
@@ -2681,42 +2877,42 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">(Intercept)</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.43&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.247&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5.8&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.43e-08</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.228&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">6.59</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.53e-10</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">sat</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000946</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000193</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">4.91</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1.39e-06</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000925</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000179</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">5.17</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">3.78e-07</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">1</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">hsperc</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.00908&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00131&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-6.91</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.08e-11</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.00786&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00121&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-6.52</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.36e-10</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">tothrs</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.00452&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000737</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">6.13</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">2.23e-09</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.003&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000726</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">4.13</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">4.54e-05</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">1</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">female</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.222&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.062&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.59</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.000379</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.291&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0572&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5.08</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">6.08e-07</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1</td>
 </tr>
 </table>
@@ -2743,7 +2939,7 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.23&nbsp;&nbsp;&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">6.4&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">4.94e-10</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.218&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.215&nbsp;&nbsp;&nbsp;</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">sat</td>
@@ -2751,7 +2947,7 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000179</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">6.39&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">5.2e-10&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.000168</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.000188</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">hsperc</td>
@@ -2759,7 +2955,7 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00124&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-6.91&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.27e-11</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00137&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00129&nbsp;</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">tothrs</td>
@@ -2767,7 +2963,7 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000731</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">3.43&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.000685</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.000782</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.00066&nbsp;</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">female</td>
@@ -2775,7 +2971,7 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.059&nbsp;&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5.14&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">4.5e-07&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0575&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0572&nbsp;&nbsp;</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">black</td>
@@ -2783,7 +2979,7 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.147&nbsp;&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.87&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.385&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.135&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.123&nbsp;&nbsp;&nbsp;</td>
 </tr>
 <tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">white</td>
@@ -2791,7 +2987,7 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 <td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.141&nbsp;&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.416</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.677&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.111&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.12&nbsp;&nbsp;&nbsp;&nbsp;</td>
 </tr>
 </table>
 
@@ -2800,7 +2996,7 @@ boot_gpa3 &lt;-<span class="st"> </span>gpa3 <span class="op">%&gt;%</span><span
 </div>
 <div id="weighted-least-squares" class="section level2">
 <h2><span class="header-section-number">1.5</span> Weighted least squares</h2>
-<p>Weighted Least Squares (WLS) attempts to provide a more efficient alternative to OLS. It is a special version of a feasbile generalized least squares (FGLS) estimator.</p>
+<p>Weighted Least Squares (WLS) attempts to provide a more efficient alternative to OLS. It is a special version of a feasible generalized least squares (FGLS) estimator.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;k401k&quot;</span>)</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># OLS (only for singles: fsize==1)</span>
 <span class="kw">lm</span>(nettfa <span class="op">~</span><span class="st"> </span>inc <span class="op">+</span><span class="st"> </span><span class="kw">I</span>((age<span class="dv">-25</span>)<span class="op">^</span><span class="dv">2</span>) <span class="op">+</span><span class="st"> </span>male <span class="op">+</span><span class="st"> </span>e401k, 
@@ -2898,7 +3094,7 @@ wlsreg &lt;-<span class="st"> </span><span class="kw">lm</span>(nettfa <span cla
 ## 2   2016 -4 39.602 &lt; 2.2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>The asumption that the variance is proportional to a regressor is usually hard to justify. Typically, we do not know the variance function; we have to estimate it. We can estiamte the relation between variance and regressors using a linear regression of the log of the squared residuals from an initial OlS regression <span class="math inline">\(log(\hat{u}^{2})\)</span> as the dependent variable.</p>
+<p>The assumption that the variance is proportional to a regressor is usually hard to justify. Typically, we do not know the variance function; we have to estimate it. We can estimate the relation between variance and regressors using a linear regression of the log of the squared residuals from an initial OLS regression <span class="math inline">\(log(\hat{u}^{2})\)</span> as the dependent variable.</p>
 <p>Wooldrige suggests two version for the selection of regressors:</p>
 <ul>
 <li>the regressors <span class="math inline">\(x_1, \dots , x_k\)</span> from the original model similar to the BP test</li>
@@ -2950,10 +3146,10 @@ w &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">/</spa
 <h2><span class="header-section-number">1.6</span> Model specification and Parameter Heterogeneity</h2>
 <div id="functional-form-misspecifcation" class="section level3">
 <h3><span class="header-section-number">1.6.1</span> Functional Form Misspecifcation</h3>
-<p>We have seen many ways to specifiy the relation between the dependent variable and the regressors. An obvious question is to ask whether or not a given specification is “correct”.</p>
+<p>We have seen many ways to specify the relation between the dependent variable and the regressors. An obvious question is to ask whether or not a given specification is “correct”.</p>
 <div id="reset" class="section level4">
 <h4><span class="header-section-number">1.6.1.1</span> RESET</h4>
-<p>The Regresion Equation Specification Error Test (RESET) is a convient tool to test the null hypothesis that the functional form is adequate.</p>
+<p>The Regression Equation Specification Error Test (RESET) is a convenient tool to test the null hypothesis that the functional form is adequate.</p>
 <p>We can run the test ourselves or use the boxed routine <code>resettest()</code> from the package <strong>lmtest</strong>.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;hprice1&quot;</span>)
 <span class="co"># original linear regression</span>
@@ -3013,7 +3209,7 @@ orig &lt;-<span class="st"> </span><span class="kw">lm</span>(price <span class=
 ## 
 ## data:  orig
 ## RESET = 4.6682, df1 = 2, df2 = 82, p-value = 0.01202</code></pre>
-<p>Wooldrige (2016, Section 9.2) also disucsses tests of non-nested models. We can use the <code>encomptest()</code> function from the package <strong>lmtest</strong>.</p>
+<p>Wooldrige (2016, Section 9.2) also discusses tests of non-nested models. We can use the <code>encomptest()</code> function from the package <strong>lmtest</strong>.</p>
 <p>Two alternative models for the housing price</p>
 <p><span class="math display">\[\begin{equation}
 price = \beta_0 + \beta_1 lotsize  +\beta_2 sqrft  +\beta_3 bdrms  + u 
@@ -3048,20 +3244,19 @@ model2 &lt;-<span class="st"> </span><span class="kw">lm</span>(price <span clas
 </tr>
 </table>
 
-<p>The ouput shows the “encompassing model” <span class="math inline">\(E\)</span> with all variables. Both models are rejected against this comprehensive model.</p>
+<p>The output shows the “encompassing model” <span class="math inline">\(E\)</span> with all variables. Both models are rejected against this comprehensive model.</p>
 </div>
 <div id="outlying-observations" class="section level4">
 <h4><span class="header-section-number">1.6.1.2</span> Outlying observations</h4>
-<p>Dealing with outliers is a tricky business. R offers different pacakges to test and ajust for outliers. But outliers can be a matter of opinion and not all outlier dedection methods give the same results. With the <strong>OutliersO3</strong> package we can compare different outlier dedection methods.</p>
+<p>Dealing with outliers is a tricky business. R offers different packages to test and adjust for outliers. But outliers can be a matter of opinion and not all outlier detection methods give the same results. With the <strong>OutliersO3</strong> package we can compare different outlier detection methods.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(rdchem)
-
 s3 &lt;-<span class="st"> </span><span class="kw">O3prep</span>(rdchem, <span class="dt">method=</span><span class="kw">c</span>(<span class="st">&quot;HDo&quot;</span>, <span class="st">&quot;adjOut&quot;</span>, <span class="st">&quot;DDC&quot;</span>))
 O3s3 &lt;-<span class="st"> </span><span class="kw">O3plotM</span>(s3)
 <span class="kw">print</span>(O3s3<span class="op">$</span>nOut)</code></pre>
 <pre><code>##    HDo adjOut    DDC 
 ##     10      1     11</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">O3s3<span class="op">$</span>gO3</code></pre>
-<p><img src="MEM5220_R_files/figure-html/unnamed-chunk-123-1.png" width="672" /></p>
+<p><img src="MEM5220_R_files/figure-html/unnamed-chunk-128-1.png" width="672" /></p>
 <p>An O3 plot of stackloss using the methods HDoutliers, adjOutlyingness
 and DectectDeviatingCells. The darker the cell, the more methods agree. If they all agree, the cell is coloured red and if all but one agree then orange.</p>
 <p>We use functions from the <strong>car</strong> package to obtain a table of different measures of leverage and influence for all observations.</p>
@@ -3079,7 +3274,7 @@ studres &lt;-<span class="st"> </span><span class="kw">rstudent</span>(reg)
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Histogram (and overlayed density plot):</span>
 <span class="kw">hist</span>(studres, <span class="dt">freq=</span><span class="ot">FALSE</span>)
 <span class="kw">lines</span>(<span class="kw">density</span>(studres), <span class="dt">lwd=</span><span class="dv">2</span>)</code></pre>
-<p><img src="MEM5220_R_files/figure-html/unnamed-chunk-124-1.png" width="672" /></p>
+<p><img src="MEM5220_R_files/figure-html/unnamed-chunk-129-1.png" width="672" /></p>
 </div>
 <div id="missing-data" class="section level4">
 <h4><span class="header-section-number">1.6.1.3</span> Missing Data</h4>
@@ -3088,7 +3283,7 @@ studres &lt;-<span class="st"> </span><span class="kw">rstudent</span>(reg)
 <li><strong>NA</strong> (not available) indicates that we do not have the information</li>
 <li><strong>NaN</strong> (not a number) indicates that the value is not defined, for example when we take the log of a negative number</li>
 </ul>
-<p>Base R offers many functions to dedect missing observations. Sometimes using <strong>mice</strong> and <strong>VIM</strong> package for looking at missing data pattern and imputing missing data is even easier.</p>
+<p>Base R offers many functions to detect missing observations. Sometimes using <strong>mice</strong> and <strong>VIM</strong> package for looking at missing data pattern and imputing missing data is even easier.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;lawsch85&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;wooldridge&quot;</span> )
 
 <span class="co"># extract LSAT</span>
@@ -3222,7 +3417,7 @@ tempData &lt;-<span class="st"> </span><span class="kw">mice</span>(data,<span c
 </div>
 <div id="least-absolute-deviations-lad-estimation" class="section level2">
 <h2><span class="header-section-number">1.7</span> Least absolute Deviations (LAD) Estimation</h2>
-<p>As an alterantive to OLS, the least absolute deviations (LAD) is less sensitive to outliers. Instead of minimizing the sum of <em>squared</em> residuals, it minimizes the sum of the <em>absolute values</em> of the residuals.</p>
+<p>As an alternative to OLS, the least absolute deviations (LAD) is less sensitive to outliers. Instead of minimizing the sum of <em>squared</em> residuals, it minimizes the sum of the <em>absolute values</em> of the residuals.</p>
 <p>In R, general quantile regression (and LAD as the default special case) can easily be implemented with the command <code>reg()</code> from the <strong>quantreg</strong> package.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># OLS Regression</span>
 ols &lt;-<span class="st"> </span><span class="kw">lm</span>(rdintens <span class="op">~</span><span class="st"> </span><span class="kw">I</span>(sales<span class="op">/</span><span class="dv">1000</span>) <span class="op">+</span>profmarg, <span class="dt">data=</span>rdchem)
@@ -3270,7 +3465,7 @@ lad &lt;-<span class="st"> </span><span class="kw">rq</span>(rdintens <span clas
 <p>Hill, R Carter, William E Griffiths, Guay C Lim, and Mark Andrew Lim. 2008. <em>Principles of Econometrics</em>. Vol. 5. Wiley Hoboken, NJ.</p>
 </div>
 <div id="ref-dalpiaz2016">
-<p>Dalpiaz, David. n.d. <em>Applied Statistics</em>. <a href="http://www.stat.illinois.edu" class="uri">http://www.stat.illinois.edu</a>.</p>
+<p>Dalpiaz, David. 2016. <em>Applied Statistics</em>. <a href="http://www.stat.illinois.edu" class="uri">http://www.stat.illinois.edu</a>.</p>
 </div>
 <div id="ref-Zeileis2017">
 <p>Zeileis, Achim, Thomas Lumley, Susanne Berger, and Nathaniel Graham. 2017. <em>Sandwich: Robust Covariance Matrix Estimators</em> (version 2.4-0). <a href="https://CRAN.R-project.org/package=sandwich" class="uri">https://CRAN.R-project.org/package=sandwich</a>.</p>
@@ -3280,7 +3475,7 @@ lad &lt;-<span class="st"> </span><span class="kw">rq</span>(rdintens <span clas
 <hr />
 <ol start="3">
 <li id="fn3"><p>Stargazer supports ton of options, including theming the LaTex output to journal styles. However, stargazer was written before R Markdown was really a thing, so it has excellent support for HTML and LaTeX output, but that’s it. Including stargazer tables in an R Markdown document is a hassle. <strong>huxtable</strong> on the the contrary plays really nice with <strong>broom</strong> and the <strong>tidyverse</strong>. For more info see Andrew Heiss <a href="https://www.andrewheiss.com/blog/2018/03/08/amelia-broom-huxtable/">blog</a>.<a href="linearregression.html#fnref3" class="footnote-back">↩</a></p></li>
-<li id="fn4"><p>This example has been adapted from the blogpost of <span class="citation">Rodrigues (<a href="#ref-Rodrigues">n.d.</a>)</span><a href="linearregression.html#fnref4" class="footnote-back">↩</a></p></li>
+<li id="fn4"><p>This example has been adapted from the blog post of <span class="citation">Rodrigues (<a href="#ref-Rodrigues2018">2018</a>)</span><a href="linearregression.html#fnref4" class="footnote-back">↩</a></p></li>
 </ol>
 </div>
             </section>

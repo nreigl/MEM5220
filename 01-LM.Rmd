@@ -25,7 +25,9 @@ To load the dataset and necessary functions:
 
 ```{r, echo=TRUE, message=FALSE, results='hide'}
 # This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
-PACKAGES<-c("wooldridge",  # Wooldrige Datasets
+devtools::install_github("ccolonescu/PoEdata")
+PACKAGES<-c("PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, an d Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+            "wooldridge",  # Wooldrige Datasets
             "tidyverse",  # for data manipulation and ggplots
             "broom",  # Tidy regression output
             "ggpubr",  # Multiple ggplots on a page. Note that, the installation of ggpubr will automatically install the gridExtra and the cowplot package; so you don’t need to re-install them. 
@@ -39,7 +41,8 @@ PACKAGES<-c("wooldridge",  # Wooldrige Datasets
             "VIM", # visualizing missing data
             "stargazer", # Regression tables
             "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
-            "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+            "MASS",  #  Functions and datasets to support Venables and Ripley,  "Modern Applied Statistics with S"
+            "mvtnorm", # Multivariate Normal and t Distributions 
             "summarytools", # Report regression summary tables
             "scales", # scale helper functions such as percent 
             "OutliersO3", # Outlier comparison method
@@ -53,33 +56,6 @@ if (length(need)>0) install.packages(PACKAGES[need])
 lapply(PACKAGES, require, character.only=T)
 ```
 
-
-
-
-The general form in which we specify regression models in R: 
-
-```{r}
-## response ~ terms
-## 
-## y ~ age + sex            # age + sex main effects
-## y ~ age + sex + age:sex  # add second-order interaction
-## y ~ age*sex              # second-order interaction +
-##                          # all main effects
-## y ~ (age + sex + pressure)^2
-##                          # age+sex+pressure+age:sex+age:pressure...
-## y ~ (age + sex + pressure)^2 - sex:pressure
-##                          # all main effects and all 2nd order
-##                          # interactions except sex:pressure
-## y ~ (age + race)*sex     # age+race+sex+age:sex+race:sex
-## y ~ treatment*(age*race + age*sex) # no interact. with race,sex
-## sqrt(y) ~ sex*sqrt(age) + race
-## # functions, with dummy variables generated if
-## # race is an R factor (classification) variable
-## y ~ sex + poly(age,2)    # poly generates orthogonal polynomials
-## race.sex <- interaction(race,sex)
-## y ~ age + race.sex       # for when you want dummy variables for
-##                          # all combinations of the factors
-```
 
 
 ## Simple Linear Regression
@@ -193,7 +169,16 @@ Consider a simple regression model
 
 $salary = \beta_0 + \beta_1roe + u$
 
-We are concerned with the population parameter $\beta_{0}$ and $\beta_{1}$. The general form of the model. 
+In the general form the linear regression model can be written as: 
+
+\begin{equation}
+y = \beta_{0} + \beta_{1}x + u
+(\#eq:simplelinearregressionmodel)
+\end{equation}
+
+
+
+We are concerned with the population parameter $\beta_{0}$ and $\beta_{1}$. The ordinary least squares (OLS) estimators are: 
 
 \begin{equation}
 \hat{\beta}_{0} = \bar{y} - \hat{\beta}_{1}\bar{x}
@@ -204,8 +189,8 @@ We are concerned with the population parameter $\beta_{0}$ and $\beta_{1}$. The 
 The ordinary least squares (OLS) estimators are
 
 \begin{equation}
-\hat{\beta}_{0} = \bar{y} - \hat{\beta}_{1}\bar{x}
-(\#eq:OLSestimator)
+\hat{\beta}_{1} = \frac{Cov(x,y)}{Var(x)}
+(\#eq:populationparameterBeta1)
 \end{equation}
 
 Ingredients for the OLS formulas
@@ -242,11 +227,6 @@ lm(salary ~ roe, data=ceosal1)
 lm1_ceosal1 <- lm(salary ~ roe, data=ceosal1) 
 ```
 
-
-
-```{r}
-unique(ceosal1$roe)
-```
 
 Plot the linear regression fit the *base* r way. 
 
@@ -316,11 +296,22 @@ summary(lm1_ceosal1)$r.squared
 **Your turn**
 
 
-Recall that the residual sum of squares (SSR) is 
+Recall that the explained sum of squares (SSE) is 
+
+\begin{equation}
+SSE = \sum_{i=1}^{n}(\hat{y}_{i} - \bar{y})^2 = (n-1) \times Var(\hat{y})
+(\#eq:SSE)
+\end{equation}
+
+
+and  the residual sum of squares (SSR) is 
 
 \begin{equation}
 R^2 = \frac{Var(\hat{y})}{Var(y)} = 1 - \frac{Var(\hat{u})}{Var(y)} 
+(\#eq:SSR)
 \end{equation}
+
+One can see that the correlation between observed and fitted values is a square root of $R^2$. 
 
 Calculate $R^2$ manually: 
 
@@ -356,6 +347,10 @@ predict(lm1_ceosal1, newdata = data.frame(roe = 30))
 ```
 
 The above code reads “predict the salary when the return on equity is 30 using the  *lm1_ceosal1* model.”
+
+---
+
+**Overthinking**
 
 ### Regression through the Origin and Regression on a Constant
 
@@ -393,7 +388,16 @@ legend("topleft",
 ```
 
 
+In models without the intercept the $R^2$ loses its interpretatation.  The reason is that the $R^2$ is the ratio of explained variance to total variance **only** if the intercept is included. 
+
+
+---
+
+**Overthinking**
+
 ### Simulating SLR
+
+
 
 ##### Expected Values, Variance, and Standard Errors
 
@@ -473,7 +477,7 @@ rightlim <- b1+3*sdb
 
 
 ```{r fig4, fig.cap='The theoretical (true) probability density function of b1', out.width='80%', fig.asp=.75, fig.align='center'}
-curve(dnorm(x, mean = b1, sd = sdb), leftlim, rightlim,)
+curve(dnorm(x, mean = b1, sd = sdb), leftlim, rightlim)
 abline(v = b1, col = "blue", lty = 2)
 ```
 
@@ -791,6 +795,9 @@ var(b1hat)
 
 Unbiasedness is provided but sampling variance is incorrect (compared to the results provided above). 
 
+---
+
+
 ### Nonlinearities
 
 Sometimes the scatter plot diagram or some theoretical considerations suggest a non-linear relationship. The most popular non-linear relationships involve logarithms of the dependent or independent variables and polynomial functions.
@@ -799,7 +806,6 @@ We will use a new dataset,  *wage1*, for this section. A detailed exploratory an
 
 ```{r}
 data("wage1")
-attach(wage1)
 ```
 
 #### Predicated variable transformation
@@ -835,7 +841,6 @@ A model with a log transformed response:
 \begin{equation}
 log(Y_{i}) = \beta_{0} + \beta_{1} \times x_{i} + \epsilon_{i}
 \end{equation}
-
 
 
 ```{r}
@@ -918,11 +923,6 @@ ggarrange(p1_nonlinearities, p2_nonlinearities,
 A: Plotting the data on the transformed log scale and adding the fitted line, the relationship again appears linear, and the variation about the fitted line looks more constant. 
 
 B: By plotting the data on the original scale, and adding the fitted regression, we see an exponential relationship. However, this is still a *linear* model, since the new transformed response, $log(Y_{i}$, is still a *linear* combination of the predictors. In other words, only $\beta$ needs to be linear, not the $x$ values. 
-
-
-*NOTE:* 
-
-The example comes from the Wooldrige book but the variable educ looks more like count data. A Poisson GLM might seems like a better choice. 
 
 
 **Quadratic Model**
@@ -1111,12 +1111,13 @@ The parameter $\hat\beta_1$ is the estimated effect of increasing $x_1$ by one u
 \end{equation}
 
 
-where
+where $\tilde\delta_{1}$ is the slope parameters of the linear regression of $x_2$ on $x_1$
 
 \begin{equation}
 \hat{x}_2 = \tilde\delta_{0} + \tilde\delta_{1} x_{1}
 (\#eq:lmomitted2)
 \end{equation}
+
 
 
 
@@ -1135,11 +1136,123 @@ In this example, the indirect effect is actually stronger than the direct effect
 
 ### Standard errors, Multicollinearity and VIF
 
-We know already how we can extract the standard errors  
+Multicollinearity means that two or more regressors in a multiple regression model are strongly correlated. If the correlation between two or more regressors is perfect, that is, one regressor can be written as a linear combination of the other(s), we have perfect multicollinearity. While strong multicollinearity in general is unpleasant as it causes the variance of the OLS estimator to be large (we will discuss this in more detail later), the presence of perfect multicollinearity makes it impossible to solve for the OLS estimator, i.e., the model cannot be estimated in the first place.
+
+#### Perfect multicollinearity
+
+We will work first with the *CAschools* data from the **AER** package to simulate an example of perfect multicollinearity
+
 ```{r}
-GPAres <- lm(colGPA ~ hsGPA + ACT, data = gpa1)
-SER<-summary(GPAres)$sigma
+data("CASchools", package = "AER")
 ```
+
+```{r}
+# define the fraction of English learners        
+CASchools$FracEL <- CASchools$english / 100
+
+# check the correlation between CASchools$FracEL and CASchools$english 
+cor(CASchools$FracEL, CASchools$english)
+
+# estimate the model
+mult.mod <- lm(read ~ students + english + FracEL, data = CASchools) 
+
+# obtain a summary of the model
+summary(mult.mod)  
+```
+
+The row *FracEL* in the coefficients section of the output consists of NA entries since FracEL was excluded from the model.
+
+Another example of perfect multicollinearity is known as the dummy variable trap. This may occur when multiple dummy variables are used as regressors. A common case for this is when dummies are used to sort the data into mutually exclusive categories. For example, suppose we have spatial information that indicates whether a school is located in the North, West, South or East of California.
+
+
+```{r}
+# set seed for reproducibility
+set.seed(1)
+
+# generate artificial data on location
+CASchools$direction <- sample(c("West", "North", "South", "East"), 
+                              420, 
+                              replace = T)
+
+# estimate the model
+mult.mod <- lm(read ~ students + english + direction, data = CASchools)
+
+# obtain a model summary
+summary(mult.mod)   
+```
+
+Notice that R solves the problem on its own by generating and including the dummies directionNorth, directionSouth and directionWest but omitting directionEast. Of course, the omission of every other dummy instead would achieve the same. Another solution would be to exclude the constant and to include all dummies instead.
+
+
+A last example considers the case where a perfect linear relationship arises from redundant regressors. Suppose we have a regressor  
+Spanish speakers, *spanish*,  , the percentage of English speakers in the school where
+
+\begin{equation}
+spanish = 100 - english  
+\end{equation}
+
+and both  *spanish*  and *english*  are included in a regression model. 
+
+```{r}
+# Percentage of english speakers 
+CASchools$spanish <- 100 - CASchools$english
+
+# estimate the model
+mult.mod <- lm(read ~ students + english + spanish, data = CASchools)
+
+# obtain a model summary
+summary(mult.mod)                                                 
+```
+
+Once more, `lm()` refuses to estimate the full model using OLS and excludes spanish.
+
+
+#### Impperfect multicollinearity
+
+
+As opposed to perfect multicollinearity, imperfect multicollinearity is — to a certain extent — less of a problem. In fact, imperfect multicollinearity is the reason why we are interested in estimating multiple regression models in the first place: the OLS estimator allows us to isolate influences of correlated regressors on the dependent variable. If it was not for these dependencies, there would not be a reason to resort to a multiple regression approach and we could simply work with a single-regressor model. However, this is rarely the case in applications. We already know that ignoring dependencies among regressors which influence the outcome variable has an adverse effect on estimation results.
+
+Simulation study: imperfect multicollinearity
+
+
+```{r}
+# set number of observations
+n <- 50
+
+# initialize vectors of coefficients
+coefs1 <- cbind("hat_beta_1" = numeric(10000), "hat_beta_2" = numeric(10000))
+coefs2 <- coefs1
+
+# set seed
+set.seed(1)
+
+# loop sampling and estimation
+for (i in 1:1000) {
+  
+  # for cov(X_1,X_2) = 0.25
+  X <- rmvnorm(n, c(50, 100), sigma = cbind(c(10, 2.5), c(2.5, 10))) # function from the mvtnorm package
+  u <- rnorm(n, sd = 5)
+  Y <- 5 + 2.5 * X[, 1] + 3 * X[, 2] + u
+  coefs1[i, ] <- lm(Y ~ X[, 1] + X[, 2])$coefficients[-1]
+  
+  # for cov(X_1,X_2) = 0.85
+  X <- rmvnorm(n, c(50, 100), sigma = cbind(c(10, 8.5), c(8.5, 10)))
+  Y <- 5 + 2.5 * X[, 1] + 3 * X[, 2] + u
+  imperf_multicol <- lm(Y ~ X[, 1] + X[, 2])
+  coefs2[i, ] <- lm(Y ~ X[, 1] + X[, 2])$coefficients[-1]
+  
+}
+
+# obtain variance estimates
+diag(var(coefs1))
+```
+
+```{r}
+diag(var(coefs2))
+```
+
+We are interested in the variances which are the diagonal elements. We see that due to the high collinearity, the variances of $\hat{\beta}_1$ and $\hat{\beta}_2$ and have more than tripled, meaning it is more difficult to precisely estimate the true coefficients.
+
 
 
 The variance inflation factor,  *VIF*, accounts for (imperfect) multicollinearity.If $x_t$ is highly related to the other regressors, $R^2_j$ and therefore also $VIF_j$ and the variance of $\hat\beta_j$ are large. 
@@ -1149,6 +1262,13 @@ The variance inflation factor,  *VIF*, accounts for (imperfect) multicollinearit
 \frac{1}{1-R^2_j}
 (\#eq:VIF)
 \end{equation}
+
+
+```{r}
+GPAres <- lm(colGPA ~ hsGPA + ACT, data = gpa1)
+SER<-summary(GPAres)$sigma
+```
+
 
 ```{r}
 # regressing hsGPA on ACT for calculation of R2 & VIF
@@ -1161,6 +1281,7 @@ The **car** package implements the command `vif()` for each regressor
 
 ```{r}
 vif(GPAres)
+vif(imperf_multicol) # from the simulated data
 ```
 
 
@@ -1378,6 +1499,7 @@ b["atndrte"] + 2.59*b["atndrte:priGPA"]
 linearHypothesis(myres,c("atndrte+2.59*atndrte:priGPA"))
 ```
 
+
 ### MLR Prediction
 
 ```{r}
@@ -1485,13 +1607,13 @@ married<- df_lm2_wage1 %>%
   pull() # pull out the single coefficient value of the dataframe
 ```
 
----
+
 A: 
 
 1. Reference group: *single* and *male*
-2. Cp. married males make `r percent(marriedmale)` more than single males. 
-3. Cp. a single female makes `r percent(singlefemale)` less than the reference group. 
-3. Married females make `r percent(abs(marriedfemale) - abs(married))` less than single females. 
+2. Cp. married males make `r percent(marriedmale)` (` percent(marriedmale)`) more than single males. 
+3. Cp. a single female makes `r percent(singlefemale)` (`percent(singlefemale)`) less than the reference group. 
+3. Married females make `r percent(abs(marriedfemale) - abs(married))` (`percent(abs(marriedfemale) - abs(married))`) less than single females. 
 4. There seems to be a marriage premium for men but for women the marriage premium is negative. 
 
 ---
@@ -1614,6 +1736,34 @@ ggplot(treg, aes(estimate, term, color = term)) +
 
 
 
+
+To recap, the general form in which we specify regression models in R: 
+
+```{r}
+## response ~ terms
+## 
+## y ~ age + sex            # age + sex main effects
+## y ~ age + sex + age:sex  # add second-order interaction
+## y ~ age*sex              # second-order interaction +
+##                          # all main effects
+## y ~ (age + sex + pressure)^2
+##                          # age+sex+pressure+age:sex+age:pressure...
+## y ~ (age + sex + pressure)^2 - sex:pressure
+##                          # all main effects and all 2nd order
+##                          # interactions except sex:pressure
+## y ~ (age + race)*sex     # age+race+sex+age:sex+race:sex
+## y ~ treatment*(age*race + age*sex) # no interact. with race,sex
+## sqrt(y) ~ sex*sqrt(age) + race
+## # functions, with dummy variables generated if
+## # race is an R factor (classification) variable
+## y ~ sex + poly(age,2)    # poly generates orthogonal polynomials
+## race.sex <- interaction(race,sex)
+## y ~ age + race.sex       # for when you want dummy variables for
+##                          # all combinations of the factors
+```
+
+
+
 ## Heteroskedasticity
 
 The homoskedasticity assumptions SLR.5 and MLR.5 require that the variance of the error term is unrelated to the regressors, i.e.
@@ -1685,7 +1835,7 @@ ref.HC1 <- coeftest(reg, vcov.=cov1)
 
 
 
-Another way of dealing with heteroskedasticity is to use the `lmrob()` function from the **robustbase** package^[This example has been adapted from the blog post of @Rodrigues]. This package is quite interesting, and offers quite a lot of functions for robust linear, and nonlinear, regression models. Running a robust linear regression is just the same as with `lm()`:
+Another way of dealing with heteroskedasticity is to use the `lmrob()` function from the **robustbase** package^[This example has been adapted from the blog post of @Rodrigues2018]. This package is quite interesting, and offers quite a lot of functions for robust linear, and nonlinear, regression models. Running a robust linear regression is just the same as with `lm()`:
 
 
 
@@ -1820,7 +1970,7 @@ mySummary <- function(model, VCOV) {
 mySummary(wlsreg, VCOV = vcovHAC)
 ```
 
-The assumption that the variance is proportional to a regressor is usually  hard to justify. Typically, we do not know the variance function; we have to estimate it. We can estimate the relation between variance and regressors using a linear regression of the log of the squared residuals from an initial OlS regression $log(\hat{u}^{2})$ as the dependent variable. 
+The assumption that the variance is proportional to a regressor is usually  hard to justify. Typically, we do not know the variance function; we have to estimate it. We can estimate the relation between variance and regressors using a linear regression of the log of the squared residuals from an initial OLS regression $log(\hat{u}^{2})$ as the dependent variable. 
 
 Wooldrige suggests two version for the selection of regressors: 
 
@@ -1928,9 +2078,9 @@ The output shows the "encompassing model " $E$ with all variables. Both models a
 
 Dealing with outliers is a tricky business. R offers different packages to test and adjust for outliers. But outliers can be a matter of opinion and not all outlier detection methods give the same results. With the **OutliersO3** package we can compare different outlier detection methods. 
 
-```{r, cache= TRUE}
-data(rdchem)
+```{r}
 
+data(rdchem)
 s3 <- O3prep(rdchem, method=c("HDo", "adjOut", "DDC"))
 O3s3 <- O3plotM(s3)
 print(O3s3$nOut)

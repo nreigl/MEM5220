@@ -25,7 +25,7 @@
 <meta name="author" content="Nicolas Reigl">
 
 
-<meta name="date" content="2018-08-20">
+<meta name="date" content="2018-08-25">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -212,7 +212,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="header">
 <h1 class="title">MEM52220 - Applied Econometrics</h1>
 <p class="author"><em>Nicolas Reigl</em></p>
-<p class="date"><em>2018-08-20</em></p>
+<p class="date"><em>2018-08-25</em></p>
 </div>
 <div id="introduction" class="section level1 unnumbered">
 <h1>Introduction</h1>
@@ -226,32 +226,31 @@ Figure .: Normal and simulated Gaussian densities on a regression line
 <div id="prerequisites" class="section level2 unnumbered">
 <h2>Prerequisites</h2>
 <p>A basic knowledge of the R <span class="citation">(Team <a href="#ref-team2013r">2013</a>)</span> programming language is required.</p>
-<p>In order to reproduce the examples in this script You need the statistical software package R. Additionally we recommend using the <a href="https://www.rstudio.com/">RStudio</a> integrated developer environment (IDE) which will improve Your R working experience.</p>
+<p>In order to reproduce the examples in this script You need the statistical software package R. Additionally we recommend using the <a href="https://www.rstudio.com">RStudio</a> integrated developer environment (IDE) which will improve Your R working experience.</p>
 <div id="installation-of-r-and-rstudio" class="section level3 unnumbered">
 <h3>Installation of R and RStudio</h3>
 <p>Go to the following webpages and download the software adequate for Your operating system:</p>
 <ol style="list-style-type: decimal">
-<li><b>The Statistical Software Package R:</b> <a href="http://cran.r-project.org/">http://cran.r-project.org</a><br>
-<br></li>
-<li><b>The GUI RStudio</b>: <a href="http://www.rstudio.com/products/rstudio/download/">http://www.rstudio.com/products/rstudio/download/</a> <br></li>
+<li><a href="http://cran.r-project.org">The Statistical Software Package R:</a></li>
+<li>The GUI <a href="https://www.rstudio.com">RStudio:</a></li>
 </ol>
-<p>Install R first and then procede with RStudio. Afterwards start RStudio.</p>
+<p>Install R first and then proceed with RStudio. Afterwards start RStudio. For accessing packages and datasets from <a href="https://github.com/">github</a> we need to install the <strong>devtools</strong> package. On Windows, download and install <a href="https://cran.r-project.org/bin/windows/Rtools/">Rtools</a>, and devtools takes care of the rest. On Mac, install the Xcode command line tools. On Linux, install the R development package, usually called r-devel or r-base-dev.</p>
 </div>
 </div>
 <div id="resources" class="section level2 unnumbered">
 <h2>Resources</h2>
-<p>Our primary resource is <span class="citation">Heiss (<a href="#ref-heiss2016using">2016</a>)</span>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> The book is availabe as free <a href="http://www.urfie.net/read.html">online</a> version. For theoretical concepts I refer to <span class="citation">Wooldridge (<a href="#ref-wooldridge2015introductory">2015</a>)</span><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>.</p>
+<p>Our primary resource is <span class="citation">Heiss (<a href="#ref-heiss2016using">2016</a>)</span>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> The book is available as free <a href="http://www.urfie.net/read.html">online</a> version. For theoretical concepts I refer to <span class="citation">Wooldridge (<a href="#ref-wooldridge2015introductory">2015</a>)</span><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>.</p>
 <p><strong>Standing on the shoulders of giants</strong></p>
-<p>This lecture material would not possible without many other open-source econometrics teaching materials and of course the R package developers. In addition to the main resources, examples and code of this workbook have been drawn from a number of free econometrics ebooks, blogs, R-vignette help pages and other researchers teaching materials.</p>
+<p>This lecture material would not possible without many other open-source econometrics teaching materials and of course the R package developers. In addition to the main resources, examples and code of this workbook have been drawn from a number of free econometrics eBooks, blogs, R-vignette help pages and other researchers teaching materials.</p>
 <div id="attribution" class="section level3 unnumbered">
 <h3>Attribution</h3>
-<p>Chapter 1 Introduction to R is copied almost entirely from appliedstats by David Dalpiaz. I added a couple of practical tasks and made some minor edits.
-Chapter 2 is partly based on appliedstats, but only up to scatterplots.</p>
+<p>Chapter 1.1.2 Simulating SLR is based on <span class="citation">Heiss (<a href="#ref-heiss2016using">2016</a>)</span> but adds parts of <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016">2016</a>)</span> and <span class="citation">Colonescu (<a href="#ref-colonescu2018">2018</a>)</span> teaching materials. Chapter 1.2.2 includes additonal material from <span class="citation">Hanck et al. (<a href="#ref-Hanck2018">2018</a>)</span>. Chapter 1.4 Heteroskedasticity has been amended with material from <span class="citation">Rodrigues (<a href="#ref-Rodrigues2018">2018</a>)</span> blog.</p>
 <ul>
-<li><a href="https://emwikts1970.github.io/URFITE-Bookdown/">Using R for Introduction to Econometrics</a></li>
-<li><a href="https://daviddalpiaz.github.io/appliedstats/">Applied Statistics with R</a>, <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016">n.d.</a>)</span></li>
-<li><a href="https://bookdown.org/ccolonescu/RPoE4/">Principles of Econometrics with R</a></li>
+<li><a href="https://emwikts1970.github.io/URFITE-Bookdown/">Using R for Introduction to Econometrics</a>, <span class="citation">Hanck et al. (<a href="#ref-Hanck2018">2018</a>)</span></li>
+<li><a href="https://daviddalpiaz.github.io/appliedstats/">Applied Statistics with R</a>, <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016">2016</a>)</span></li>
+<li><a href="https://bookdown.org/ccolonescu/RPoE4/">Principles of Econometrics with R</a>, <span class="citation">Colonescu (<a href="#ref-colonescu2018">2018</a>)</span></li>
 <li><a href="https://scpoecon.github.io/ScPoEconometrics/">Introduction to Econometrics with R</a>, <span class="citation">Oswald and Robin (<a href="#ref-oswald2018introduction">2018</a>)</span></li>
+<li><a href="https://bookdown.org/roback/bookdown-bysh/">Broadening Your Statistical Horizons</a></li>
 </ul>
 </div>
 </div>
@@ -274,45 +273,18 @@ Chapter 2 is partly based on appliedstats, but only up to scatterplots.</p>
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.18    bookdown_0.7.15 digest_0.6.15   rprojroot_1.3-2
+##  [1] Rcpp_0.12.18    bookdown_0.7.15 digest_0.6.16   rprojroot_1.3-2
 ##  [5] backports_1.1.2 magrittr_1.5    evaluate_0.11   highr_0.7      
 ##  [9] stringi_1.2.4   rstudioapi_0.7  rmarkdown_1.10  tools_3.5.1    
 ## [13] stringr_1.3.1   xfun_0.3        yaml_2.2.0      compiler_3.5.1 
 ## [17] htmltools_0.3.6 knitr_1.20</code></pre>
-<p>I do not add prompts (<code>&gt;</code> and <code>+</code>) to R source code in this book, and I comment out the text output with two hashes <code>##</code> by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out). Package names are in bold text (e.g., <strong>rmarkdown</strong>), and inline code and filenames are formatted in a typewriter font (e.g., <code>knitr::knit('foo.Rmd')</code>). Function names are followed by parentheses (e.g., <code>bookdown::render_book()</code>), function arguments are given without parentheses (e.g. <code>config_file =</code>). The double-colon operator <code>::</code> means accessing an object from a package.</p>
+<p>I do not add prompts (<code>&gt;</code> and <code>+</code>) to R source code in this book, and I comment out the text output with two hashes <code>##</code> by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out). Package names are in bold text (e.g., <strong>rmarkdown</strong>), and inline code and function arguments are formatted in a typewriter font (e.g., <code>knitr::knit('foo.Rmd')</code>). Function names are followed by parentheses (e.g., <code>bookdown::render_book()</code>). The double-colon operator <code>::</code> means accessing an object from a package.
+Content with <strong>Note</strong>, <strong>Your turn</strong> and <strong>Overthinking</strong> is surrounded by two horizontal lines. <strong>Overthinking</strong> sections serve as additional information for the interested reader but will not be covered in detail in class.</p>
 </div>
 <div id="acknowledgements" class="section level2 unnumbered">
 <h2>Acknowledgements</h2>
 <p>I thank Kadri Männasoo and Juan Carlos Cuestas for proofreading and their useful comments.</p>
 
-<p>To load the dataset and necessary functions:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace</span>
-PACKAGES&lt;-<span class="kw">c</span>(<span class="st">&quot;wooldridge&quot;</span>,  <span class="co"># Wooldrige Datasets</span>
-            <span class="st">&quot;tidyverse&quot;</span>,  <span class="co"># for data manipulation and ggplots</span>
-            <span class="st">&quot;broom&quot;</span>,  <span class="co"># Tidy regression output</span>
-            <span class="st">&quot;ggpubr&quot;</span>,  <span class="co"># Multiple ggplots on a page. Note that, the installation of ggpubr will automatically install the gridExtra and the cowplot package; so you don’t need to re-install them. </span>
-            <span class="st">&quot;ggfortify&quot;</span>, <span class="co"># Simple ggplot recipe for lm objects) </span>
-            <span class="st">&quot;plot3D&quot;</span>,  <span class="co">#  3D graphs</span>
-            <span class="st">&quot;car&quot;</span>, <span class="co"># Companion to applied regression</span>
-            <span class="st">&quot;knitr&quot;</span>, <span class="co"># knit functions</span>
-            <span class="co"># &quot;kableExtra&quot;, # extended knit functions for objects exported from other packages</span>
-            <span class="st">&quot;huxtable&quot;</span>, <span class="co">#  Regression tables, broom compatible</span>
-            <span class="st">&quot;mice&quot;</span>,  <span class="co"># multiple imputation</span>
-            <span class="st">&quot;VIM&quot;</span>, <span class="co"># visualizing missing data</span>
-            <span class="st">&quot;stargazer&quot;</span>, <span class="co"># Regression tables</span>
-            <span class="st">&quot;AER&quot;</span>, <span class="co">#  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)</span>
-            <span class="st">&quot;PoEdata&quot;</span>, <span class="co"># R data sets for &quot;Principles of Econometrics&quot; by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata</span>
-            <span class="st">&quot;summarytools&quot;</span>, <span class="co"># Report regression summary tables</span>
-            <span class="st">&quot;scales&quot;</span>, <span class="co"># scale helper functions such as percent </span>
-            <span class="st">&quot;OutliersO3&quot;</span>, <span class="co"># Outlier comparison method</span>
-            <span class="st">&quot;robustbase&quot;</span>, <span class="co"># Basic robust statistics</span>
-            <span class="st">&quot;quantreg&quot;</span>, <span class="co"># Quantile regression</span>
-            <span class="st">&quot;modelr&quot;</span>, <span class="co"># model simulation/ boostraping the modern way</span>
-            <span class="st">&quot;magrittr&quot;</span>) <span class="co">#  pipes</span>
-inst&lt;-<span class="kw">match</span>(PACKAGES, <span class="kw">.packages</span>(<span class="dt">all=</span><span class="ot">TRUE</span>))
-need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
-<span class="cf">if</span> (<span class="kw">length</span>(need)<span class="op">&gt;</span><span class="dv">0</span>) <span class="kw">install.packages</span>(PACKAGES[need])
-<span class="kw">lapply</span>(PACKAGES, require, <span class="dt">character.only=</span>T)</code></pre>
 </div>
 </div>
 <h3>References</h3>
@@ -327,7 +299,16 @@ need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
 <p>Wooldridge, Jeffrey M. 2015. <em>Introductory Econometrics: A Modern Approach</em>. Nelson Education.</p>
 </div>
 <div id="ref-dalpiaz2016">
-<p>Dalpiaz, David. n.d. <em>Applied Statistics</em>. <a href="http://www.stat.illinois.edu" class="uri">http://www.stat.illinois.edu</a>.</p>
+<p>Dalpiaz, David. 2016. <em>Applied Statistics</em>. <a href="http://www.stat.illinois.edu" class="uri">http://www.stat.illinois.edu</a>.</p>
+</div>
+<div id="ref-colonescu2018">
+<p>Colonescu, Constantin. 2018. <em>Using R for Principles of Econometrics</em>. Lulu.com.</p>
+</div>
+<div id="ref-Hanck2018">
+<p>Hanck, Christopher, Martin Arnold, Alexander Gerber, and Martin Schmelzer. 2018. <em>Using R for Introduction to Econometrics</em>. <a href="https://emwikts1970.github.io/URFITE-Bookdown/" class="uri">https://emwikts1970.github.io/URFITE-Bookdown/</a>.</p>
+</div>
+<div id="ref-Rodrigues2018">
+<p>Rodrigues, Bruno. 2018. “Econometrics and Free Software.” 2018. <a href="http://www.brodrigues.co/blog/2018-07-08-rob_stderr/" class="uri">http://www.brodrigues.co/blog/2018-07-08-rob_stderr/</a>.</p>
 </div>
 <div id="ref-oswald2018introduction">
 <p>Oswald, Florian, and Jean-Marc Robin. 2018. <em>Introduction to Econometrics with R</em>. github.com. <a href="https://scpoecon.github.io/ScPoEconometrics/" class="uri">https://scpoecon.github.io/ScPoEconometrics/</a>.</p>

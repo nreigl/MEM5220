@@ -2,20 +2,28 @@
 title: "MEM52220 - Applied Econometrics"
 author: "Nicolas Reigl"
 date: "`r Sys.Date()`"
-site: bookdown::bookdown_site
+output: pdf_document
+description: This manual constitutues the classroom material of the applied econometrics
+  course at Tallinn University of Technology
 documentclass: book
-bibliography: [MEM5220.bib, packages.bib]
-biblio-style: apalike
 link-citations: yes
-description: "This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology"
+bibliography:
+- MEM5220.bib
+- packages.bib
+site: bookdown::bookdown_site
+citation_package: biblatex
+biblatexoptions: [backend=bibtex]
 ---
 
 # Introduction {-}
 
 
-```{r fig.align='center', echo=FALSE, include=identical(knitr:::pandoc_to(), 'html'), fig.cap="Normal and simulated Gaussian densities on a regression line",  fig.link='https://stackoverflow.com/questions/31794876/ggplot2-how-to-curve-small-gaussian-densities-on-a-regression-line'}
+```{r fig.align='center', echo=FALSE, include= identical(knitr:::pandoc_to(), "html") ,  fig.cap="Normal and simulated Gaussian densities on a regression line",  fig.link='https://stackoverflow.com/questions/31794876/ggplot2-how-to-curve-small-gaussian-densities-on-a-regression-line'}
 knitr::include_graphics('images/cover.jpeg', dpi = NA)
 ```
+
+
+
 
 
 Welcome to MEM5220 - Applied Econometrics. This handout is designed for the use with MEM5220 - Applied Econometrics at Tallinn University of Technology. Note that this workbook is still under heavy development!  
@@ -25,19 +33,18 @@ Welcome to MEM5220 - Applied Econometrics. This handout is designed for the use 
 A basic knowledge of the R [@team2013r] programming language  is required. 
 
 
-In order to reproduce the examples in this script You need the statistical software package R. Additionally we recommend using the <a href="https://www.rstudio.com/">RStudio</a> integrated developer environment (IDE) which will improve Your R working experience.
+In order to reproduce the examples in this script You need the statistical software package R. Additionally we recommend using the [RStudio](https://www.rstudio.com) integrated developer environment (IDE) which will improve Your R working experience.
 
 ### Installation of R and RStudio  {-}
 
 Go to the following webpages and download the software adequate for Your operating system:
 
 
-1. <b>The Statistical Software Package R:</b> <a href="http://cran.r-project.org/">http://cran.r-project.org</a><br>
-<br>
-2. <b>The GUI RStudio</b>: <a href="http://www.rstudio.com/products/rstudio/download/">http://www.rstudio.com/products/rstudio/download/</a> <br>
+1. [The Statistical Software Package R:](http://cran.r-project.org)
+2. The GUI [RStudio:](https://www.rstudio.com)
 
 
-Install R first and then proceed with RStudio. Afterwards start RStudio.
+Install R first and then proceed with RStudio. Afterwards start RStudio. For accessing packages and datasets from [github](https://github.com/) we need to install the **devtools** package. On Windows, download and install [Rtools](https://cran.r-project.org/bin/windows/Rtools/), and devtools takes care of the rest. On Mac, install the Xcode command line tools. On Linux, install the R development package, usually called r-devel or r-base-dev. 
 
 
 ## Resources {-}
@@ -51,14 +58,14 @@ This lecture material would not possible without many other open-source economet
 
 ### Attribution {-}
 
-Chapter 1 Introduction to R is copied almost entirely from appliedstats by David Dalpiaz. I added a couple of practical tasks and made some minor edits.
-Chapter 2 is partly based on appliedstats, but only up to scatterplots.
+Chapter 1.1.2 Simulating SLR is based on @heiss2016using but adds parts of @dalpiaz2016 and @colonescu2018 teaching materials. Chapter 1.2.2 includes additonal material from @Hanck2018.  Chapter 1.4 Heteroskedasticity has been amended with material from @Rodrigues2018 blog. 
 
 
-- [Using R for Introduction to Econometrics](https://emwikts1970.github.io/URFITE-Bookdown/)
+- [Using R for Introduction to Econometrics](https://emwikts1970.github.io/URFITE-Bookdown/), @Hanck2018
 - [Applied Statistics with R](https://daviddalpiaz.github.io/appliedstats/), @dalpiaz2016
-- [Principles of Econometrics with R](https://bookdown.org/ccolonescu/RPoE4/)
+- [Principles of Econometrics with R](https://bookdown.org/ccolonescu/RPoE4/), @colonescu2018
 - [Introduction to Econometrics with R](https://scpoecon.github.io/ScPoEconometrics/), @oswald2018introduction
+- [Broadening Your Statistical Horizons](https://bookdown.org/roback/bookdown-bysh/)
 
 
 
@@ -72,6 +79,7 @@ sessionInfo()
 ```
 
 I do not add prompts (`>` and `+`) to R source code in this book, and I comment out the text output with two hashes `##` by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out). Package names are in bold text (e.g., **rmarkdown**), and inline code and function arguments are formatted in a typewriter font (e.g., `knitr::knit('foo.Rmd')`). Function names are followed by parentheses (e.g., `bookdown::render_book()`). The double-colon operator `::` means accessing an object from a package. 
+Content with **Note**, **Your turn** and **Overthinking** is surrounded by two horizontal lines. **Overthinking** sections serve as additional information for the interested reader but will not be covered in detail in class. 
 
 ## Acknowledgements {-}
 

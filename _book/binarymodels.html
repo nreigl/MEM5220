@@ -25,7 +25,7 @@
 <meta name="author" content="Nicolas Reigl">
 
 
-<meta name="date" content="2018-08-20">
+<meta name="date" content="2018-08-25">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -213,7 +213,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1><span class="header-section-number">Chapter 2</span> Qualitative and LDV Models</h1>
 <p>To load the dataset and necessary functions:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace</span>
-PACKAGES&lt;-<span class="kw">c</span>(<span class="st">&quot;wooldridge&quot;</span>,  <span class="co"># Wooldrige Datasets</span>
+devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;ccolonescu/PoEdata&quot;</span>)
+PACKAGES&lt;-<span class="kw">c</span>(
             <span class="st">&quot;tidyverse&quot;</span>,  <span class="co"># for data manipulation and ggplots</span>
             <span class="st">&quot;broom&quot;</span>,  <span class="co"># Tidy regression output</span>
             <span class="st">&quot;car&quot;</span>, <span class="co"># Companion to applied regression</span>
@@ -223,6 +224,7 @@ PACKAGES&lt;-<span class="kw">c</span>(<span class="st">&quot;wooldridge&quot;</
             <span class="st">&quot;stargazer&quot;</span>, <span class="co"># Regression tables</span>
             <span class="st">&quot;AER&quot;</span>, <span class="co">#  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)</span>
             <span class="st">&quot;PoEdata&quot;</span>, <span class="co"># R data sets for &quot;Principles of Econometrics&quot; by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata</span>
+            <span class="st">&quot;wooldridge&quot;</span>,  <span class="co"># Wooldrige Datasets</span>
             <span class="st">&quot;MCMCpack&quot;</span>, <span class="co"># Contains functions to perform Bayesian inference using posterior simulation for a number of ssatistical models.</span>
             <span class="st">&quot;sampleSelection&quot;</span>, <span class="co"># Two-step and maximum likelihood estimation of Heckman-type sample selection models</span>
             <span class="st">&quot;scales&quot;</span>, <span class="co"># scale helper functions such as percent </span>
@@ -242,7 +244,7 @@ need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
 <p><span class="math inline">\(E(y|x) = 0 \times P(y = 0|x) + 1 \times P(y = 1|x) = P(y=1|x)\)</span></p>
 <p>An important class of models specifies the success probability as</p>
 <p><span class="math inline">\(P(y = 1 | x) = G(\beta_0 + \beta_1 + \dots \beta_k x_k) = G(\boldsymbol{x} \boldsymbol{\beta})\)</span></p>
-<p>The following table is taken from <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016">n.d.</a>)</span> and summarizes three examples of a generalized linear model:</p>
+<p>The following table is taken from <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016">2016</a>)</span> and summarizes three examples of a generalized linear model:</p>
 <table>
 <colgroup>
 <col width="22%" />
@@ -474,7 +476,7 @@ tabMCMC &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(sclo
 <span class="kw">kable</span>(tabMCMC, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,
       <span class="dt">caption=</span><span class="st">&quot;Conditional logit estimates for the &#39;cola&#39; problem&quot;</span>)</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-137">Table 2.1: </span>Conditional logit estimates for the ‘cola’ problem</caption>
+<caption><span id="tab:unnamed-chunk-142">Table 2.1: </span>Conditional logit estimates for the ‘cola’ problem</caption>
 <thead>
 <tr class="header">
 <th></th>
@@ -512,7 +514,7 @@ tabOprobit &lt;-<span class="st"> </span>sOprobit<span class="op">$</span>statis
 <span class="kw">kable</span>(tabOprobit, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,
       <span class="dt">caption=</span><span class="st">&quot;Ordered probit estimates for the &#39;nels&#39; problem&quot;</span>)</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-138">Table 2.2: </span>Ordered probit estimates for the ‘nels’ problem</caption>
+<caption><span id="tab:unnamed-chunk-143">Table 2.2: </span>Ordered probit estimates for the ‘nels’ problem</caption>
 <thead>
 <tr class="header">
 <th></th>
@@ -564,6 +566,15 @@ Dp3DGrades &lt;-<span class="st"> </span><span class="kw">pnorm</span>(mu2<span 
 </div>
 <div id="probit-model" class="section level3">
 <h3><span class="header-section-number">2.2.4</span> Probit model</h3>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">detach</span>(<span class="st">&quot;package:PoEdata&quot;</span>, <span class="dt">unload=</span><span class="ot">TRUE</span>)
+<span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)
+<span class="kw">attach</span>(mroz)</code></pre>
+<pre><code>## The following objects are masked from bwght:
+## 
+##     faminc, fatheduc, motheduc</code></pre>
+<pre><code>## The following object is masked from gpa1:
+## 
+##     age</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Estimate probit model</span>
 probitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,
                <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>probit),<span class="dt">data=</span>mroz)
@@ -604,6 +615,65 @@ probitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># McFadden&#39;s pseudo R2:</span>
 <span class="dv">1</span> <span class="op">-</span><span class="st"> </span>probitres<span class="op">$</span>deviance<span class="op">/</span>probitres<span class="op">$</span>null.deviance</code></pre>
 <pre><code>## [1] 0.2205805</code></pre>
+<p>Take a boostrap sample for the 95% confidence interval for each parameter.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)
+
+boot_probitres &lt;-<span class="st"> </span>mroz <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">bootstrap</span>(<span class="dv">500</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">do</span>(<span class="kw">tidy</span>(<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,
+               <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>probit),.)))
+boot_probitres <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span><span class="kw">group_by</span>(term) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">  </span>dplyr<span class="op">::</span><span class="kw">summarise</span>(<span class="dt">low =</span> <span class="kw">quantile</span>(estimate, <span class="fl">.025</span>), 
+                   <span class="dt">high =</span> <span class="kw">quantile</span>(estimate, <span class="fl">.0975</span>))</code></pre>
+<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 56.6666666666667%; margin-left: 0%; margin-right: auto; ">
+<col><col><col><tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">term</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">low</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">high</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">(Intercept)</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.27&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.27&nbsp;&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">age</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.0529&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.0529&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">educ</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.131&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.131&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">exper</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.123&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.123&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">I(exper^2)</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.00189</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.00189</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">kidsge6</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.036&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.036&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">kidslt6</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.868&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.868&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">nwifeinc</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.012&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.012&nbsp;&nbsp;</td>
+</tr>
+</table>
+
 </div>
 <div id="inference" class="section level3">
 <h3><span class="header-section-number">2.2.5</span> Inference</h3>
@@ -1100,7 +1170,6 @@ res&lt;-<span class="kw">survreg</span>(<span class="kw">Surv</span>(<span class
 <p>The models are useful when the sample selection is not random, but whehter an individual is in the sample depends on individual characteristics. For example, when studying wage determination for married women, some women are not in the labour force, therefore their wages are zero.</p>
 <p>The Heckit procedure involves two steps, estimating both the selection equation and the equation of interest. Function <code>selection()</code> in the <strong>sampleSelection</strong> package performs both steps; therefore, it needs both equations among its arguments. (The selection equation is, in fact, a probit model.)</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)
-
 wage.heckit &lt;-<span class="st"> </span><span class="kw">selection</span>(inlf<span class="op">~</span>age<span class="op">+</span>educ<span class="op">+</span><span class="kw">I</span>(kidslt6<span class="op">+</span>kidsge6)<span class="op">+</span>mtr,
                          <span class="kw">log</span>(wage)<span class="op">~</span>educ<span class="op">+</span>exper, 
                          <span class="dt">data=</span>mroz, <span class="dt">method=</span><span class="st">&quot;ml&quot;</span>)
@@ -1139,7 +1208,7 @@ wage.heckit &lt;-<span class="st"> </span><span class="kw">selection</span>(inlf
 <h3>References</h3>
 <div id="refs" class="references">
 <div id="ref-dalpiaz2016">
-<p>Dalpiaz, David. n.d. <em>Applied Statistics</em>. <a href="http://www.stat.illinois.edu" class="uri">http://www.stat.illinois.edu</a>.</p>
+<p>Dalpiaz, David. 2016. <em>Applied Statistics</em>. <a href="http://www.stat.illinois.edu" class="uri">http://www.stat.illinois.edu</a>.</p>
 </div>
 <div id="ref-Adkins2014">
 <p>Adkins, Lee. 2014. “Using Gretl for Principles of Econometrics, 4th Edition.” Economics Working Paper Series 1412. Oklahoma State University, Department of Economics and Legal Studies in Business. <a href="https://econpapers.repec.org/paper/oklwpaper/1412.htm" class="uri">https://econpapers.repec.org/paper/oklwpaper/1412.htm</a>.</p>
