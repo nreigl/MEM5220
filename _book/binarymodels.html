@@ -25,7 +25,7 @@
 <meta name="author" content="Nicolas Reigl">
 
 
-<meta name="date" content="2018-08-25">
+<meta name="date" content="2018-10-05">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -144,15 +144,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="1.1.1" data-path="linearregression.html"><a href="linearregression.html#regression-through-the-origin-and-regression-on-a-constant"><i class="fa fa-check"></i><b>1.1.1</b> Regression through the Origin and Regression on a Constant</a></li>
 <li class="chapter" data-level="1.1.2" data-path="linearregression.html"><a href="linearregression.html#simulating-slr"><i class="fa fa-check"></i><b>1.1.2</b> Simulating SLR</a></li>
 <li class="chapter" data-level="1.1.3" data-path="linearregression.html"><a href="linearregression.html#nonlinearities"><i class="fa fa-check"></i><b>1.1.3</b> Nonlinearities</a></li>
-<li class="chapter" data-level="1.1.4" data-path="linearregression.html"><a href="linearregression.html#inference-for-simple-linear-regression"><i class="fa fa-check"></i><b>1.1.4</b> Inference for Simple Linear Regression</a></li>
 </ul></li>
 <li class="chapter" data-level="1.2" data-path="linearregression.html"><a href="linearregression.html#multiple-linear-regression"><i class="fa fa-check"></i><b>1.2</b> Multiple Linear Regression</a><ul>
 <li class="chapter" data-level="1.2.1" data-path="linearregression.html"><a href="linearregression.html#ceteris-paribus-interpretation-and-omitted-variable-bias"><i class="fa fa-check"></i><b>1.2.1</b> Ceteris Paribus Interpretation and Omitted Variable bias</a></li>
 <li class="chapter" data-level="1.2.2" data-path="linearregression.html"><a href="linearregression.html#standard-errors-multicollinearity-and-vif"><i class="fa fa-check"></i><b>1.2.2</b> Standard errors, Multicollinearity and VIF</a></li>
-<li class="chapter" data-level="1.2.3" data-path="linearregression.html"><a href="linearregression.html#multiple-regression-analysis-ols-asymptotics"><i class="fa fa-check"></i><b>1.2.3</b> Multiple Regression Analysis: OLS Asymptotics</a></li>
-<li class="chapter" data-level="1.2.4" data-path="linearregression.html"><a href="linearregression.html#reporting-regression-results"><i class="fa fa-check"></i><b>1.2.4</b> Reporting Regression Results</a></li>
-<li class="chapter" data-level="1.2.5" data-path="linearregression.html"><a href="linearregression.html#model-formulae"><i class="fa fa-check"></i><b>1.2.5</b> Model Formulae</a></li>
-<li class="chapter" data-level="1.2.6" data-path="linearregression.html"><a href="linearregression.html#mlr-prediction"><i class="fa fa-check"></i><b>1.2.6</b> MLR Prediction</a></li>
+<li class="chapter" data-level="1.2.3" data-path="linearregression.html"><a href="linearregression.html#reporting-regression-results"><i class="fa fa-check"></i><b>1.2.3</b> Reporting Regression Results</a></li>
+<li class="chapter" data-level="1.2.4" data-path="linearregression.html"><a href="linearregression.html#model-formulae"><i class="fa fa-check"></i><b>1.2.4</b> Model Formulae</a></li>
+<li class="chapter" data-level="1.2.5" data-path="linearregression.html"><a href="linearregression.html#mlr-prediction"><i class="fa fa-check"></i><b>1.2.5</b> MLR Prediction</a></li>
 </ul></li>
 <li class="chapter" data-level="1.3" data-path="linearregression.html"><a href="linearregression.html#mlr-analysis-with-qualitative-regressors"><i class="fa fa-check"></i><b>1.3</b> MLR Analysis with Qualitative Regressors</a><ul>
 <li class="chapter" data-level="1.3.1" data-path="linearregression.html"><a href="linearregression.html#dummy-variabes"><i class="fa fa-check"></i><b>1.3.1</b> Dummy variabes</a></li>
@@ -213,10 +211,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1><span class="header-section-number">Chapter 2</span> Qualitative and LDV Models</h1>
 <p>To load the dataset and necessary functions:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace</span>
-devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">&quot;ccolonescu/PoEdata&quot;</span>)
+<span class="co"># devtools::install_github(&quot;ccolonescu/PoEdata&quot;)</span>
 PACKAGES&lt;-<span class="kw">c</span>(
             <span class="st">&quot;tidyverse&quot;</span>,  <span class="co"># for data manipulation and ggplots</span>
             <span class="st">&quot;broom&quot;</span>,  <span class="co"># Tidy regression output</span>
+            <span class="st">&quot;Hmisc&quot;</span>, <span class="co"># Harrell Miscellaneous functions</span>
+            <span class="st">&quot;psych&quot;</span>, <span class="co"># Procedures for Psychometric research</span>
             <span class="st">&quot;car&quot;</span>, <span class="co"># Companion to applied regression</span>
             <span class="st">&quot;knitr&quot;</span>, <span class="co"># knit functions</span>
             <span class="co"># &quot;kableExtra&quot;, # extended knit functions for objects exported from other packages</span>
@@ -324,9 +324,572 @@ need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
 <div id="linear-probability-models" class="section level2">
 <h2><span class="header-section-number">2.1</span> Linear probability models</h2>
 <p>If a dummy variable is used as the dependent variable <span class="math inline">\(y\)</span>, we can still use OLS to estimate its relation to the regressors <span class="math inline">\(x\)</span>.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;wooldridge&quot;</span>)
-<span class="co"># Estimate linear probability model</span>
-linprob &lt;-<span class="st"> </span><span class="kw">lm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,<span class="dt">data=</span>mroz)
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;wooldridge&quot;</span>)</code></pre>
+<p>Let us use the <code>describe()</code> function from the <strong>Hmisc</strong> package to use a different way to describe the datatset.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">describe</span>(mroz)</code></pre>
+<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto; ">
+<col><col><col><col><col><col><col><col><col><col><col><col><col><tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">vars</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">n</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">mean</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">sd</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">median</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">trimmed</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">mad</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">min</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">max</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">range</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">skew</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">kurtosis</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">se</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.568&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.496&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.585&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.276&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-1.93&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0181&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">2</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">741&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">871&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">288&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">634&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">427&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">4.95e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">4.95e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.921&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.185&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">31.8&nbsp;&nbsp;&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.238&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.524&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.119&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.3&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5.23&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0191&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">4</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1.35&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1.32&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1.21&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1.48&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.906&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.8&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0481&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">42.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">8.07&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">43&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">42.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">10.4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">60&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.151&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-1.02&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.294&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">6</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">12.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">2.28&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">12.3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">17&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.021&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.734&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0831&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">7</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">428</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">4.18&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.31&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.48&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.67&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.94&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.128&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">25&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">24.9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.07&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">13.7&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.16&nbsp;&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">8</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1.85&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">2.42&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1.44&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">9.98&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">9.98&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1.17&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.724&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0882&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">9</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.27e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">596&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.16e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.24e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">421&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">175&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5.01e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">4.84e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.565&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.84&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">21.7&nbsp;&nbsp;&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">10</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">45.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">8.06&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">46&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">45.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">10.4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">60&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">30&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.0643</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-1.01&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.294&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">11</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">12.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.02&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">12&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">12.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.97&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">17&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.276&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.343&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.11&nbsp;&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">12</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">7.48&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">4.23&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">6.98&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">7.04&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">3.25&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.412&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">40.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">40.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">2.26&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">11.5&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.154&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">13</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.31e+04</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.22e+04</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.09e+04</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.17e+04</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">9.08e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.5e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">9.6e+04&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">9.45e+04</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.9&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">6.46&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">444&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">14</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.679&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.0835&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.692&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.687&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.0445&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.442&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.942&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.64&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1.38&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.00304</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">15</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">9.25&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.37&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">9.24&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">4.45&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">17&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">17&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.118&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.104&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.123&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">16</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">8.81&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">3.57&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">8.76&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">4.45&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">17&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">17&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.197&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.0463</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.13&nbsp;&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">17</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">8.62&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.11&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">7.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">8.57&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.71&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">14&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">11&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.195&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.649&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.114&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">18</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.643&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.48&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.678&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.595&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-1.65&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0175&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">19</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">10.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">8.07&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">9.76&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">7.41&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">45&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.959&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.692&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.294&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">20</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">20.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">11.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">17.7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">18.6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">8.24&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.0291&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">96&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">96&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">2.21&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">8.35&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.424&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">21</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">428</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.19&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.723&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.25&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.22&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.586&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-2.05&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.22&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5.27&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.683&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">2.53&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.035&nbsp;&nbsp;</td>
+</tr>
+<tr>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">22</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">753</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">178&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">250&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">81&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">124&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">107&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">2.02e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">2.02e+03</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">2.58&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">8.69&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">9.1&nbsp;&nbsp;&nbsp;&nbsp;</td>
+</tr>
+</table>
+
+<p>The function <code>rcorr()</code> can be useful to check visually for correlation.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rcorr</span>(<span class="kw">as.matrix</span>(mroz))</code></pre>
+<pre><code>##           inlf hours kidslt6 kidsge6   age  educ  wage repwage hushrs
+## inlf      1.00  0.74   -0.21    0.00 -0.08  0.19   NaN    0.63  -0.07
+## hours     0.74  1.00   -0.22   -0.09 -0.03  0.11 -0.10    0.61  -0.06
+## kidslt6  -0.21 -0.22    1.00    0.08 -0.43  0.11  0.03   -0.13   0.02
+## kidsge6   0.00 -0.09    0.08    1.00 -0.39 -0.06 -0.08   -0.07   0.10
+## age      -0.08 -0.03   -0.43   -0.39  1.00 -0.12  0.03   -0.06  -0.08
+## educ      0.19  0.11    0.11   -0.06 -0.12  1.00  0.34    0.27   0.08
+## wage       NaN -0.10    0.03   -0.08  0.03  0.34  1.00    0.42  -0.03
+## repwage   0.63  0.61   -0.13   -0.07 -0.06  0.27  0.42    1.00  -0.07
+## hushrs   -0.07 -0.06    0.02    0.10 -0.08  0.08 -0.03   -0.07   1.00
+## husage   -0.07 -0.03   -0.44   -0.35  0.89 -0.13  0.03   -0.06  -0.10
+## huseduc   0.05 -0.01    0.13    0.01 -0.16  0.61  0.17    0.11   0.11
+## huswage  -0.07 -0.10    0.03   -0.03  0.03  0.28  0.22    0.02  -0.24
+## faminc    0.10  0.15   -0.03   -0.02  0.05  0.36  0.30    0.21   0.13
+## mtr      -0.14 -0.19    0.06    0.15 -0.06 -0.41 -0.31   -0.24  -0.14
+## motheduc  0.09  0.06    0.11    0.03 -0.23  0.44  0.06    0.09   0.05
+## fatheduc  0.06  0.01    0.10   -0.03 -0.16  0.44  0.11    0.10   0.05
+## unem     -0.03 -0.06   -0.01    0.01  0.08  0.07  0.03    0.01  -0.16
+## city     -0.01 -0.02   -0.04   -0.03  0.10  0.16  0.12    0.09  -0.11
+## exper     0.34  0.40   -0.19   -0.30  0.33  0.07  0.05    0.34  -0.10
+## nwifeinc -0.12 -0.12    0.04    0.02  0.06  0.28  0.14   -0.06   0.16
+## lwage      NaN -0.02   -0.02   -0.12  0.05  0.34  0.83    0.51   0.00
+## expersq   0.26  0.34   -0.18   -0.30  0.38  0.02  0.04    0.28  -0.07
+##          husage huseduc huswage faminc   mtr motheduc fatheduc  unem  city
+## inlf      -0.07    0.05   -0.07   0.10 -0.14     0.09     0.06 -0.03 -0.01
+## hours     -0.03   -0.01   -0.10   0.15 -0.19     0.06     0.01 -0.06 -0.02
+## kidslt6   -0.44    0.13    0.03  -0.03  0.06     0.11     0.10 -0.01 -0.04
+## kidsge6   -0.35    0.01   -0.03  -0.02  0.15     0.03    -0.03  0.01 -0.03
+## age        0.89   -0.16    0.03   0.05 -0.06    -0.23    -0.16  0.08  0.10
+## educ      -0.13    0.61    0.28   0.36 -0.41     0.44     0.44  0.07  0.16
+## wage       0.03    0.17    0.22   0.30 -0.31     0.06     0.11  0.03  0.12
+## repwage   -0.06    0.11    0.02   0.21 -0.24     0.09     0.10  0.01  0.09
+## hushrs    -0.10    0.11   -0.24   0.13 -0.14     0.05     0.05 -0.16 -0.11
+## husage     1.00   -0.20    0.02   0.04 -0.04    -0.23    -0.14  0.05  0.07
+## huseduc   -0.20    1.00    0.39   0.38 -0.44     0.32     0.37  0.06  0.23
+## huswage    0.02    0.39    1.00   0.73 -0.72     0.13     0.19  0.16  0.32
+## faminc     0.04    0.38    0.73   1.00 -0.88     0.16     0.21  0.06  0.25
+## mtr       -0.04   -0.44   -0.72  -0.88  1.00    -0.19    -0.25 -0.06 -0.26
+## motheduc  -0.23    0.32    0.13   0.16 -0.19     1.00     0.57  0.02  0.07
+## fatheduc  -0.14    0.37    0.19   0.21 -0.25     0.57     1.00  0.06  0.15
+## unem       0.05    0.06    0.16   0.06 -0.06     0.02     0.06  1.00  0.18
+## city       0.07    0.23    0.32   0.25 -0.26     0.07     0.15  0.18  1.00
+## exper      0.27   -0.04   -0.10  -0.03 -0.03    -0.08    -0.08  0.00  0.01
+## nwifeinc   0.05    0.36    0.76   0.94 -0.81     0.13     0.19  0.07  0.24
+## lwage      0.04    0.16    0.17   0.35 -0.37     0.05     0.08  0.04  0.10
+## expersq    0.31   -0.07   -0.12  -0.04 -0.02    -0.10    -0.10 -0.02 -0.01
+##          exper nwifeinc lwage expersq
+## inlf      0.34    -0.12   NaN    0.26
+## hours     0.40    -0.12 -0.02    0.34
+## kidslt6  -0.19     0.04 -0.02   -0.18
+## kidsge6  -0.30     0.02 -0.12   -0.30
+## age       0.33     0.06  0.05    0.38
+## educ      0.07     0.28  0.34    0.02
+## wage      0.05     0.14  0.83    0.04
+## repwage   0.34    -0.06  0.51    0.28
+## hushrs   -0.10     0.16  0.00   -0.07
+## husage    0.27     0.05  0.04    0.31
+## huseduc  -0.04     0.36  0.16   -0.07
+## huswage  -0.10     0.76  0.17   -0.12
+## faminc   -0.03     0.94  0.35   -0.04
+## mtr      -0.03    -0.81 -0.37   -0.02
+## motheduc -0.08     0.13  0.05   -0.10
+## fatheduc -0.08     0.19  0.08   -0.10
+## unem      0.00     0.07  0.04   -0.02
+## city      0.01     0.24  0.10   -0.01
+## exper     1.00    -0.17  0.17    0.94
+## nwifeinc -0.17     1.00  0.14   -0.17
+## lwage     0.17     0.14  1.00    0.13
+## expersq   0.94    -0.17  0.13    1.00
+## 
+## n
+##          inlf hours kidslt6 kidsge6 age educ wage repwage hushrs husage
+## inlf      753   753     753     753 753  753  428     753    753    753
+## hours     753   753     753     753 753  753  428     753    753    753
+## kidslt6   753   753     753     753 753  753  428     753    753    753
+## kidsge6   753   753     753     753 753  753  428     753    753    753
+## age       753   753     753     753 753  753  428     753    753    753
+## educ      753   753     753     753 753  753  428     753    753    753
+## wage      428   428     428     428 428  428  428     428    428    428
+## repwage   753   753     753     753 753  753  428     753    753    753
+## hushrs    753   753     753     753 753  753  428     753    753    753
+## husage    753   753     753     753 753  753  428     753    753    753
+## huseduc   753   753     753     753 753  753  428     753    753    753
+## huswage   753   753     753     753 753  753  428     753    753    753
+## faminc    753   753     753     753 753  753  428     753    753    753
+## mtr       753   753     753     753 753  753  428     753    753    753
+## motheduc  753   753     753     753 753  753  428     753    753    753
+## fatheduc  753   753     753     753 753  753  428     753    753    753
+## unem      753   753     753     753 753  753  428     753    753    753
+## city      753   753     753     753 753  753  428     753    753    753
+## exper     753   753     753     753 753  753  428     753    753    753
+## nwifeinc  753   753     753     753 753  753  428     753    753    753
+## lwage     428   428     428     428 428  428  428     428    428    428
+## expersq   753   753     753     753 753  753  428     753    753    753
+##          huseduc huswage faminc mtr motheduc fatheduc unem city exper
+## inlf         753     753    753 753      753      753  753  753   753
+## hours        753     753    753 753      753      753  753  753   753
+## kidslt6      753     753    753 753      753      753  753  753   753
+## kidsge6      753     753    753 753      753      753  753  753   753
+## age          753     753    753 753      753      753  753  753   753
+## educ         753     753    753 753      753      753  753  753   753
+## wage         428     428    428 428      428      428  428  428   428
+## repwage      753     753    753 753      753      753  753  753   753
+## hushrs       753     753    753 753      753      753  753  753   753
+## husage       753     753    753 753      753      753  753  753   753
+## huseduc      753     753    753 753      753      753  753  753   753
+## huswage      753     753    753 753      753      753  753  753   753
+## faminc       753     753    753 753      753      753  753  753   753
+## mtr          753     753    753 753      753      753  753  753   753
+## motheduc     753     753    753 753      753      753  753  753   753
+## fatheduc     753     753    753 753      753      753  753  753   753
+## unem         753     753    753 753      753      753  753  753   753
+## city         753     753    753 753      753      753  753  753   753
+## exper        753     753    753 753      753      753  753  753   753
+## nwifeinc     753     753    753 753      753      753  753  753   753
+## lwage        428     428    428 428      428      428  428  428   428
+## expersq      753     753    753 753      753      753  753  753   753
+##          nwifeinc lwage expersq
+## inlf          753   428     753
+## hours         753   428     753
+## kidslt6       753   428     753
+## kidsge6       753   428     753
+## age           753   428     753
+## educ          753   428     753
+## wage          428   428     428
+## repwage       753   428     753
+## hushrs        753   428     753
+## husage        753   428     753
+## huseduc       753   428     753
+## huswage       753   428     753
+## faminc        753   428     753
+## mtr           753   428     753
+## motheduc      753   428     753
+## fatheduc      753   428     753
+## unem          753   428     753
+## city          753   428     753
+## exper         753   428     753
+## nwifeinc      753   428     753
+## lwage         428   428     428
+## expersq       753   428     753
+## 
+## P
+##          inlf   hours  kidslt6 kidsge6 age    educ   wage   repwage hushrs
+## inlf            0.0000 0.0000  0.9470  0.0272 0.0000        0.0000  0.0738
+## hours    0.0000        0.0000  0.0128  0.3642 0.0036 0.0435 0.0000  0.1224
+## kidslt6  0.0000 0.0000         0.0209  0.0000 0.0028 0.5168 0.0002  0.5057
+## kidsge6  0.9470 0.0128 0.0209          0.0000 0.1063 0.1017 0.0596  0.0063
+## age      0.0272 0.3642 0.0000  0.0000         0.0009 0.5306 0.1098  0.0206
+## educ     0.0000 0.0036 0.0028  0.1063  0.0009        0.0000 0.0000  0.0304
+## wage            0.0435 0.5168  0.1017  0.5306 0.0000        0.0000  0.5061
+## repwage  0.0000 0.0000 0.0002  0.0596  0.1098 0.0000 0.0000         0.0521
+## hushrs   0.0738 0.1224 0.5057  0.0063  0.0206 0.0304 0.5061 0.0521        
+## husage   0.0458 0.3943 0.0000  0.0000  0.0000 0.0002 0.5966 0.1288  0.0088
+## huseduc  0.2082 0.7915 0.0002  0.7960  0.0000 0.0000 0.0006 0.0033  0.0030
+## huswage  0.0567 0.0068 0.3749  0.4156  0.4592 0.0000 0.0000 0.5974  0.0000
+## faminc   0.0066 0.0000 0.4465  0.5930  0.1505 0.0000 0.0000 0.0000  0.0004
+## mtr      0.0000 0.0000 0.1010  0.0000  0.1037 0.0000 0.0000 0.0000  0.0002
+## motheduc 0.0130 0.1126 0.0031  0.3749  0.0000 0.0000 0.2387 0.0188  0.1436
+## fatheduc 0.1135 0.7080 0.0083  0.4622  0.0000 0.0000 0.0258 0.0048  0.1676
+## unem     0.4311 0.0983 0.8042  0.6956  0.0345 0.0478 0.5054 0.8026  0.0000
+## city     0.8658 0.6568 0.2426  0.3577  0.0081 0.0000 0.0135 0.0164  0.0020
+## exper    0.0000 0.0000 0.0000  0.0000  0.0000 0.0692 0.2563 0.0000  0.0064
+## nwifeinc 0.0012 0.0006 0.2951  0.4974  0.1078 0.0000 0.0032 0.1258  0.0000
+## lwage           0.7315 0.7026  0.0130  0.2569 0.0000 0.0000 0.0000  0.9378
+## expersq  0.0000 0.0000 0.0000  0.0000  0.0000 0.5084 0.3814 0.0000  0.0406
+##          husage huseduc huswage faminc mtr    motheduc fatheduc unem  
+## inlf     0.0458 0.2082  0.0567  0.0066 0.0000 0.0130   0.1135   0.4311
+## hours    0.3943 0.7915  0.0068  0.0000 0.0000 0.1126   0.7080   0.0983
+## kidslt6  0.0000 0.0002  0.3749  0.4465 0.1010 0.0031   0.0083   0.8042
+## kidsge6  0.0000 0.7960  0.4156  0.5930 0.0000 0.3749   0.4622   0.6956
+## age      0.0000 0.0000  0.4592  0.1505 0.1037 0.0000   0.0000   0.0345
+## educ     0.0002 0.0000  0.0000  0.0000 0.0000 0.0000   0.0000   0.0478
+## wage     0.5966 0.0006  0.0000  0.0000 0.0000 0.2387   0.0258   0.5054
+## repwage  0.1288 0.0033  0.5974  0.0000 0.0000 0.0188   0.0048   0.8026
+## hushrs   0.0088 0.0030  0.0000  0.0004 0.0002 0.1436   0.1676   0.0000
+## husage          0.0000  0.5897  0.2670 0.2214 0.0000   0.0002   0.1455
+## huseduc  0.0000         0.0000  0.0000 0.0000 0.0000   0.0000   0.1315
+## huswage  0.5897 0.0000          0.0000 0.0000 0.0005   0.0000   0.0000
+## faminc   0.2670 0.0000  0.0000         0.0000 0.0000   0.0000   0.0916
+## mtr      0.2214 0.0000  0.0000  0.0000        0.0000   0.0000   0.1138
+## motheduc 0.0000 0.0000  0.0005  0.0000 0.0000          0.0000   0.6141
+## fatheduc 0.0002 0.0000  0.0000  0.0000 0.0000 0.0000            0.1085
+## unem     0.1455 0.1315  0.0000  0.0916 0.1138 0.6141   0.1085         
+## city     0.0636 0.0000  0.0000  0.0000 0.0000 0.0623   0.0000   0.0000
+## exper    0.0000 0.3198  0.0045  0.4478 0.3725 0.0241   0.0306   0.9033
+## nwifeinc 0.2091 0.0000  0.0000  0.0000 0.0000 0.0004   0.0000   0.0398
+## lwage    0.4211 0.0010  0.0005  0.0000 0.0000 0.3305   0.1086   0.3933
+## expersq  0.0000 0.0413  0.0011  0.2458 0.6564 0.0060   0.0068   0.5108
+##          city   exper  nwifeinc lwage  expersq
+## inlf     0.8658 0.0000 0.0012          0.0000 
+## hours    0.6568 0.0000 0.0006   0.7315 0.0000 
+## kidslt6  0.2426 0.0000 0.2951   0.7026 0.0000 
+## kidsge6  0.3577 0.0000 0.4974   0.0130 0.0000 
+## age      0.0081 0.0000 0.1078   0.2569 0.0000 
+## educ     0.0000 0.0692 0.0000   0.0000 0.5084 
+## wage     0.0135 0.2563 0.0032   0.0000 0.3814 
+## repwage  0.0164 0.0000 0.1258   0.0000 0.0000 
+## hushrs   0.0020 0.0064 0.0000   0.9378 0.0406 
+## husage   0.0636 0.0000 0.2091   0.4211 0.0000 
+## huseduc  0.0000 0.3198 0.0000   0.0010 0.0413 
+## huswage  0.0000 0.0045 0.0000   0.0005 0.0011 
+## faminc   0.0000 0.4478 0.0000   0.0000 0.2458 
+## mtr      0.0000 0.3725 0.0000   0.0000 0.6564 
+## motheduc 0.0623 0.0241 0.0004   0.3305 0.0060 
+## fatheduc 0.0000 0.0306 0.0000   0.1086 0.0068 
+## unem     0.0000 0.9033 0.0398   0.3933 0.5108 
+## city            0.7583 0.0000   0.0446 0.7565 
+## exper    0.7583        0.0000   0.0004 0.0000 
+## nwifeinc 0.0000 0.0000          0.0034 0.0000 
+## lwage    0.0446 0.0004 0.0034          0.0090 
+## expersq  0.7565 0.0000 0.0000   0.0090</code></pre>
+<p>Estimate linear probability model</p>
+<pre class="sourceCode r"><code class="sourceCode r">linprob &lt;-<span class="st"> </span><span class="kw">lm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,<span class="dt">data=</span>mroz)
 <span class="co"># Regression table with heteroscedasticity-robust SE and t tests:</span>
 <span class="kw">coeftest</span>(linprob,<span class="dt">vcov=</span>hccm)</code></pre>
 <pre><code>## 
@@ -345,6 +908,12 @@ linprob &lt;-<span class="st"> </span><span class="kw">lm</span>(inlf<span class
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>The estimated coefficient <em>educ</em> can be interpreted as: an additional year of schooling increases the probability that a woman is in the labor force <em>ceteris paribus</em> by 3.80%.</p>
 <p>One problem with linear probability models is that <span class="math inline">\(P(y=1|x)\)</span> is specified as a linear function of the regressors. By construction, there are more or less realistic combinations of regressor values that yield <span class="math inline">\(\hat{y} &lt; 0\)</span> or <span class="math inline">\(\hat{y} &gt; 1\)</span>.</p>
+<p>Predictions for two “extreme” women:</p>
+<pre class="sourceCode r"><code class="sourceCode r">xpred &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">nwifeinc=</span><span class="kw">c</span>(<span class="dv">100</span>,<span class="dv">0</span>),<span class="dt">educ=</span><span class="kw">c</span>(<span class="dv">5</span>,<span class="dv">17</span>),<span class="dt">exper=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">30</span>),
+              <span class="dt">age=</span><span class="kw">c</span>(<span class="dv">20</span>,<span class="dv">52</span>),<span class="dt">kidslt6=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">0</span>),<span class="dt">kidsge6=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>))
+<span class="kw">predict</span>(linprob,xpred)</code></pre>
+<pre><code>##          1          2 
+## -0.4104582  1.0428084</code></pre>
 </div>
 <div id="logit-and-probit-models-estimation" class="section level2">
 <h2><span class="header-section-number">2.2</span> Logit and Probit Models: Estimation</h2>
@@ -398,6 +967,43 @@ logitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<s
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># McFadden&#39;s pseudo R2:</span>
 <span class="dv">1</span> <span class="op">-</span><span class="st"> </span>logitres<span class="op">$</span>deviance<span class="op">/</span>logitres<span class="op">$</span>null.deviance</code></pre>
 <pre><code>## [1] 0.2196814</code></pre>
+<p>We can also extract the fitted values from the specified model and compare them the observed predicated binomial explained variable.</p>
+<pre class="sourceCode r"><code class="sourceCode r">fit &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">response =</span> mroz<span class="op">$</span>inlf, <span class="dt">predicted =</span> <span class="kw">round</span>(<span class="kw">fitted</span>(logitres), <span class="dv">0</span>))
+<span class="kw">xtabs</span>(<span class="op">~</span><span class="st"> </span>predicted <span class="op">+</span><span class="st"> </span>response, <span class="dt">data =</span> fit)</code></pre>
+<pre><code>##          response
+## predicted   0   1
+##         0 207  81
+##         1 118 347</code></pre>
+<p>If you want to interpret the estimated effects as relative odds ratios (plus their confidence intervals):</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(logitres<span class="op">$</span>coefficients)</code></pre>
+<pre><code>## (Intercept)    nwifeinc        educ       exper  I(exper^2)         age 
+##   1.5302825   0.9788810   1.2475360   1.2285929   0.9968509   0.9157386 
+##     kidslt6     kidsge6 
+##   0.2361344   1.0619557</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="kw">confint</span>(logitres)) <span class="co"># Lets convert the confidence intervals the same way</span></code></pre>
+<pre><code>## Waiting for profiling to be done...</code></pre>
+<pre><code>##                 2.5 %    97.5 %
+## (Intercept) 0.2829827 8.2907776
+## nwifeinc    0.9625447 0.9949193
+## educ        1.1473738 1.3607465
+## exper       1.1540225 1.3092803
+## I(exper^2)  0.9948707 0.9988906
+## age         0.8894633 0.9418229
+## kidslt6     0.1567171 0.3485513
+## kidsge6     0.9175642 1.2306237</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">resultsTable &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="kw">cbind</span>(<span class="dt">OddsRatios =</span> <span class="kw">coef</span>(logitres), <span class="kw">confint</span>(logitres)))</code></pre>
+<pre><code>## Waiting for profiling to be done...</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">round</span>(resultsTable, <span class="dt">digits =</span> <span class="dv">5</span>)</code></pre>
+<pre><code>##             OddsRatios   2.5 %  97.5 %
+## (Intercept)    1.53028 0.28298 8.29078
+## nwifeinc       0.97888 0.96254 0.99492
+## educ           1.24754 1.14737 1.36075
+## exper          1.22859 1.15402 1.30928
+## I(exper^2)     0.99685 0.99487 0.99889
+## age            0.91574 0.88946 0.94182
+## kidslt6        0.23613 0.15672 0.34855
+## kidsge6        1.06196 0.91756 1.23062</code></pre>
+<p>This gives you <span class="math inline">\(e^\beta\)</span>, the multiplicative change in the odds ratio for <span class="math inline">\(y=1\)</span> if the covariate associated with <span class="math inline">\(\beta\)</span> increases by 1.</p>
 <div id="multinomial-logit" class="section level3">
 <h3><span class="header-section-number">2.2.1</span> Multinomial Logit</h3>
 <p>A relatively common R function that fits multinomial logit models is <code>multinom()</code> from package <strong>nnet</strong>. Let us use the dataset <em>nels_small</em> for an example of how multinom works. The variable grades in this dataset is an index, with best grades represented by lower values of grade. We try to explain the choice of a secondary institution (psechoice) only by the high school grade. The variable pschoice</p>
@@ -476,7 +1082,7 @@ tabMCMC &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(sclo
 <span class="kw">kable</span>(tabMCMC, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,
       <span class="dt">caption=</span><span class="st">&quot;Conditional logit estimates for the &#39;cola&#39; problem&quot;</span>)</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-142">Table 2.1: </span>Conditional logit estimates for the ‘cola’ problem</caption>
+<caption><span id="tab:unnamed-chunk-152">Table 2.1: </span>Conditional logit estimates for the ‘cola’ problem</caption>
 <thead>
 <tr class="header">
 <th></th>
@@ -514,7 +1120,7 @@ tabOprobit &lt;-<span class="st"> </span>sOprobit<span class="op">$</span>statis
 <span class="kw">kable</span>(tabOprobit, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,
       <span class="dt">caption=</span><span class="st">&quot;Ordered probit estimates for the &#39;nels&#39; problem&quot;</span>)</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-143">Table 2.2: </span>Ordered probit estimates for the ‘nels’ problem</caption>
+<caption><span id="tab:unnamed-chunk-153">Table 2.2: </span>Ordered probit estimates for the ‘nels’ problem</caption>
 <thead>
 <tr class="header">
 <th></th>
@@ -566,6 +1172,21 @@ Dp3DGrades &lt;-<span class="st"> </span><span class="kw">pnorm</span>(mu2<span 
 </div>
 <div id="probit-model" class="section level3">
 <h3><span class="header-section-number">2.2.4</span> Probit model</h3>
+<pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">3</span>,<span class="dv">3</span>, <span class="fl">.2</span>)
+<span class="kw">plot</span>(x, <span class="kw">pnorm</span>(x), <span class="dt">type=</span><span class="st">&quot;l&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;b1+b2x&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;P[y=1]&quot;</span>)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig21"></span>
+<img src="MEM5220_R_files/figure-html/fig21-1.png" alt="The shape of the probit function is the standard normal distribution" width="80%" />
+<p class="caption">
+Figure 2.1: The shape of the probit function is the standard normal distribution
+</p>
+</div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(x, <span class="kw">dnorm</span>(x), <span class="dt">type=</span><span class="st">&quot;l&quot;</span>)</code></pre>
+<div class="figure" style="text-align: center"><span id="fig:fig21"></span>
+<img src="MEM5220_R_files/figure-html/fig21-2.png" alt="The shape of the probit function is the standard normal distribution" width="80%" />
+<p class="caption">
+Figure 2.1: The shape of the probit function is the standard normal distribution
+</p>
+</div>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">detach</span>(<span class="st">&quot;package:PoEdata&quot;</span>, <span class="dt">unload=</span><span class="ot">TRUE</span>)
 <span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)
 <span class="kw">attach</span>(mroz)</code></pre>
@@ -686,25 +1307,25 @@ probitres<span class="op">$</span>null.deviance <span class="op">-</span><span c
 <span class="kw">lrtest</span>(probitres)</code></pre>
 <table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 62.2222222222222%; margin-left: 0%; margin-right: auto; ">
 <col><col><col><col><col><tr>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">#Df</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">LogLik</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Df</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Chisq</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Pr(&gt;Chisq)</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">#Df</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">LogLik</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Df</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Chisq</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Pr(&gt;Chisq)</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">8</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">8</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-401</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);"></td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);"></td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">1</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-515</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-7</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">227</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">2.01e-45</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">1</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-515</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-7</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">227</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">2.01e-45</td>
 </tr>
 </table>
 
@@ -714,25 +1335,25 @@ restr &lt;-<span class="st"> </span><span class="kw">glm</span>(inlf<span class=
 <span class="kw">lrtest</span>(restr,probitres)</code></pre>
 <table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 62.2222222222222%; margin-left: 0%; margin-right: auto; ">
 <col><col><col><col><col><tr>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">#Df</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">LogLik</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Df</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Chisq</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Pr(&gt;Chisq)</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">#Df</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">LogLik</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Df</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Chisq</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">Pr(&gt;Chisq)</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-465</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);"></td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);"></td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">8</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-401</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">3</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">127</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">2.12e-27</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">8</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-401</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">3</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">127</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">2.12e-27</td>
 </tr>
 </table>
 
@@ -776,10 +1397,10 @@ probit.p &lt;-<span class="st"> </span><span class="kw">predict</span>(probit.re
 <span class="kw">legend</span>(<span class="st">&quot;topleft&quot;</span>, 
        <span class="kw">c</span>(<span class="st">&quot;linear prob.&quot;</span>, <span class="st">&quot;logit&quot;</span>, <span class="st">&quot;probit&quot;</span>), 
        <span class="dt">lwd =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>))</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:fig21"></span>
-<img src="MEM5220_R_files/figure-html/fig21-1.png" alt="Predictions from binary response models (simulated data)" width="80%" />
+<div class="figure" style="text-align: center"><span id="fig:fig22"></span>
+<img src="MEM5220_R_files/figure-html/fig22-1.png" alt="Predictions from binary response models (simulated data)" width="80%" />
 <p class="caption">
-Figure 2.1: Predictions from binary response models (simulated data)
+Figure 2.2: Predictions from binary response models (simulated data)
 </p>
 </div>
 </div>
@@ -791,67 +1412,67 @@ Figure 2.1: Predictions from binary response models (simulated data)
 <span class="kw">summary</span>(effects_logit_participation)</code></pre>
 <table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto; ">
 <col><col><col><col><col><col><col><tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">factor</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">AME</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">SE</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">z</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">p</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">lower</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">upper</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">factor</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">AME</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">SE</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">z</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">p</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">lower</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">upper</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">age</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">age</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.0157&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00238</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-6.6&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">4.04e-11</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.0204&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.0111&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.0111&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">educ</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">educ</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.0395&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.00729</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">5.41&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">6.15e-08</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.0252&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0538&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0538&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">exper</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">exper</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0254&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00224</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">11.4&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">5.99e-30</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.021&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0298&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0298&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">kidsge6</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">kidsge6</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.0107&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.0133&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.805</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.421&nbsp;&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.0154&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0369&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0369&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">kidslt6</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">kidslt6</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.258&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0319&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-8.07&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">7.05e-16</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.32&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.195&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.195&nbsp;&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">nwifeinc</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.00381</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.00148</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-2.57&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0101&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.00672</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.000906</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">nwifeinc</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.00381</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.00148</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-2.57&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0101&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.00672</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.000906</td>
 </tr>
 </table>
 
@@ -859,67 +1480,67 @@ Figure 2.1: Predictions from binary response models (simulated data)
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(<span class="kw">margins</span>(logitres, <span class="dt">data =</span> <span class="kw">subset</span>(mroz, kidslt6 <span class="op">==</span><span class="st"> </span><span class="dv">0</span>))) <span class="co"># no kids &lt; 6 years</span></code></pre>
 <table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto; ">
 <col><col><col><col><col><col><col><tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">factor</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">AME</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">SE</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">z</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">p</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">lower</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">upper</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">factor</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">AME</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">SE</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">z</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">p</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">lower</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">upper</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">age</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">age</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.0156&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00234</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-6.64&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">3.04e-11</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.0202&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.011&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.011&nbsp;&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">educ</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">educ</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.0391&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.00726</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">5.39&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">7.13e-08</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.0249&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0534&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0534&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">exper</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">exper</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0246&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.00212</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">11.6&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">4.23e-31</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0204&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0287&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0287&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">kidsge6</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">kidsge6</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.0106&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.0132&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.807</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.42&nbsp;&nbsp;&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.0152&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0365&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0365&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">kidslt6</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">kidslt6</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.255&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.033&nbsp;&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-7.73&nbsp;</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">1.09e-14</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.32&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.191&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.191&nbsp;&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">nwifeinc</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.00378</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.00147</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-2.57&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0102&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.00666</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.000894</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">nwifeinc</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.00378</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.00147</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-2.57&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.0102&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.00666</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.000894</td>
 </tr>
 </table>
 
@@ -929,35 +1550,35 @@ Figure 2.1: Predictions from binary response models (simulated data)
 <span class="st">  </span><span class="kw">geom_hline</span>(<span class="dt">yintercept =</span> <span class="dv">0</span>, <span class="dt">color=</span><span class="st">&quot;lightgrey&quot;</span>) <span class="op">+</span>
 <span class="st">  </span><span class="kw">theme_minimal</span>() <span class="op">+</span>
 <span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">45</span>))</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:fig22"></span>
-<img src="MEM5220_R_files/figure-html/fig22-1.png" alt="Logit effect plot" width="80%" />
+<div class="figure" style="text-align: center"><span id="fig:fig23"></span>
+<img src="MEM5220_R_files/figure-html/fig23-1.png" alt="Logit effect plot" width="80%" />
 <p class="caption">
-Figure 2.2: Logit effect plot
+Figure 2.3: Logit effect plot
 </p>
 </div>
 <p>You can also extract the marginal effects of a single variable, with <code>dydx</code>:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(<span class="kw">dydx</span>(mroz, logitres, <span class="st">&quot;educ&quot;</span>))</code></pre>
 <table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 20%; margin-left: 0%; margin-right: auto; ">
 <col><tr>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0.4pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">dydx_educ</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0.4pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">dydx_educ</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0464</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0464</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">0.0416</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">0.0416</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0463</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0463</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">0.0384</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">0.0384</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0538</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.0538</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">0.0335</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">0.0335</td>
 </tr>
 </table>
 
@@ -984,10 +1605,10 @@ Figure 2.2: Logit effect plot
 ## 18  13.5 0.6915913 0.7418704 0.6413122
 ## 19  14.0 0.7146659 0.7672368 0.6620950
 ## 20  14.5 0.7366715 0.7918749 0.6814681</code></pre>
-<div class="figure" style="text-align: center"><span id="fig:fig23"></span>
-<img src="MEM5220_R_files/figure-html/fig23-1.png" alt="Marginal effects for logit model" width="80%" />
+<div class="figure" style="text-align: center"><span id="fig:fig24"></span>
+<img src="MEM5220_R_files/figure-html/fig24-1.png" alt="Marginal effects for logit model" width="80%" />
 <p class="caption">
-Figure 2.3: Marginal effects for logit model
+Figure 2.4: Marginal effects for logit model
 </p>
 </div>
 </div>
@@ -1208,10 +1829,10 @@ wage.heckit &lt;-<span class="st"> </span><span class="kw">selection</span>(inlf
 <h3>References</h3>
 <div id="refs" class="references">
 <div id="ref-dalpiaz2016">
-<p>Dalpiaz, David. 2016. <em>Applied Statistics</em>. <a href="http://www.stat.illinois.edu" class="uri">http://www.stat.illinois.edu</a>.</p>
+<p>Dalpiaz, David. 2016. <em>Applied Statistics</em>. <a href="http://www.stat.illinois.edu">http://www.stat.illinois.edu</a>.</p>
 </div>
 <div id="ref-Adkins2014">
-<p>Adkins, Lee. 2014. “Using Gretl for Principles of Econometrics, 4th Edition.” Economics Working Paper Series 1412. Oklahoma State University, Department of Economics and Legal Studies in Business. <a href="https://econpapers.repec.org/paper/oklwpaper/1412.htm" class="uri">https://econpapers.repec.org/paper/oklwpaper/1412.htm</a>.</p>
+<p>Adkins, Lee. 2014. “Using Gretl for Principles of Econometrics, 4th Edition.” Economics Working Paper Series 1412. Oklahoma State University, Department of Economics and Legal Studies in Business. <a href="https://econpapers.repec.org/paper/oklwpaper/1412.htm">https://econpapers.repec.org/paper/oklwpaper/1412.htm</a>.</p>
 </div>
 </div>
             </section>
@@ -1267,7 +1888,7 @@ gitbook.start({
     var script = document.createElement("script");
     script.type = "text/javascript";
     var src = "true";
-    if (src === "" || src === "true") src = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
     if (location.protocol !== "file:" && /^https?:/.test(src))
       src = src.replace(/^https?:/, '');
     script.src = src;

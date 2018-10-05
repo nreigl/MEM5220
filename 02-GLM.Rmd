@@ -6,10 +6,12 @@ To load the dataset and necessary functions:
 
 ```{r, echo=TRUE, message=FALSE, results='hide'}
 # This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
-devtools::install_github("ccolonescu/PoEdata")
+# devtools::install_github("ccolonescu/PoEdata")
 PACKAGES<-c(
             "tidyverse",  # for data manipulation and ggplots
             "broom",  # Tidy regression output
+            "Hmisc", # Harrell Miscellaneous functions
+            "psych", # Procedures for Psychometric research
             "car", # Companion to applied regression
             "knitr", # knit functions
             # "kableExtra", # extended knit functions for objects exported from other packages
@@ -85,9 +87,27 @@ $$
 If a dummy variable is used as the dependent variable $y$, we can still use OLS to estimate its relation to the regressors $x$. 
 
 
+
 ```{r}
 data("mroz", package = "wooldridge")
-# Estimate linear probability model
+```
+
+Let us use the `describe()` function from the **Hmisc** package to use a different way to describe the datatset. 
+
+```{r}
+describe(mroz)
+```
+
+The function `rcorr()` can be useful to check visually for correlation. 
+
+
+```{r}
+rcorr(as.matrix(mroz))
+```
+
+Estimate linear probability model
+
+```{r}
 linprob <- lm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,data=mroz)
 # Regression table with heteroscedasticity-robust SE and t tests:
 coeftest(linprob,vcov=hccm)
@@ -97,6 +117,14 @@ coeftest(linprob,vcov=hccm)
 The estimated coefficient *educ* can be interpreted as: an additional year of schooling increases the probability that a woman is in the labor force *ceteris paribus* by `r percent(coef(linprob)["educ"])`. 
 
 One problem with linear probability models is that $P(y=1|x)$ is specified as a linear function of the regressors. By construction, there are more or less realistic combinations of regressor values that yield $\hat{y} <	0$ or $\hat{y} >	1$.   
+
+Predictions for two "extreme" women:
+
+```{r}
+xpred <- list(nwifeinc=c(100,0),educ=c(5,17),exper=c(0,30),
+              age=c(20,52),kidslt6=c(2,0),kidsge6=c(0,0))
+predict(linprob,xpred)
+```
 
 
 ## Logit and Probit Models: Estimation
@@ -113,17 +141,43 @@ In R  many generalized linear models can be estimated by the `glm()` command. It
 - `family = binomial (link = logit)` for the logit model or 
 - `family = binomial (link = probit)` for the probit model 
 
+
 ```{r}
 # Estimate logit model
 logitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
               family=binomial(link=logit),data=mroz)
 # Summary of results:
 summary(logitres)
+
 # Log likelihood value:
 logLik(logitres) 
 # McFadden's pseudo R2:
 1 - logitres$deviance/logitres$null.deviance
 ```
+
+
+We can also extract the fitted values from the specified model and compare them the observed predicated binomial explained variable. 
+
+```{r}
+fit <- data.frame(response = mroz$inlf, predicted = round(fitted(logitres), 0))
+xtabs(~ predicted + response, data = fit)
+```
+
+If you want to interpret the estimated effects as relative odds ratios (plus their confidence intervals):  
+
+
+```{r}
+exp(logitres$coefficients)
+exp(confint(logitres)) # Lets convert the confidence intervals the same way
+
+resultsTable <- exp(cbind(OddsRatios = coef(logitres), confint(logitres)))
+round(resultsTable, digits = 5)
+```
+
+
+This gives you $e^\beta$, the multiplicative change in the odds ratio for $y=1$ if the covariate associated with $\beta$ increases by 1. 
+
+
 
 ### Multinomial Logit
 
@@ -244,6 +298,14 @@ For instance, the marginal effect of grades on the probability of attending a fo
 
 ### Probit model 
 
+```{r fig21, fig.cap='The shape of the probit function is the standard normal distribution', out.width='80%', fig.asp=.75, fig.align='center'}
+x <- seq(-3,3, .2)
+plot(x, pnorm(x), type="l", xlab="b1+b2x", ylab="P[y=1]")
+plot(x, dnorm(x), type="l")
+```
+
+
+
 ```{r}
 detach("package:PoEdata", unload=TRUE)
 data("mroz", package='wooldridge')
@@ -334,7 +396,7 @@ probit.p <- predict(probit.res, list(x = xp), type = "response")
 
 
 
-```{r fig21, fig.cap='Predictions from binary response models (simulated data)', out.width='80%', fig.asp=.75, fig.align='center'}
+```{r fig22, fig.cap='Predictions from binary response models (simulated data)', out.width='80%', fig.asp=.75, fig.align='center'}
 plot(x,y)
 lines(xp, linpr.p, lwd=2, lty = 1)
 lines(xp, logit.p, lwd=2, lty = 2)
@@ -364,7 +426,7 @@ summary(margins(logitres, data = subset(mroz, kidslt6 == 0))) # no kids < 6 year
 ```
 
 
-```{r fig22, fig.cap='Logit effect plot', out.width='80%', fig.asp=.75, fig.align='center'}
+```{r fig23, fig.cap='Logit effect plot', out.width='80%', fig.asp=.75, fig.align='center'}
 ggplot(data = summary(effects_logit_participation)) +
   geom_point(aes(factor, AME)) +
   geom_errorbar(aes(x = factor, ymin = lower, ymax = upper)) +
@@ -381,7 +443,7 @@ head(dydx(mroz, logitres, "educ"))
 
 The function `cplot()` provides the commonly needed visual summaries of predictions or average marginal effects conditional on a covariate.
 
-```{r fig23, fig.cap='Marginal effects for logit model', out.width='80%', fig.asp=.75, fig.align='center'}
+```{r fig24, fig.cap='Marginal effects for logit model', out.width='80%', fig.asp=.75, fig.align='center'}
 cplot(logitres, x = "educ", se.type = "shade")
 ```
 
