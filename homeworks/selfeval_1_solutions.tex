@@ -1,0 +1,1353 @@
+\documentclass[12pt,]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={MEM5220 - R Econometrics Evaluation},
+            pdfauthor={YOUR NAME HERE},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{MEM5220 - R Econometrics Evaluation}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{YOUR NAME HERE}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+    \date{}
+    \predate{}\postdate{}
+  
+\usepackage{array}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage[table]{xcolor}
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{calc}
+\usepackage{tabularx}
+
+\begin{document}
+\maketitle
+
+\begin{center}\rule{0.5\linewidth}{\linethickness}\end{center}
+
+This first R econometrics self-evaluation assignment is focused on data
+cleaning, data manipulation, plotting and estimating and interpreting
+simple linear regression models. You can use \textbf{any} additional
+packages for answering the questions.
+
+Packages I have used to solve the exercises:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\KeywordTok{library}\NormalTok{(stargazer)}
+\KeywordTok{library}\NormalTok{(huxtable)}
+\KeywordTok{library}\NormalTok{(broom)}
+\KeywordTok{library}\NormalTok{(lmtest)}
+\KeywordTok{library}\NormalTok{(sandwich)}
+\KeywordTok{library}\NormalTok{(car)}
+\KeywordTok{library}\NormalTok{(magrittr)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Note:}
+
+\begin{itemize}
+\tightlist
+\item
+  This assignemtn has to be solved in this R markdown and you should be
+  able to ``knit'' the document without errors
+\item
+  Fill out your name in ``yaml'' - block on top of this document
+\item
+  Use the R markdown syntax:
+\item
+  Write your code in code chunks
+\item
+  Write your explanations including the equations in markdown syntax
+\item
+  If you have an error in your code use \texttt{\#} to comment the line
+  out where the error occurs but do not delete the code itself
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{\linethickness}\end{center}
+
+You will be working with the dataset \texttt{Caschool} from the
+\textbf{Ecdat} package, the dataset \texttt{Wage1} from
+\textbf{wooldrige} package. In the last step, you will be working with a
+simulated dataset.
+
+\hypertarget{caschool-exercises}{%
+\section{Caschool exercises}\label{caschool-exercises}}
+
+\hypertarget{question}{%
+\subsection{Question:}\label{question}}
+
+Load the dataset \texttt{Caschool} from the \textbf{Ecdat} package.
+
+The Caschooldataset contains the average test scores of 420 elementary
+schools in California along with some additional information.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# install.packages("Ecdat")}
+\KeywordTok{library}\NormalTok{(}\StringTok{"Ecdat"}\NormalTok{)}
+\KeywordTok{data}\NormalTok{(}\StringTok{"Caschool"}\NormalTok{, }\DataTypeTok{package =} \StringTok{"Ecdat"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+What are the dimensions of the \texttt{Caschool} dataset?
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{dim}\NormalTok{(Caschool)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 420  17
+\end{verbatim}
+
+\hypertarget{question-1}{%
+\subsection{Question:}\label{question-1}}
+
+Display the structure of the Caschool dataset. Which variable has values
+encoded as factors?
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{str}\NormalTok{(Caschool)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+'data.frame':   420 obs. of  17 variables:
+ $ distcod : int  75119 61499 61549 61457 61523 62042 68536 63834 62331 67306 ...
+ $ county  : Factor w/ 45 levels "Alameda","Butte",..: 1 2 2 2 2 6 29 11 6 25 ...
+ $ district: Factor w/ 409 levels "Ackerman Elementary",..: 362 214 367 132 270 53 152 383 263 94 ...
+ $ grspan  : Factor w/ 2 levels "KK-06","KK-08": 2 2 2 2 2 2 2 2 2 1 ...
+ $ enrltot : int  195 240 1550 243 1335 137 195 888 379 2247 ...
+ $ teachers: num  10.9 11.1 82.9 14 71.5 ...
+ $ calwpct : num  0.51 15.42 55.03 36.48 33.11 ...
+ $ mealpct : num  2.04 47.92 76.32 77.05 78.43 ...
+ $ computer: int  67 101 169 85 171 25 28 66 35 0 ...
+ $ testscr : num  691 661 644 648 641 ...
+ $ compstu : num  0.344 0.421 0.109 0.35 0.128 ...
+ $ expnstu : num  6385 5099 5502 7102 5236 ...
+ $ str     : num  17.9 21.5 18.7 17.4 18.7 ...
+ $ avginc  : num  22.69 9.82 8.98 8.98 9.08 ...
+ $ elpct   : num  0 4.58 30 0 13.86 ...
+ $ readscr : num  692 660 636 652 642 ...
+ $ mathscr : num  690 662 651 644 640 ...
+\end{verbatim}
+
+County, district and grspan are encoded as factors.
+
+\hypertarget{question-2}{%
+\subsection{Question:}\label{question-2}}
+
+Provide a summary statistic of the data
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(Caschool)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+    distcod              county                         district  
+ Min.   :61382   Sonoma     : 29   Lakeside Union Elementary:  3  
+ 1st Qu.:64308   Kern       : 27   Mountain View Elementary :  3  
+ Median :67760   Los Angeles: 27   Jefferson Elementary     :  2  
+ Mean   :67473   Tulare     : 24   Liberty Elementary       :  2  
+ 3rd Qu.:70419   San Diego  : 21   Ocean View Elementary    :  2  
+ Max.   :75440   Santa Clara: 20   Pacific Union Elementary :  2  
+                 (Other)    :272   (Other)                  :406  
+   grspan       enrltot           teachers          calwpct      
+ KK-06: 61   Min.   :   81.0   Min.   :   4.85   Min.   : 0.000  
+ KK-08:359   1st Qu.:  379.0   1st Qu.:  19.66   1st Qu.: 4.395  
+             Median :  950.5   Median :  48.56   Median :10.520  
+             Mean   : 2628.8   Mean   : 129.07   Mean   :13.246  
+             3rd Qu.: 3008.0   3rd Qu.: 146.35   3rd Qu.:18.981  
+             Max.   :27176.0   Max.   :1429.00   Max.   :78.994  
+                                                                 
+    mealpct          computer         testscr         compstu       
+ Min.   :  0.00   Min.   :   0.0   Min.   :605.5   Min.   :0.00000  
+ 1st Qu.: 23.28   1st Qu.:  46.0   1st Qu.:640.0   1st Qu.:0.09377  
+ Median : 41.75   Median : 117.5   Median :654.5   Median :0.12546  
+ Mean   : 44.71   Mean   : 303.4   Mean   :654.2   Mean   :0.13593  
+ 3rd Qu.: 66.86   3rd Qu.: 375.2   3rd Qu.:666.7   3rd Qu.:0.16447  
+ Max.   :100.00   Max.   :3324.0   Max.   :706.8   Max.   :0.42083  
+                                                                    
+    expnstu          str            avginc           elpct       
+ Min.   :3926   Min.   :14.00   Min.   : 5.335   Min.   : 0.000  
+ 1st Qu.:4906   1st Qu.:18.58   1st Qu.:10.639   1st Qu.: 1.941  
+ Median :5215   Median :19.72   Median :13.728   Median : 8.778  
+ Mean   :5312   Mean   :19.64   Mean   :15.317   Mean   :15.768  
+ 3rd Qu.:5601   3rd Qu.:20.87   3rd Qu.:17.629   3rd Qu.:22.970  
+ Max.   :7712   Max.   :25.80   Max.   :55.328   Max.   :85.540  
+                                                                 
+    readscr         mathscr     
+ Min.   :604.5   Min.   :605.4  
+ 1st Qu.:640.4   1st Qu.:639.4  
+ Median :655.8   Median :652.5  
+ Mean   :655.0   Mean   :653.3  
+ 3rd Qu.:668.7   3rd Qu.:665.9  
+ Max.   :704.0   Max.   :709.5  
+                                
+\end{verbatim}
+
+\hypertarget{question-3}{%
+\subsection{Question:}\label{question-3}}
+
+What are the names of the variables in the dataset?
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{names}\NormalTok{(Caschool)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ [1] "distcod"  "county"   "district" "grspan"   "enrltot"  "teachers"
+ [7] "calwpct"  "mealpct"  "computer" "testscr"  "compstu"  "expnstu" 
+[13] "str"      "avginc"   "elpct"    "readscr"  "mathscr" 
+\end{verbatim}
+
+\hypertarget{question-4}{%
+\subsection{Question:}\label{question-4}}
+
+How many unique observations are available in the variable ``county''
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{unique}\NormalTok{(Caschool}\OperatorTok{$}\NormalTok{county)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ [1] Alameda         Butte           Fresno          San Joaquin    
+ [5] Kern            Sacramento      Merced          Tulare         
+ [9] Los Angeles     Imperial        Monterey        San Diego      
+[13] San Bernardino  San Mateo       Ventura         Riverside      
+[17] Santa Clara     Madera          Santa Barbara   Orange         
+[21] Kings           Sonoma          Contra Costa    Humboldt       
+[25] Siskiyou        Lake            Sutter          Mendocino      
+[29] San Benito      Shasta          Tehama          Stanislaus     
+[33] Tuolumne        El Dorado       Placer          Glenn          
+[37] Lassen          Santa Cruz      Nevada          Calaveras      
+[41] Marin           San Luis Obispo Inyo            Trinity        
+[45] Yuba           
+45 Levels: Alameda Butte Calaveras Contra Costa El Dorado Fresno ... Yuba
+\end{verbatim}
+
+\hypertarget{question-5}{%
+\subsection{Question:}\label{question-5}}
+
+Summarize the mean number of students grouped by county.
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mean_countCaschool <-}\StringTok{ }\NormalTok{Caschool }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(county) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{mean_count =} \KeywordTok{mean}\NormalTok{(enrltot)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(mean_count))}
+\CommentTok{# options(scipen=999) # remove scientific notation}
+\CommentTok{# head(mean_countCaschool) #  just show the first six counties}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{question-6}{%
+\subsection{Question:}\label{question-6}}
+
+Calculate the log of average income from of the Caschool dataset. Call
+the variable \textbf{logavginc} and add this variable to the dataset.
+Then, plot a histogram of the average income vs.~a histogram of log
+average income. What do you observe?
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Caschool}\OperatorTok{$}\NormalTok{logavginc <-}\StringTok{ }\KeywordTok{log}\NormalTok{(Caschool}\OperatorTok{$}\NormalTok{avginc)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mfrow=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{))  }
+\KeywordTok{hist}\NormalTok{(Caschool}\OperatorTok{$}\NormalTok{avginc)}
+\KeywordTok{hist}\NormalTok{(Caschool}\OperatorTok{$}\NormalTok{logavginc)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-10-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(gridExtra)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Attaching package: 'gridExtra'
+\end{verbatim}
+
+\begin{verbatim}
+The following object is masked from 'package:dplyr':
+
+    combine
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(Caschool, }\KeywordTok{aes}\NormalTok{(avginc)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{show.legend =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme_bw}\NormalTok{()}
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(Caschool, }\KeywordTok{aes}\NormalTok{(logavginc)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{show.legend =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme_bw}\NormalTok{()}
+\KeywordTok{grid.arrange}\NormalTok{(p1, p2,  }
+             \DataTypeTok{ncol =} \DecValTok{2}\NormalTok{)  }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+
+\begin{verbatim}
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+\end{verbatim}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-11-1.pdf}
+
+Average income is clearly leftward-skewed. The log of averge income
+looks more like a normal distribution.
+
+\hypertarget{question-7}{%
+\subsection{Question:}\label{question-7}}
+
+We want to create now a subset of counties that have the ten highest
+district average income and that have the ten lowest district average
+income. Call this subset \emph{Caschool\_lowhighincome}.
+
+\textbf{Hint}: One way is the create two subsets (eg.
+Cascholl\_highincome and Caschool\_lowincome and the use the
+\texttt{rbind()} function to bind them together.).
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Caschool_highincome <-}\StringTok{ }\NormalTok{Caschool }\OperatorTok{%>%}\StringTok{ }
+\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(avginc)) }\OperatorTok{%>%}\StringTok{ }
+\KeywordTok{head}\NormalTok{(}\DecValTok{10}\NormalTok{)}
+
+\NormalTok{Caschool_lowincome <-}\StringTok{ }\NormalTok{Caschool }\OperatorTok{%>%}\StringTok{ }
+\KeywordTok{arrange}\NormalTok{((avginc)) }\OperatorTok{%>%}\StringTok{ }
+\KeywordTok{head}\NormalTok{(}\DecValTok{10}\NormalTok{)}
+
+\NormalTok{Caschool_lowhighincome <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(Caschool_highincome,Caschool_highincome)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{question-8}{%
+\subsection{Question:}\label{question-8}}
+
+Let us test wether a high student/teacher ratio will be associated with
+higher-than-average test scores for the school? Create a scatter plot
+for the full dataset (\emph{Caschool}) for the variables
+\textbf{testscr} and \textbf{str}. You can plot either in base R or use
+ggplot2.
+
+\textbf{A}:
+
+Base R-style
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(}\DataTypeTok{formula =}\NormalTok{ testscr }\OperatorTok{~}\StringTok{ }\NormalTok{str,}
+     \DataTypeTok{data =}\NormalTok{ Caschool,}
+     \DataTypeTok{xlab =} \StringTok{"Student/Teacher Ratio"}\NormalTok{,}
+     \DataTypeTok{ylab =} \StringTok{"Average Test Score"}\NormalTok{, }\DataTypeTok{pch =} \DecValTok{21}\NormalTok{, }\DataTypeTok{col =} \StringTok{'blue'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-13-1.pdf}
+
+ggplot2-style
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ str, }\DataTypeTok{y =}\NormalTok{ testscr), }\DataTypeTok{data =}\NormalTok{ Caschool) }\OperatorTok{+}\StringTok{ }\CommentTok{# base plot}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}\StringTok{ }\CommentTok{# add points}
+\StringTok{  }\KeywordTok{scale_y_continuous}\NormalTok{(}\DataTypeTok{name =} \StringTok{"Average Test Score"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{name =} \StringTok{"Student/Teacher Ratio"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Testscores vs Student/Teacher Ratio"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-14-1.pdf}
+
+\hypertarget{question-9}{%
+\subsection{Question:}\label{question-9}}
+
+Suppose a policymaker is interested in the following linear model:
+
+\begin{equation}
+testscr = \beta_0 +  \beta_1  str + u
+\end{equation}
+
+Where \(testscr\) is the average test score for a given school and
+\(str\) is the Student/Teacher Ratio (i.e.~the average number of
+students per teacher).
+
+Estimate the specified linear model. Is the estimated relationship
+between a school's Student/Teacher Ratio and its average test results
+postitive or negative?
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit_single <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\DataTypeTok{formula =}\NormalTok{ testscr }\OperatorTok{~}\StringTok{ }\NormalTok{str, }\DataTypeTok{data =}\NormalTok{ Caschool)}
+\KeywordTok{summary}\NormalTok{(fit_single)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = testscr ~ str, data = Caschool)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-47.727 -14.251   0.483  12.822  48.540 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 698.9330     9.4675  73.825  < 2e-16 ***
+str          -2.2798     0.4798  -4.751 2.78e-06 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 18.58 on 418 degrees of freedom
+Multiple R-squared:  0.05124,   Adjusted R-squared:  0.04897 
+F-statistic: 22.58 on 1 and 418 DF,  p-value: 2.783e-06
+\end{verbatim}
+
+\hypertarget{question-10}{%
+\subsection{Question:}\label{question-10}}
+
+Now, plot the regression line for the model we have just estimated.
+Again, you can use either base R or ggplot2-style.
+
+\textbf{A}:
+
+Base R-style
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit_california <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\DataTypeTok{formula =}\NormalTok{ testscr }\OperatorTok{~}\StringTok{ }\NormalTok{str, }\DataTypeTok{data =}\NormalTok{ Caschool)}
+\KeywordTok{plot}\NormalTok{(}\DataTypeTok{formula =}\NormalTok{ testscr }\OperatorTok{~}\StringTok{ }\NormalTok{str,}
+     \DataTypeTok{data =}\NormalTok{ Caschool,}
+     \DataTypeTok{xlab =} \StringTok{"Student/Teacher Ratio"}\NormalTok{,}
+     \DataTypeTok{ylab =} \StringTok{"Average Test Score"}\NormalTok{, }\DataTypeTok{pch =} \DecValTok{21}\NormalTok{, }\DataTypeTok{col =} \StringTok{'blue'}\NormalTok{)}\CommentTok{# same plot as before}
+\KeywordTok{abline}\NormalTok{(fit_california, }\DataTypeTok{col =} \StringTok{'red'}\NormalTok{) }\CommentTok{# add regression line}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-16-1.pdf}
+
+ggplot2-style
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ str, }\DataTypeTok{y =}\NormalTok{ testscr), }\DataTypeTok{data =}\NormalTok{ Caschool) }\OperatorTok{+}\StringTok{ }\CommentTok{# base plot}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}\StringTok{ }\CommentTok{# add points}
+\StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{color=}\StringTok{"red"}\NormalTok{) }\OperatorTok{+}\StringTok{ }\CommentTok{# add regression line}
+\StringTok{  }\KeywordTok{scale_y_continuous}\NormalTok{(}\DataTypeTok{name =} \StringTok{"Average Test Score"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{name =} \StringTok{"Student/Teacher Ratio"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme_bw}\NormalTok{() }\OperatorTok{+}\StringTok{ }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Testscores vs Student/Teacher Ratio"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-17-1.pdf}
+
+\hypertarget{question-11}{%
+\subsection{Question:}\label{question-11}}
+
+Let us extend our example of student test scores by adding families'
+average income to our previous model:
+
+\begin{equation}
+testscr = \beta_0 +  \beta_1  str +   \beta_2  avginc + u
+\end{equation}
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit_multivariate <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\DataTypeTok{formula =} \StringTok{"testscr ~ str + avginc"}\NormalTok{, }\DataTypeTok{data =}\NormalTok{ Caschool)}
+\KeywordTok{summary}\NormalTok{(fit_multivariate)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = "testscr ~ str + avginc", data = Caschool)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-39.608  -9.052   0.707   9.259  31.898 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 638.72915    7.44908  85.746   <2e-16 ***
+str          -0.64874    0.35440  -1.831   0.0679 .  
+avginc        1.83911    0.09279  19.821   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 13.35 on 417 degrees of freedom
+Multiple R-squared:  0.5115,    Adjusted R-squared:  0.5091 
+F-statistic: 218.3 on 2 and 417 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+Addiing the explanatory variable ``avginc'' to the model, the estimated
+coefficient of the student/ teacher ratio becomes first smaller compared
+to the previous model and second insignificant at confentional levels.
+
+\hypertarget{question-12}{%
+\subsection{Question:}\label{question-12}}
+
+Assume know that ``str'' depends also on the value of yet another
+regressor, ``avginc''. Estimate the following model. Compare the sign of
+the estimate of \(\beta_2\) and \(\beta_3\). Interpret the results.
+
+\begin{equation}
+testscr = \beta_0 +  \beta_1  str +   \beta_2  avginc + \beta_3 (str \times avginc)  + u
+\end{equation}
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{fit_inter =}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\DataTypeTok{formula =}\NormalTok{ testscr }\OperatorTok{~}\StringTok{ }\NormalTok{str }\OperatorTok{+}\StringTok{ }\NormalTok{avginc }\OperatorTok{+}\StringTok{ }\NormalTok{str}\OperatorTok{*}\NormalTok{avginc, }\DataTypeTok{data =}\NormalTok{ Caschool)}
+\KeywordTok{summary}\NormalTok{(fit_inter)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = testscr ~ str + avginc + str * avginc, data = Caschool)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-41.346  -9.260   0.209   8.736  33.368 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 689.47473   14.40894  47.850  < 2e-16 ***
+str          -3.40957    0.75980  -4.487 9.34e-06 ***
+avginc       -1.62388    0.85214  -1.906   0.0574 .  
+str:avginc    0.18988    0.04646   4.087 5.24e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 13.1 on 416 degrees of freedom
+Multiple R-squared:  0.5303,    Adjusted R-squared:  0.527 
+F-statistic: 156.6 on 3 and 416 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+We observe also that the estimate of \(\beta_2\) changes signs and
+becomes negative, while the interaction effect \(\beta_3\) is positive.
+
+This means that an increase in str reduces average student scores (more
+students per teacher make it harder to teach effectively); that an
+increase in average district income in isolation actually reduces
+scores; and that the interaction of both increases scores (more students
+per teacher are actually a good thing for student performance in richer
+areas).
+
+\hypertarget{question-13}{%
+\subsection{Question:}\label{question-13}}
+
+In question 10, 12 and 13, you have fitted 3 models. Report the
+regression results, the number of observations, the Akaike information
+criterion and the model fit (adj. \(R^2\)) in a formatted table
+regression output table. You can use for example the \textbf{stargazer}
+or the \textbf{huxtable} package. Which model fits the data best?
+
+\textbf{stargazer} package:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(stargazer)}
+\KeywordTok{invisible}\NormalTok{(}\KeywordTok{stargazer}\NormalTok{(}
+\KeywordTok{list}\NormalTok{(fit_single, }
+\NormalTok{fit_multivariate,}
+\NormalTok{fit_inter)}
+\NormalTok{,}\DataTypeTok{keep.stat =} \KeywordTok{c}\NormalTok{(}\StringTok{"n"}\NormalTok{, }\StringTok{"adj.rsq"}\NormalTok{, }\StringTok{"aic"}\NormalTok{, }\StringTok{"bic"}\NormalTok{), }\DataTypeTok{type =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{style =} \StringTok{"ajps"}\NormalTok{))}\CommentTok{# to have number of observations and R^2 reported}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+-----------------------------------------------
+                testscr    testscr       NA    
+                Model 1    Model 2    Model 3  
+-----------------------------------------------
+str            -2.280***   -0.649*   -3.410*** 
+                (0.480)    (0.354)    (0.760)  
+avginc                     1.839***   -1.624*  
+                           (0.093)    (0.852)  
+str:avginc                            0.190*** 
+                                      (0.046)  
+Constant       698.933*** 638.729*** 689.475***
+                (9.467)    (7.449)    (14.409) 
+N                 420        420        420    
+Adj. R-squared   0.049      0.509      0.527   
+-----------------------------------------------
+***p < .01; **p < .05; *p < .1                 
+\end{verbatim}
+
+\textbf{huxtable} package:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(huxtable)}
+\KeywordTok{huxreg}\NormalTok{(fit_single, }
+\NormalTok{fit_multivariate, }
+\NormalTok{fit_inter, }
+\DataTypeTok{statistics =} \KeywordTok{c}\NormalTok{(}\StringTok{"nobs"}\NormalTok{, }\StringTok{"adj.r.squared"}\NormalTok{, }\StringTok{"AIC"}\NormalTok{, }\StringTok{"BIC"}\NormalTok{)) }
+\end{Highlighting}
+\end{Shaded}
+
+\textbackslash{}begin\{table\}{[}h{]} \centering
+
+\providecommand{\huxb}[2][0,0,0]{\arrayrulecolor[RGB]{#1}\global\arrayrulewidth=#2pt}
+    \providecommand{\huxvb}[2][0,0,0]{\color[RGB]{#1}\vrule width #2pt}
+    \providecommand{\huxtpad}[1]{\rule{0pt}{\baselineskip+#1}}
+    \providecommand{\huxbpad}[1]{\rule[-#1]{0pt}{#1}}
+  \begin{tabularx}{0.5\textwidth}{p{0.125\textwidth} p{0.125\textwidth} p{0.125\textwidth} p{0.125\textwidth}}
+
+\textbackslash{}end\{table\}
+
+The adjusted \(R^2\) is highest for the model 3, the model that includes
+an interaction term. AIC and BIC, two widely used information criteria,
+would also select model 3, relative to each of the other models (The
+relatively quality of the model is maximized when the information
+criterium is minimized).
+
+\hypertarget{wage1-excercises}{%
+\section{Wage1 excercises}\label{wage1-excercises}}
+
+Wooldridge Source: These are data from the 1976 Current Population
+Survey.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# install.packages("wooldridge")}
+\KeywordTok{library}\NormalTok{(}\StringTok{"wooldridge"}\NormalTok{) }
+\KeywordTok{data}\NormalTok{(}\StringTok{"wage1"}\NormalTok{, }\DataTypeTok{package =} \StringTok{"wooldridge"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{question-14}{%
+\subsection{Question:}\label{question-14}}
+
+Estimate the following model:
+
+\begin{equation}
+log(wage) = \beta_0 +  \beta_1 (married \times female) +  \beta_3 educ + \beta_4 exper + beta_5 exper^2 + \beta_6 tenure + \beta_7 tenure^2 + u 
+\end{equation}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  What is the reference group in this model?
+\item
+  Ceteris paribus, how much more wage do single males make relative to
+  the reference group?
+\item
+  Ceteris paribus, how much more wage do single females make relative to
+  the reference group?
+\item
+  Ceteris paribus, how much less do married females make than single
+  females?
+\item
+  Do the results make sense economically. What socio-economic factors
+  could explain the results?
+\end{enumerate}
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm2_wage1 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\KeywordTok{log}\NormalTok{(wage)}\OperatorTok{~}\NormalTok{married}\OperatorTok{*}\NormalTok{female}\OperatorTok{+}\NormalTok{educ}\OperatorTok{+}\NormalTok{exper}\OperatorTok{+}\KeywordTok{I}\NormalTok{(exper}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{+}\NormalTok{tenure}\OperatorTok{+}\KeywordTok{I}\NormalTok{(tenure}\OperatorTok{^}\DecValTok{2}\NormalTok{), }\DataTypeTok{data=}\NormalTok{wage1)}
+\KeywordTok{summary}\NormalTok{(lm2_wage1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = log(wage) ~ married * female + educ + exper + I(exper^2) + 
+    tenure + I(tenure^2), data = wage1)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.89697 -0.24060 -0.02689  0.23144  1.09197 
+
+Coefficients:
+                 Estimate Std. Error t value Pr(>|t|)    
+(Intercept)     0.3213781  0.1000090   3.213 0.001393 ** 
+married         0.2126757  0.0553572   3.842 0.000137 ***
+female         -0.1103502  0.0557421  -1.980 0.048272 *  
+educ            0.0789103  0.0066945  11.787  < 2e-16 ***
+exper           0.0268006  0.0052428   5.112 4.50e-07 ***
+I(exper^2)     -0.0005352  0.0001104  -4.847 1.66e-06 ***
+tenure          0.0290875  0.0067620   4.302 2.03e-05 ***
+I(tenure^2)    -0.0005331  0.0002312  -2.306 0.021531 *  
+married:female -0.3005931  0.0717669  -4.188 3.30e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.3933 on 517 degrees of freedom
+Multiple R-squared:  0.4609,    Adjusted R-squared:  0.4525 
+F-statistic: 55.25 on 8 and 517 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(scales) }\CommentTok{#  quick percent}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df_lm2_wage1 <-}\StringTok{ }\KeywordTok{tidy}\NormalTok{(lm2_wage1)}
+\CommentTok{# Singe male}
+\NormalTok{marriedmale <-}\StringTok{ }\NormalTok{df_lm2_wage1 }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "married"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{select}\NormalTok{(estimate) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{pull}\NormalTok{() }\CommentTok{# pull out the single coefficient value of the dataframe}
+\CommentTok{# Single female}
+\NormalTok{singlefemale <-}\StringTok{ }\NormalTok{df_lm2_wage1 }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "female"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{select}\NormalTok{(estimate) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{pull}\NormalTok{() }\CommentTok{# pull out the single coefficient value of the dataframe}
+\NormalTok{marriedfemale <-}\StringTok{ }\NormalTok{df_lm2_wage1 }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "married:female"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{select}\NormalTok{(estimate) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{pull}\NormalTok{() }\CommentTok{# pull out the single coefficient value of the dataframe}
+\NormalTok{married<-}\StringTok{ }\NormalTok{df_lm2_wage1 }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "married"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\CommentTok{#  }
+\StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{select}\NormalTok{(estimate) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{pull}\NormalTok{() }\CommentTok{# pull out the single coefficient value of the dataframe}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Reference group: \emph{single} and \emph{male}
+\item
+  Cp. married males make 21.3\% (\texttt{percent(marriedmale)}) more
+  than single males.
+\item
+  Cp. a single female makes -11.0\% (\texttt{percent(singlefemale)})
+  less than the reference group.
+\item
+  Married females make 8.79\%
+  (\texttt{percent(abs(marriedfemale)\ -\ abs(married))}) less than
+  single females.
+\item
+  There seems to be a marriage premium\footnote{There is clearly a
+    correlation between men having children and men getting higher
+    salaries, and the reverse for women. However, this may reflect the
+    fact that women are more likely to withdraw from work to take care
+    of children (regardless of whether they'd prefer to), and men may
+    double down on work.} for men but for women the marriage premium is
+  negative.
+\end{enumerate}
+
+\hypertarget{question-15}{%
+\subsection{Question:}\label{question-15}}
+
+Test for heteroskedasdicity test in the estimated regression of the
+wage1 dataset. Do we reject homoscedasticity for all reasonable
+signficance levels? Adjust for heteroscedasticity if necessary by using
+refined White heteroscedasticity-robust SE
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{bptest}\NormalTok{(lm2_wage1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+    studentized Breusch-Pagan test
+
+data:  lm2_wage1
+BP = 13.189, df = 8, p-value = 0.1055
+\end{verbatim}
+
+We do not reject the null hypothesis at conventional signficance levels
+
+\hypertarget{question-16}{%
+\subsection{Question}\label{question-16}}
+
+\hypertarget{question-17}{%
+\subsection{Question}\label{question-17}}
+
+Now, estimate the following model and test again for heteroscedasticity.
+
+\begin{equation}
+wage = \beta_0 +  \beta_1  female +  \beta_3 educ + \beta_4 exper + u 
+\end{equation}
+
+Adjust for heteroscedasticity if necessary.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm3_wage1 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(wage}\OperatorTok{~}\NormalTok{female}\OperatorTok{+}\NormalTok{educ}\OperatorTok{+}\NormalTok{exper, }\DataTypeTok{data=}\NormalTok{wage1)}
+\NormalTok{lm3_bptest <-}\StringTok{ }\KeywordTok{bptest}\NormalTok{(lm3_wage1)}
+\NormalTok{lm3_bptest}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+    studentized Breusch-Pagan test
+
+data:  lm3_wage1
+BP = 36.904, df = 3, p-value = 4.821e-08
+\end{verbatim}
+
+The test statistic of the BP-test is 36.9043336 and the corresponding
+p-value is smaller than 4.8208966\times 10\^{}\{-8\}, so we can reject
+homoscedasticity for all reasonable signficance levels.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{coeftest}\NormalTok{(lm3_wage1, }\DataTypeTok{vcov=}\NormalTok{hccm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+t test of coefficients:
+
+             Estimate Std. Error t value  Pr(>|t|)    
+(Intercept) -1.734481   0.868647 -1.9968   0.04637 *  
+female      -2.155517   0.260249 -8.2825 1.020e-15 ***
+educ         0.602580   0.065005  9.2697 < 2.2e-16 ***
+exper        0.064242   0.010113  6.3521 4.626e-10 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cov3 <-}\StringTok{ }\KeywordTok{hccm}\NormalTok{(lm3_wage1, }\DataTypeTok{type=}\StringTok{"hc3"}\NormalTok{) }\CommentTok{# hc3 is the standard method}
+\NormalTok{ref.HC3 <-}\StringTok{ }\KeywordTok{coeftest}\NormalTok{(lm3_wage1, }\DataTypeTok{vcov.=}\NormalTok{cov3)}
+\NormalTok{ref.HC3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+t test of coefficients:
+
+             Estimate Std. Error t value  Pr(>|t|)    
+(Intercept) -1.734481   0.868647 -1.9968   0.04637 *  
+female      -2.155517   0.260249 -8.2825 1.020e-15 ***
+educ         0.602580   0.065005  9.2697 < 2.2e-16 ***
+exper        0.064242   0.010113  6.3521 4.626e-10 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\hypertarget{collinearity-exercises}{%
+\section{Collinearity exercises}\label{collinearity-exercises}}
+
+This exercise focuses on the \textbf{collineartiy} problem.
+
+\hypertarget{question-18}{%
+\subsection{Question:}\label{question-18}}
+
+Perform the following commands in R:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{x1 <-}\StringTok{ }\KeywordTok{runif}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\NormalTok{x2 <-}\StringTok{ }\FloatTok{0.5} \OperatorTok{*}\StringTok{ }\NormalTok{x1 }\OperatorTok{+}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}\OperatorTok{/}\DecValTok{10}
+\NormalTok{y <-}\StringTok{ }\DecValTok{2} \OperatorTok{+}\DecValTok{2}\OperatorTok{*}\NormalTok{x1 }\OperatorTok{+}\StringTok{ }\FloatTok{0.3} \OperatorTok{*}\NormalTok{x2 }\OperatorTok{+}\KeywordTok{rnorm}\NormalTok{(}\DecValTok{100}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+The last line corresponds to creating a linear model in which \(y\) is a
+function of \(x_1\) and \(x_2\). Write out the form of the linear model.
+What are the regression coefficients?
+
+\textbf{A}:
+
+\(y = 2 +2x_1 + 0.3x_2 + \epsilon\)
+
+\(\beta_0 = 2\), \(\beta_1 = 2\), \(\beta_3 = 0.3\)
+
+\hypertarget{question-19}{%
+\subsection{Question:}\label{question-19}}
+
+What is the correlation between \(x_1\) and \(x_2\)? Create a
+scatterplot displaying the relationship between the variables.
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cor}\NormalTok{(x1, x2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.8351212
+\end{verbatim}
+
+Base R style:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(x1, x2)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-31-1.pdf}
+
+ggplot2 style:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{d <-}\StringTok{  }\KeywordTok{data.frame}\NormalTok{(x1,x2)}
+\KeywordTok{ggplot}\NormalTok{(d, }\KeywordTok{aes}\NormalTok{(x1, x2)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{shape =} \DecValTok{16}\NormalTok{, }\DataTypeTok{size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{show.legend =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme_minimal}\NormalTok{() }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-32-1.pdf}
+
+\hypertarget{question-20}{%
+\subsection{Question:}\label{question-20}}
+
+Using this data, fit a least squares regression to predict \(y\) using
+\(x_1\) and \(x_2\). Describe the results obtained. What are
+\(\hat{\beta_0}\), \(\hat{\beta_1}\) and \(\hat{\beta_2}\)? How do these
+relate to the true \(\beta_0\), \(\beta_1\) and \(\beta_2\)? Can you
+reject the null hypothesis \(H_0: \beta_1 =0\)? How about the null
+hypothesis \(H_0: \beta_2 =0\)?
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm.fit =}\StringTok{ }\KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x1}\OperatorTok{+}\NormalTok{x2)}
+\KeywordTok{summary}\NormalTok{(lm.fit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ x1 + x2)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.8311 -0.7273 -0.0537  0.6338  2.3359 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   2.1305     0.2319   9.188 7.61e-15 ***
+x1            1.4396     0.7212   1.996   0.0487 *  
+x2            1.0097     1.1337   0.891   0.3754    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.056 on 97 degrees of freedom
+Multiple R-squared:  0.2088,    Adjusted R-squared:  0.1925 
+F-statistic:  12.8 on 2 and 97 DF,  p-value: 1.164e-05
+\end{verbatim}
+
+The regression coefficients are close to the true coefficients, although
+with high standard error. We can reject the null hypothesis for
+\(\beta_1\) because its p-value is below 5\%. We cannot reject the null
+hypothesis for \(\beta_2\) because its p-value is much above the 5\%
+typical cutoff, over 60\%.
+
+\hypertarget{question-21}{%
+\subsection{Question:}\label{question-21}}
+
+Now fit least squares regression to predict \(y\) using only \(x_1\).
+Comment on your results. Can you reject the null hypothesis
+\(H_0: \beta_1=0\)?
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm.fit =}\StringTok{ }\KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x1)}
+\KeywordTok{summary}\NormalTok{(lm.fit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ x1)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.89495 -0.66874 -0.07785  0.59221  2.45560 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   2.1124     0.2307   9.155 8.27e-15 ***
+x1            1.9759     0.3963   4.986 2.66e-06 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.055 on 98 degrees of freedom
+Multiple R-squared:  0.2024,    Adjusted R-squared:  0.1942 
+F-statistic: 24.86 on 1 and 98 DF,  p-value: 2.661e-06
+\end{verbatim}
+
+Yes, we can reject the null hypothesis for the regression coefficient
+given the p-value for its t-statistic is near zero.
+
+\hypertarget{question-22}{%
+\subsection{Question:}\label{question-22}}
+
+Now fit least squares regression to predict \(y\) using only \(x_2\).
+Comment on your results. Can you reject the null hypothesis
+\(H_0: \beta_2=0\)?
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm.fit =}\StringTok{ }\KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x2)}
+\KeywordTok{summary}\NormalTok{(lm.fit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ x2)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.62687 -0.75156 -0.03598  0.72383  2.44890 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   2.3899     0.1949   12.26  < 2e-16 ***
+x2            2.8996     0.6330    4.58 1.37e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.072 on 98 degrees of freedom
+Multiple R-squared:  0.1763,    Adjusted R-squared:  0.1679 
+F-statistic: 20.98 on 1 and 98 DF,  p-value: 1.366e-05
+\end{verbatim}
+
+Yes, we can reject the null hypothesis for the regression coefficient
+given the p-value for its t-statistic is near zero.
+
+\hypertarget{question-23}{%
+\subsection{Question:}\label{question-23}}
+
+Do the results from the previous questions contradict each other?
+Explain your answer.
+
+\textbf{A}:
+
+No, because \(x_1\) and \(x_2\) have collinearity, it is hard to
+distinguish their effects when regressed upon together. When they are
+regressed upon separately, the linear relationship between y and each
+predictor is indicated more clearly.
+
+\hypertarget{question-24}{%
+\subsection{Question:}\label{question-24}}
+
+Now suppose we obtain one additional observation, which was
+unfortunately mismeasured.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x1 <-}\StringTok{ }\KeywordTok{c}\NormalTok{(x1, }\FloatTok{0.1}\NormalTok{)}
+\NormalTok{x2 <-}\StringTok{ }\KeywordTok{c}\NormalTok{(x2, }\FloatTok{0.8}\NormalTok{)}
+\NormalTok{y =}\StringTok{ }\KeywordTok{c}\NormalTok{(y,}\DecValTok{6}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Re-fit the linear model using the new data. What effect does this new
+observation have on the each of the models? In each model, is this
+observation an outlier?
+
+\textbf{A}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm.fit1 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x1}\OperatorTok{+}\NormalTok{x2)}
+\KeywordTok{summary}\NormalTok{(lm.fit1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ x1 + x2)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.73348 -0.69318 -0.05263  0.66385  2.30619 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   2.2267     0.2314   9.624 7.91e-16 ***
+x1            0.5394     0.5922   0.911  0.36458    
+x2            2.5146     0.8977   2.801  0.00614 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.075 on 98 degrees of freedom
+Multiple R-squared:  0.2188,    Adjusted R-squared:  0.2029 
+F-statistic: 13.72 on 2 and 98 DF,  p-value: 5.564e-06
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm.fit2 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x1)}
+\KeywordTok{summary}\NormalTok{(lm.fit2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ x1)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.8897 -0.6556 -0.0909  0.5682  3.5665 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   2.2569     0.2390   9.445 1.78e-15 ***
+x1            1.7657     0.4124   4.282 4.29e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.111 on 99 degrees of freedom
+Multiple R-squared:  0.1562,    Adjusted R-squared:  0.1477 
+F-statistic: 18.33 on 1 and 99 DF,  p-value: 4.295e-05
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm.fit3 =}\StringTok{ }\KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x2)}
+\KeywordTok{summary}\NormalTok{(lm.fit3)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y ~ x2)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.64729 -0.71021 -0.06899  0.72699  2.38074 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)   2.3451     0.1912  12.264  < 2e-16 ***
+x2            3.1190     0.6040   5.164 1.25e-06 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.074 on 99 degrees of freedom
+Multiple R-squared:  0.2122,    Adjusted R-squared:  0.2042 
+F-statistic: 26.66 on 1 and 99 DF,  p-value: 1.253e-06
+\end{verbatim}
+
+In the first model, it shifts \(x_1\) to statistically insignificance
+and shifts \(x_2\) to statistiscal significance from the change in
+p-values between the two linear regressions.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggfortify)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{autoplot}\NormalTok{(lm.fit1)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-41-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{autoplot}\NormalTok{(lm.fit2)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-42-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{autoplot}\NormalTok{(lm.fit3)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{selfeval_1_solutions_files/figure-latex/selfeval_1_solutions-43-1.pdf}
+
+The additional observation for \(x_2\) seems to become a high leverage
+point.
+
+
+\end{document}

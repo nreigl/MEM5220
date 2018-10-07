@@ -20,7 +20,7 @@ knitr::opts_chunk$set(comment=NA)
 This first R econometrics self-evaluation assignment is focused on data cleaning, data manipulation, plotting and estimating and interpreting simple linear regression models.  You can use **any** additional packages for answering the questions. 
 
 Packages I have used to solve the exercises: 
-```{r, message=FALSE}
+```{r selfeval_1_solutions-1, message=FALSE}
 library(tidyverse)
 library(stargazer)
 library(huxtable)
@@ -28,17 +28,18 @@ library(broom)
 library(lmtest)
 library(sandwich)
 library(car)
+library(magrittr)
 ```
 
 
 **Note:**
 
- - This assignemtn has to be solved in this R markdown and you should be able to "knit" the document without errors
- - Fill out your name in "yaml" - block on top of this document
- - Use the R markdown syntax: 
-    - Write your code in code chunks
-    - Write your explanations including the equations in markdown syntax
- - If you have an error in your code use `#` to comment the line out where the error occurs but do not delete the code itself
+- This assignemtn has to be solved in this R markdown and you should be able to "knit" the document without errors
+- Fill out your name in "yaml" - block on top of this document
+- Use the R markdown syntax: 
+- Write your code in code chunks
+- Write your explanations including the equations in markdown syntax
+- If you have an error in your code use `#` to comment the line out where the error occurs but do not delete the code itself
 
 
 ----
@@ -55,7 +56,7 @@ Load the dataset `Caschool` from the **Ecdat** package.
 
 The Caschooldataset contains the average test scores of 420 elementary schools in California along with some additional information.
 
-```{r, message=FALSE}
+```{r selfeval_1_solutions-2, message=FALSE}
 # install.packages("Ecdat")
 library("Ecdat")
 data("Caschool", package = "Ecdat")
@@ -67,7 +68,7 @@ What are the dimensions of the `Caschool` dataset?
 
 **A**: 
 
-```{r}
+```{r selfeval_1_solutions-3}
 dim(Caschool)
 ```
 
@@ -77,9 +78,10 @@ Display the structure of the Caschool dataset. Which variable has values encoded
 
 **A**: 
 
-```{r}
+```{r selfeval_1_solutions-4}
 str(Caschool)
 ```
+
 
 County, district and grspan are encoded as factors. 
 
@@ -89,7 +91,7 @@ Provide a summary statistic of the data
 
 **A**: 
 
-```{r}
+  ```{r selfeval_1_solutions-5}
 summary(Caschool)
 ```
 
@@ -101,7 +103,8 @@ What are the names of the variables in the dataset?
 
 **A**: 
 
-```{r}
+
+```{r selfeval_1_solutions-6}
 names(Caschool)
 ```
 
@@ -112,11 +115,9 @@ How many unique observations are available in the variable "county"
 
 **A**: 
 
-```{r}
+```{r selfeval_1_solutions-7}
 unique(Caschool$county)
-table(Caschool$county)
 ```
-
 
 ## Question: 
 
@@ -124,12 +125,16 @@ Summarize the mean number of students grouped by county.
 
 **A**: 
 
-```{r}
-Caschool %>% 
+```{r selfeval_1_solutions-8}
+mean_countCaschool <- Caschool %>% 
   group_by(county) %>%
   summarise(mean_count = mean(enrltot)) %>%
   arrange(desc(mean_count))
+# options(scipen=999) # remove scientific notation
+# head(mean_countCaschool) #  just show the first six counties
 ```
+
+
 
 
 ## Question: 
@@ -138,19 +143,20 @@ Calculate the log of average income from of the Caschool dataset. Call the varia
 
 **A**: 
 
-```{r}
+
+```{r selfeval_1_solutions-9}
 Caschool$logavginc <- log(Caschool$avginc)
 ```
 
 
-```{r}
+```{r selfeval_1_solutions-10}
 par(mfrow=c(1,2))  
 hist(Caschool$avginc)
 hist(Caschool$logavginc)
 ```
 
 
-```{r}
+```{r selfeval_1_solutions-11}
 library(gridExtra)
 p1 <- ggplot(Caschool, aes(avginc)) +
   geom_histogram(show.legend = FALSE) +
@@ -175,14 +181,14 @@ We want to create now a subset of counties that have the ten highest district av
 **A**:
 
 
-```{r}
+```{r selfeval_1_solutions-12}
 Caschool_highincome <- Caschool %>% 
-  arrange(desc(avginc)) %>% 
-  head(10)
+arrange(desc(avginc)) %>% 
+head(10)
 
 Caschool_lowincome <- Caschool %>% 
-  arrange((avginc)) %>% 
-  head(10)
+arrange((avginc)) %>% 
+head(10)
 
 Caschool_lowhighincome <- rbind(Caschool_highincome,Caschool_highincome)
 ```
@@ -197,7 +203,7 @@ Let us test wether a high student/teacher ratio will be associated with higher-t
 
 Base R-style
 
-```{r}
+```{r selfeval_1_solutions-13}
 plot(formula = testscr ~ str,
      data = Caschool,
      xlab = "Student/Teacher Ratio",
@@ -206,12 +212,12 @@ plot(formula = testscr ~ str,
 
 ggplot2-style
 
-```{r}
+```{r selfeval_1_solutions-14}
 ggplot(mapping = aes(x = str, y = testscr), data = Caschool) + # base plot
   geom_point() + # add points
-scale_y_continuous(name = "Average Test Score") + 
+  scale_y_continuous(name = "Average Test Score") + 
   scale_x_continuous(name = "Student/Teacher Ratio") +
-theme_bw() + ggtitle("Testscores vs Student/Teacher Ratio")
+  theme_bw() + ggtitle("Testscores vs Student/Teacher Ratio")
 ```
 
 
@@ -229,10 +235,13 @@ Estimate the specified linear model. Is the estimated relationship between a sch
 
 **A**: 
 
-```{r}
+```{r selfeval_1_solutions-15}
 fit_single <- lm(formula = testscr ~ str, data = Caschool)
 summary(fit_single)
 ```
+
+
+
 
 
 ## Question:
@@ -243,7 +252,7 @@ Now, plot the regression line for the model we have just estimated. Again, you c
 
 Base R-style 
 
-```{r}
+```{r selfeval_1_solutions-16}
 fit_california <- lm(formula = testscr ~ str, data = Caschool)
 plot(formula = testscr ~ str,
      data = Caschool,
@@ -254,7 +263,7 @@ abline(fit_california, col = 'red') # add regression line
 
 ggplot2-style
 
-```{r}
+```{r selfeval_1_solutions-17}
 ggplot(mapping = aes(x = str, y = testscr), data = Caschool) + # base plot
   geom_point() + # add points
   geom_smooth(method = "lm", size=1, color="red") + # add regression line
@@ -277,7 +286,7 @@ testscr = \beta_0 +  \beta_1  str +   \beta_2  avginc + u
 **A**:
 
 
-```{r}
+```{r selfeval_1_solutions-18}
 fit_multivariate <- lm(formula = "testscr ~ str + avginc", data = Caschool)
 summary(fit_multivariate)
 ```
@@ -295,7 +304,7 @@ testscr = \beta_0 +  \beta_1  str +   \beta_2  avginc + \beta_3 (str \times avgi
 
 **A**: 
 
-```{r}
+```{r selfeval_1_solutions-19}
 fit_inter = lm(formula = testscr ~ str + avginc + str*avginc, data = Caschool)
 summary(fit_inter)
 ```
@@ -314,23 +323,23 @@ In question 10, 12 and 13, you have fitted 3 models. Report the regression resul
 
 **stargazer** package:
 
-```{r}
+```{r selfeval_1_solutions-20}
 library(stargazer)
 invisible(stargazer(
-  list(fit_single, 
-       fit_multivariate,
-      fit_inter)
-  ,keep.stat = c("n", "adj.rsq", "aic", "bic"), type = "text", style = "ajps"))# to have number of observations and R^2 reported
+list(fit_single, 
+fit_multivariate,
+fit_inter)
+,keep.stat = c("n", "adj.rsq", "aic", "bic"), type = "text", style = "ajps"))# to have number of observations and R^2 reported
 ```
 
 **huxtable** package:
 
-```{r}
+```{r selfeval_1_solutions-21}
 library(huxtable)
 huxreg(fit_single, 
-       fit_multivariate, 
-       fit_inter, 
-       statistics = c("nobs", "adj.r.squared", "AIC", "BIC")) 
+fit_multivariate, 
+fit_inter, 
+statistics = c("nobs", "adj.r.squared", "AIC", "BIC")) 
 ```
 
 The adjusted $R^2$ is highest for the model 3, the model that includes an interaction term. AIC and BIC, two widely used information criteria, would also select model 3, relative to each of the other models (The relatively quality of the model is maximized when the information criterium is minimized). 
@@ -339,7 +348,7 @@ The adjusted $R^2$ is highest for the model 3, the model that includes an intera
 
 Wooldridge Source: These are data from the 1976 Current Population Survey. 
 
-```{r, message=FALSE}
+```{r selfeval_1_solutions-22, message=FALSE}
 # install.packages("wooldridge")
 library("wooldridge") 
 data("wage1", package = "wooldridge")
@@ -351,30 +360,31 @@ data("wage1", package = "wooldridge")
 Estimate the following model: 
 
 \begin{equation}
- log(wage) = \beta_0 +  \beta_1 (married \times female) +  \beta_3 educ + \beta_4 exper + beta_5 exper^2 + \beta_6 tenure + \beta_7 tenure^2 + u 
+log(wage) = \beta_0 +  \beta_1 (married \times female) +  \beta_3 educ + \beta_4 exper + beta_5 exper^2 + \beta_6 tenure + \beta_7 tenure^2 + u 
 \end{equation}
 
-  1. What is the reference group in this model? 
-  2. Ceteris paribus, how much more wage do single males make relative to the reference group?
-  3. Ceteris paribus, how much more wage do single females make relative to the reference group?
-  4. Ceteris paribus, how much less do married females make than single females?
-  5. Do the results make sense economically. What socio-economic factors could explain the results? 
+1. What is the reference group in this model? 
+2. Ceteris paribus, how much more wage do single males make relative to the reference group?
+3. Ceteris paribus, how much more wage do single females make relative to the reference group?
+4. Ceteris paribus, how much less do married females make than single females?
+5. Do the results make sense economically. What socio-economic factors could explain the results? 
 
 **A**: 
 
 
 
-```{r}
+
+```{r selfeval_1_solutions-23}
 lm2_wage1 <- lm(log(wage)~married*female+educ+exper+I(exper^2)+tenure+I(tenure^2), data=wage1)
 summary(lm2_wage1)
 ```
 
-```{r, message= FALSE}
+```{r selfeval_1_solutions-24, message= FALSE}
 library(scales) #  quick percent
 ```
 
 
-```{r}
+```{r selfeval_1_solutions-25}
 df_lm2_wage1 <- tidy(lm2_wage1)
 # Singe male
 marriedmale <- df_lm2_wage1 %>%
@@ -397,6 +407,8 @@ married<- df_lm2_wage1 %>%
 ```
 
 
+
+
 1. Reference group: *single* and *male*
 2. Cp. married males make `r percent(marriedmale)` (` percent(marriedmale)`) more than single males. 
 3. Cp. a single female makes `r percent(singlefemale)` (`percent(singlefemale)`) less than the reference group. 
@@ -409,7 +421,7 @@ married<- df_lm2_wage1 %>%
 
 Test for heteroskedasdicity test in the estimated regression of the wage1 dataset. Do we reject homoscedasticity for all reasonable signficance levels? Adjust for heteroscedasticity if necessary by using refined White heteroscedasticity-robust SE
 
-```{r}
+```{r selfeval_1_solutions-26}
 bptest(lm2_wage1)
 ```
 
@@ -417,17 +429,20 @@ We do not reject the null hypothesis at conventional signficance levels
 
 ## Question
 
+
+## Question
+
 Now, estimate the following model and test again for heteroscedasticity.
 
 \begin{equation}
- wage = \beta_0 +  \beta_1  female +  \beta_3 educ + \beta_4 exper + u 
+wage = \beta_0 +  \beta_1  female +  \beta_3 educ + \beta_4 exper + u 
 \end{equation}
 
 
 
 Adjust for heteroscedasticity if necessary.
 
-```{r}
+```{r selfeval_1_solutions-27}
 lm3_wage1 <- lm(wage~female+educ+exper, data=wage1)
 lm3_bptest <- bptest(lm3_wage1)
 lm3_bptest
@@ -435,7 +450,7 @@ lm3_bptest
 
 The test statistic of the BP-test is `r lm3_bptest$statistic[[1]]` and the corresponding p-value is smaller than `r lm3_bptest$p.value[[1]] `, so we can reject homoscedasticity for all reasonable signficance levels.
 
-```{r}
+```{r selfeval_1_solutions-28}
 coeftest(lm3_wage1, vcov=hccm)
 cov3 <- hccm(lm3_wage1, type="hc3") # hc3 is the standard method
 ref.HC3 <- coeftest(lm3_wage1, vcov.=cov3)
@@ -447,14 +462,14 @@ ref.HC3
 # Collinearity exercises
 
 This exercise focuses on the **collineartiy** problem. 
-  
+
 
 ## Question: 
 
 
 Perform the following commands in R: 
 
-```{r}
+```{r selfeval_1_solutions-29}
 set.seed(1)
 x1 <- runif(100)
 x2 <- 0.5 * x1 + rnorm(100)/10
@@ -477,21 +492,21 @@ What is the correlation between $x_1$ and $x_2$? Create a scatterplot displaying
 **A**:
 
 
-```{r}
+```{r selfeval_1_solutions-30}
 cor(x1, x2)
 ```
 
 
 Base R style: 
 
-```{r}
+```{r selfeval_1_solutions-31}
 plot(x1, x2)
 
 ```
 
 ggplot2 style: 
 
-```{r}
+```{r selfeval_1_solutions-32}
 d <-  data.frame(x1,x2)
 ggplot(d, aes(x1, x2)) +
   geom_point(shape = 16, size = 3, show.legend = FALSE) +
@@ -506,7 +521,7 @@ Using this data, fit a least squares regression to predict $y$ using $x_1$ and $
 
 **A**: 
 
-```{r}
+```{r selfeval_1_solutions-33}
 lm.fit = lm(y~x1+x2)
 summary(lm.fit)
 ```
@@ -521,7 +536,7 @@ Now fit least squares regression to predict $y$ using only $x_1$. Comment on you
 
 **A**:
 
-```{r}
+```{r selfeval_1_solutions-34}
 lm.fit = lm(y~x1)
 summary(lm.fit)
 ```
@@ -537,7 +552,7 @@ Now fit least squares regression to predict $y$ using only $x_2$. Comment on you
 
 **A**: 
 
-```{r}
+```{r selfeval_1_solutions-35}
 lm.fit = lm(y~x2)
 summary(lm.fit)
 ```
@@ -560,7 +575,7 @@ No, because $x_1$ and $x_2$ have collinearity, it is hard to distinguish their e
 
 Now suppose we obtain one additional observation, which was unfortunately mismeasured. 
 
-```{r}
+```{r selfeval_1_solutions-36}
 x1 <- c(x1, 0.1)
 x2 <- c(x2, 0.8)
 y = c(y,6)
@@ -570,18 +585,18 @@ Re-fit the linear model using the new data. What effect does this new observatio
 
 **A**: 
 
-```{r}
+```{r selfeval_1_solutions-37}
 lm.fit1 = lm(y~x1+x2)
 summary(lm.fit1)
 ```
 
 
-```{r}
+```{r selfeval_1_solutions-38}
 lm.fit2 = lm(y~x1)
 summary(lm.fit2)
 ```
 
-```{r}
+```{r selfeval_1_solutions-39}
 lm.fit3 = lm(y~x2)
 summary(lm.fit3)
 ```
@@ -589,21 +604,25 @@ summary(lm.fit3)
 In the first model, it shifts $x_1$ to statistically insignificance and shifts $x_2$ to statistiscal significance from the change in p-values between the two linear regressions.
 
 
-```{r}
+```{r selfeval_1_solutions-40}
 library(ggfortify)
 ```
 
-```{r}
+```{r selfeval_1_solutions-41}
 autoplot(lm.fit1)
 ```
 
-```{r}
+
+
+```{r selfeval_1_solutions-42}
 autoplot(lm.fit2)
 ```
 
 
-```{r}
+```{r selfeval_1_solutions-43}
 autoplot(lm.fit3)
 ```
 
 The additional observation for $x_2$ seems to become a high leverage point.
+
+

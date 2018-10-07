@@ -1036,7 +1036,6 @@ logitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<s
 ## 
 ## Residual Deviance: 1750.626 
 ## AIC: 1758.626</code></pre>
-<p>The output from function multinom gives coefficient estimates for each level of the response variable psechoice, except for the first level, which is the benchmark.</p>
 <pre class="sourceCode r"><code class="sourceCode r">medGrades &lt;-<span class="st"> </span><span class="kw">median</span>(nels_small<span class="op">$</span>grades)
 fifthPercentileGrades &lt;-<span class="st"> </span><span class="kw">quantile</span>(nels_small<span class="op">$</span>grades, <span class="fl">.05</span>)
 newdat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">grades=</span><span class="kw">c</span>(medGrades, fifthPercentileGrades))
@@ -1076,13 +1075,15 @@ cola.clogit &lt;-<span class="st"> </span><span class="kw">MCMCmnl</span>(bchoic
 <pre><code>## Calculating MLEs and large sample var-cov matrix.
 ## This may take a moment...
 ## Inverting Hessian to get large sample var-cov matrix.</code></pre>
+<p>The output from function multinom gives coefficient estimates for each level of the response variable psechoice, except for the first level, which is the benchmark.</p>
+<p>We can calculate the probability that individual <span class="math inline">\(i\)</span> chooses pepsi and sevenup for some given values of the prices that individual <span class="math inline">\(i\)</span>. Coke is not shown as it is the baseline choice.</p>
 <pre class="sourceCode r"><code class="sourceCode r">sclogit &lt;-<span class="st"> </span><span class="kw">summary</span>(cola.clogit)
 tabMCMC &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(sclogit<span class="op">$</span>statistics)[,<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>]
 <span class="kw">row.names</span>(tabMCMC)&lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;b2&quot;</span>,<span class="st">&quot;b11&quot;</span>,<span class="st">&quot;b12&quot;</span>)
 <span class="kw">kable</span>(tabMCMC, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,
       <span class="dt">caption=</span><span class="st">&quot;Conditional logit estimates for the &#39;cola&#39; problem&quot;</span>)</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-152">Table 2.1: </span>Conditional logit estimates for the ‘cola’ problem</caption>
+<caption><span id="tab:unnamed-chunk-14">Table 2.1: </span>Conditional logit estimates for the ‘cola’ problem</caption>
 <thead>
 <tr class="header">
 <th></th>
@@ -1108,6 +1109,32 @@ tabMCMC &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(sclo
 </tr>
 </tbody>
 </table>
+<p>We can also estimate the probabilities of individual <span class="math inline">\(i\)</span> choosing Pepsi or Sevenup for a given price.</p>
+<pre class="sourceCode r"><code class="sourceCode r">pPepsi &lt;-<span class="st"> </span><span class="dv">1</span>
+pSevenup &lt;-<span class="st"> </span><span class="fl">1.25</span>
+pCoke &lt;-<span class="st"> </span><span class="fl">1.10</span>
+b13 &lt;-<span class="st"> </span><span class="dv">0</span>
+b2  &lt;-<span class="st"> </span>tabMCMC<span class="op">$</span>Mean[<span class="dv">1</span>]
+b11 &lt;-<span class="st"> </span>tabMCMC<span class="op">$</span>Mean[<span class="dv">2</span>]
+b12 &lt;-<span class="st"> </span>tabMCMC<span class="op">$</span>Mean[<span class="dv">3</span>]
+
+<span class="co"># The probability that individual i chooses Pepsi:</span>
+PiPepsi &lt;-<span class="st"> </span><span class="kw">exp</span>(b11<span class="op">+</span>b2<span class="op">*</span>pPepsi)<span class="op">/</span>
+<span class="st">          </span>(<span class="kw">exp</span>(b11<span class="op">+</span>b2<span class="op">*</span>pPepsi)<span class="op">+</span><span class="kw">exp</span>(b12<span class="op">+</span>b2<span class="op">*</span>pSevenup)<span class="op">+</span>
+<span class="st">                              </span><span class="kw">exp</span>(b13<span class="op">+</span>b2<span class="op">*</span>pCoke))
+<span class="co"># The probability that individual i chooses Sevenup:</span>
+PiSevenup &lt;-<span class="st"> </span><span class="kw">exp</span>(b12<span class="op">+</span>b2<span class="op">*</span>pSevenup)<span class="op">/</span>
+<span class="st">          </span>(<span class="kw">exp</span>(b11<span class="op">+</span>b2<span class="op">*</span>pPepsi)<span class="op">+</span><span class="kw">exp</span>(b12<span class="op">+</span>b2<span class="op">*</span>pSevenup)<span class="op">+</span>
+<span class="st">                              </span><span class="kw">exp</span>(b13<span class="op">+</span>b2<span class="op">*</span>pCoke))
+<span class="co"># The probability that individual i chooses Coke:</span>
+PiCoke &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">-</span>PiPepsi<span class="op">-</span>PiSevenup</code></pre>
+<p>The calculatred probabilities are:</p>
+<ul>
+<li><span class="math inline">\(p_{i,pepsi}=0.483\)</span></li>
+<li><span class="math inline">\(p_{i,sevenup}=0.227\)</span></li>
+<li><span class="math inline">\(p_{i,coke}=0.289\)</span></li>
+</ul>
+<p>The three probabilities are different for different individuals because different individuals face different prices; in a more complex model other regressors may be included, some of which may reflect individual characteristics.</p>
 </div>
 <div id="ordered-choice-models" class="section level3">
 <h3><span class="header-section-number">2.2.3</span> Ordered Choice Models</h3>
@@ -1120,7 +1147,7 @@ tabOprobit &lt;-<span class="st"> </span>sOprobit<span class="op">$</span>statis
 <span class="kw">kable</span>(tabOprobit, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,
       <span class="dt">caption=</span><span class="st">&quot;Ordered probit estimates for the &#39;nels&#39; problem&quot;</span>)</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-153">Table 2.2: </span>Ordered probit estimates for the ‘nels’ problem</caption>
+<caption><span id="tab:unnamed-chunk-16">Table 2.2: </span>Ordered probit estimates for the ‘nels’ problem</caption>
 <thead>
 <tr class="header">
 <th></th>
@@ -1189,14 +1216,8 @@ Figure 2.1: The shape of the probit function is the standard normal distribution
 </div>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">detach</span>(<span class="st">&quot;package:PoEdata&quot;</span>, <span class="dt">unload=</span><span class="ot">TRUE</span>)
 <span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)
-<span class="kw">attach</span>(mroz)</code></pre>
-<pre><code>## The following objects are masked from bwght:
-## 
-##     faminc, fatheduc, motheduc</code></pre>
-<pre><code>## The following object is masked from gpa1:
-## 
-##     age</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Estimate probit model</span>
+<span class="kw">attach</span>(mroz)
+<span class="co"># Estimate probit model</span>
 probitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,
                <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>probit),<span class="dt">data=</span>mroz)
 <span class="co"># Summary of results:</span>
@@ -1249,49 +1270,49 @@ boot_probitres <span class="op">%&gt;%</span><span class="st"> </span>
                    <span class="dt">high =</span> <span class="kw">quantile</span>(estimate, <span class="fl">.0975</span>))</code></pre>
 <table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 56.6666666666667%; margin-left: 0%; margin-right: auto; ">
 <col><col><col><tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">term</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">low</td>
-<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">high</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">term</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">low</td>
+<td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">high</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">(Intercept)</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">(Intercept)</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.27&nbsp;&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.27&nbsp;&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.27&nbsp;&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">age</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">age</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">-0.0529&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.0529&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.0529&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">educ</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">educ</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.131&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.131&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">0.131&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">exper</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">exper</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.123&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.123&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.123&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">I(exper^2)</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">I(exper^2)</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.00189</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.00189</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.00189</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">kidsge6</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">kidsge6</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt;">0.036&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.036&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt;">0.036&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">kidslt6</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0pt 0.4pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">kidslt6</td>
 <td style="vertical-align: top; text-align: right; white-space: normal; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.868&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.868&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0pt 0pt; padding: 4pt 4pt 4pt 4pt; background-color: rgb(242, 242, 242);">-0.868&nbsp;&nbsp;</td>
 </tr>
 <tr>
-<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">nwifeinc</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.012&nbsp;&nbsp;</td>
-<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.012&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt;">nwifeinc</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.012&nbsp;&nbsp;</td>
+<td style="vertical-align: top; text-align: right; white-space: normal; border-style: solid solid solid solid; border-width: 0pt 0.4pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt;">-0.012&nbsp;&nbsp;</td>
 </tr>
 </table>
 
@@ -1476,6 +1497,8 @@ Figure 2.2: Predictions from binary response models (simulated data)
 </tr>
 </table>
 
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(effects_logit_participation)</code></pre>
+<p><img src="MEM5220_R_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 <p>If one desires subgroup effects, simply pass a subset of data to the data argument:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(<span class="kw">margins</span>(logitres, <span class="dt">data =</span> <span class="kw">subset</span>(mroz, kidslt6 <span class="op">==</span><span class="st"> </span><span class="dv">0</span>))) <span class="co"># no kids &lt; 6 years</span></code></pre>
 <table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto; ">

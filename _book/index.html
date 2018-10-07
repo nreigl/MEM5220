@@ -271,29 +271,11 @@ Figure .: Normal and simulated Gaussian densities on a regression line
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.19          mvtnorm_1.0-8         gmm_1.6-2            
-##  [4] lattice_0.20-35       zoo_1.8-4             assertthat_0.2.0     
-##  [7] rprojroot_1.3-2       digest_0.6.17         lmtest_0.9-36        
-## [10] R6_2.3.0              cellranger_1.1.0      plyr_1.8.4           
-## [13] backports_1.1.2       stats4_3.5.1          evaluate_0.11        
-## [16] highr_0.7             ggplot2_3.0.0         pillar_1.3.0         
-## [19] miscTools_0.6-22      rlang_0.2.2           lazyeval_0.2.1.9000  
-## [22] curl_3.2              readxl_1.1.0          rstudioapi_0.8       
-## [25] data.table_1.11.8     car_3.0-2             Matrix_1.2-14        
-## [28] rmarkdown_1.10        splines_3.5.1         systemfit_1.1-22     
-## [31] stringr_1.3.1         foreign_0.8-71        munsell_0.5.0        
-## [34] xfun_0.3              compiler_3.5.1        pkgconfig_2.0.2      
-## [37] maxLik_1.3-4          htmltools_0.3.6       tidyselect_0.2.4     
-## [40] tibble_1.4.2          bookdown_0.7.20       rio_0.5.10           
-## [43] crayon_1.3.4          dplyr_0.7.6           MASS_7.3-50          
-## [46] grid_3.5.1            gtable_0.2.0          magrittr_1.5         
-## [49] scales_1.0.0          zip_1.0.0             stringi_1.2.4        
-## [52] carData_3.0-2         bindrcpp_0.2.2        sandwich_2.5-0       
-## [55] openxlsx_4.1.0        Formula_1.2-3         tools_3.5.1          
-## [58] forcats_0.3.0         glue_1.3.0            purrr_0.2.5          
-## [61] sampleSelection_1.2-0 hms_0.4.2.9001        abind_1.4-5          
-## [64] yaml_2.2.0            colorspace_1.3-2      VGAM_1.0-6           
-## [67] knitr_1.20            bindr_0.1.1           haven_1.1.2</code></pre>
+##  [1] Rcpp_0.12.19    bookdown_0.7.20 digest_0.6.17   rprojroot_1.3-2
+##  [5] backports_1.1.2 magrittr_1.5    evaluate_0.11   highr_0.7      
+##  [9] stringi_1.2.4   rstudioapi_0.8  rmarkdown_1.10  tools_3.5.1    
+## [13] stringr_1.3.1   xfun_0.3        yaml_2.2.0      compiler_3.5.1 
+## [17] htmltools_0.3.6 knitr_1.20</code></pre>
 <p>I do not add prompts (<code>&gt;</code> and <code>+</code>) to R source code in this book, and I comment out the text output with two hashes <code>##</code> by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out). Package names are in bold text (e.g., <strong>rmarkdown</strong>), and inline code and function arguments are formatted in a typewriter font (e.g., <code>knitr::knit('foo.Rmd')</code>). Function names are followed by parentheses (e.g., <code>bookdown::render_book()</code>). The double-colon operator <code>::</code> means accessing an object from a package.
 Content with <strong>Note</strong>, <strong>Your turn</strong> and <strong>Overthinking</strong> is surrounded by two horizontal lines. <strong>Overthinking</strong> sections serve as additional information for the interested reader but will not be covered in detail in class.</p>
 </div>
@@ -384,19 +366,6 @@ gitbook.start({
 });
 </script>
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    var src = "true";
-    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
-    if (location.protocol !== "file:" && /^https?:/.test(src))
-      src = src.replace(/^https?:/, '');
-    script.src = src;
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
 </body>
 
 </html>
