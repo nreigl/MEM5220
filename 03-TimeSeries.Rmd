@@ -1,0 +1,429 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+# Time Series {#timeseries}
+
+To load the dataset and necessary functions: 
+
+```{r, echo=TRUE, message=FALSE, results='hide'}
+# This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
+# devtools::install_github("ccolonescu/PoEdata")
+PACKAGES<-c("PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, an d Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+"wooldridge",  # Wooldrige Datasets
+"tidyverse",  # for data manipulation and ggplots
+"broom",  # Tidy regression output
+"car", # Companion to applied regression
+"knitr", # knit functions
+# "kableExtra", # extended knit functions for objects exported from other packages
+"huxtable", #  Regression tables, broom compatible
+"stargazer", # Regression tables
+"AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
+"MASS",  #  Functions and datasets to support Venables and Ripley,  "Modern Applied Statistics with S"
+"eurostat", # query data from eurostat
+"stats", 
+"fUnitRoots", # unit root testing
+"uroot", 
+"urca", # unit root testing
+"forecast", # forecast functions
+"astsa", # applied statistcal time series analysis 
+"modelr", # model simulation/ boostraping the modern way
+"magrittr") #  pipes
+inst<-match(PACKAGES, .packages(all=TRUE))
+need<-which(is.na(inst))
+if (length(need)>0) install.packages(PACKAGES[need])
+lapply(PACKAGES, require, character.only=T)
+```
+
+In this tutorial we discuss various time series objects in R. We will cover objects time series, zoo and xts. Base R has limited functionality for handling time series data.  There are several R packages with functions for creating, manipulating and visualizing time date and time series objects. 
+The packages that we will use are `lubridate`,  `quantmod`, `timeDate`, `timeSeries`, `zoo`, `xts`, `xtsExtra`, `tsibble`.
+
+
+We download monthly CPI from Eurostat
+
+```{r warning=TRUE, cache=TRUE}
+#Since 1996
+cpi<- get_eurostat("prc_hicp_midx", filters = list(geo = "EE", coicop="CP00", unit="I15")) %>%
+  dplyr::filter(time>=as.Date("1992-01-01")) %>%  dplyr::select(time, values) %>% 
+  rename(cpi=values, Date=time)
+plot(cpi, type="l")
+```
+
+
+The `data.frame` object is not designed to work efficiently with time series data. 
+The default plotting methods in R are not designed for handling time series data. 
+Depending on your data set and the purpose of your analysis you may need more flexible objects. 
+
+
+| object      |         package | explanation |  
+|-------------| ----------------|-------------------------------------------------------------------|
+| fts |  from package	fts |   	An R interfact to tslib (a time series library in C++) |  
+| its	 | its |  	for handling irregular time series |  
+| irts	|  tseries |  	irregular time‐series objects |  
+| timeSeries | 	timeSeries	|  Rmetrics package of time series tools and utilities |  
+| ti | 	tis |  	Functions for time indexes and time indexed series|  
+| ts, mts | 	stats |  	Regularly spaced time series objects |  
+| zoo	| zoo |  	indexed totally ordered observations which includes irregular time series |  
+| xts | 	xts	|   Extension of the zoo class |  
+
+
+For simple regularly spaced time series (e.g monthly, quarterly and yearly data), you may use `ts` object from `stats` package. For irregular time series data (e.g. daily data with gaps), you may prefer `zoo` or `irts`object if date is important for you. If the date does not matter, then simple time series object `ts`should be enough.
+
+```{r}
+head(cpi)
+cpits <-  ts(cpi$cpi, start=c(1996,1), frequency = 12)
+#check structure
+str(cpits)
+plot(cpits)
+
+#Some functions to characterise time series
+#Position in the cycle
+cycle(cpits)
+#to check frequency
+frequency(cpits)
+#How time is represented? As a fraction of the year!
+time(cpits)
+#average difference between time units (0.08333 years or =1/12)
+deltat(cpits)
+```
+
+
+## Seasonal decomposition of time Series
+
+We use `stl` from package `stats` to decompose time series. See the options of the command for details. 
+In addition, we apply the command `acf2` from package `astsa` to illustrate how we can use the components.
+
+
+```{r}
+#Fixed seasonal components, s.window - seasonal window
+plot(stl(cpits, s.window="periodic"))
+#vertical bars on the right reflect the scale of the components
+
+#smoothed seasonal component
+plot(stl(cpits, s.window=7))
+
+#remainder component seem to follow AR process
+#We can make the stl components as object and analyse these separately
+cpicomponents <- stl(cpits, s.window=7)
+
+#remainder
+plot(cpicomponents$time.series[,3])
+
+#Autocorrelation function of the remainder
+acf2(cpicomponents$time.series[,3])
+
+```
+
+
+
+## Differences and lags
+We can apply standard functions to time series, such as differences, seasonal differences, logs, etc.
+Let's use CPI to calculate monthly and annual inflation rates.
+
+
+```{r}
+head(cpi)
+cpits <-  ts(cpi$cpi, start=c(1996,1), frequency = 12)
+#check structure
+str(cpits)
+plot(cpits)
+
+#Some functions to characterise time series
+#Position in the cycle
+cycle(cpits)
+#to check frequency
+frequency(cpits)
+#How time is represented? As a fraction of the year!
+time(cpits)
+#average difference between time units (0.08333 years or =1/12)
+deltat(cpits)
+
+#Let's plot four graphs in 2x2
+par(mfrow=c(2,2))
+plot(cpits)
+plot(log(cpits))
+#monthly growth rate
+plot(diff(log(cpits)))
+#annual growth rate
+plot(diff(log(cpits), lag=12))
+
+#close the graph
+dev.off()
+
+```
+
+## Exponential smoothing and forecasting
+
+Let's forecast monthly inflation rate based using Holt-Winters exponential smoothing with trend and additive seasonal component. Note that we must not have missing data.
+
+```{r}
+dlcpi <- diff(log(cpits), lag=1)
+#omit missing values, we had one in October 2018
+dlcpi <- na.omit(dlcpi)
+plot(dlcpi)
+
+#Additive Holt-Winters
+(m <- HoltWinters(dlcpi, seasonal = "additive"))
+plot(m)
+
+#Predict 12 months ahead
+p <- predict(m, n.ahead = 12, prediction.interval = TRUE)
+plot(m, p)
+```
+
+
+## ARIMA models
+
+
+We use functions `arima` from `stats` package, `auto.arima` and `Arima` from `forecast` package.
+We also look at autocorrelation functions and partial autocorrelation functions with `acf2` command from  `astsa` package.
+
+
+```{r eval=FALSE, include=FALSE}
+#Linke endale
+#https://a-little-book-of-r-for-time-series.readthedocs.io/en/latest/src/timeseries.html
+#https://faculty.washington.edu/ezivot/econ424/Working%20with%20Time%20Series%20Data%20in%20R.pdf
+
+```
+
+
+## Autoregressive-integrated-moving-average model
+
+ARMA models are suited to describe stationary time series.  Wold's composition says that every covariance-stationary time series can be represented as a linear combination of lags of white noise (+ a deterministic time series).
+$X(t) = W(t) + a_1 \times W(t-1)+ a_2 \times W(t-2) + ...$
+
+If the time series is not stationary, we need to take first difference of the series.
+
+ARIMA models are denoted by ARIMA(p,d,q) where p is the order of AR terms, q is the order of MA terms and d is the order of integration. Full seasonal model is denoted by SARIMA(p,d,q)x(P,D,Q)S where capital letters denote respective the seasonal orders.
+
+
+### Simulation of ARIMA models
+
+To simulate ARMA models we use function `arima.sim`. 
+
+```{r}
+#To simulate ARIMA process
+#MA(1) process
+xma1 <- arima.sim(list(order=c(0,0,1), ma=0.9), n=100)
+plot(xma1)
+#AR(1)
+xar1 <- arima.sim(list(order=c(1,0,0), ar=0.8), n=100)
+plot(xar1)
+#ARMA(1,1)
+xarma11 <- arima.sim(list(order=c(1,0,1), ar=0.8, ma=0.5), n=100)
+plot(xarma11)
+#ARMA(2,1)
+xarma21 <- arima.sim(list(order=c(2,0,1), ar=c(0.8,-0.5), ma=0.5), n=100)
+plot(xarma21)
+
+```
+
+### ACF and PACF
+
+Next let's have a quick look how to identify ARMA model from the data. Very difficult to distinguish from the graphs, therefore we also use autocorrelation functions (ACF) and partial autocorrelation functions (PACF).
+
+```{r}
+#Compare the following time series in the graph
+x <- arima.sim(list(order=c(1,0,0), ar=-.7), n=200)
+y <- arima.sim(list(order=c(0,0,1), ma=-.7), n=200)
+
+par(mfrow=c(1,2))
+plot(x, main = "AR(1)")
+plot(y, main = "MA(1)")
+
+dev.off()
+
+```
+
+Autocorrelation function and partial autocorrelation function help to identify lag structure of ARMA models.
+If pure AR(p) process then ACF will tail off (changes to smaller) and PACF cuts off lag p.
+If pure MA(q) process then PACF will tail off (changes to smaller) and ACF cuts off lag q.
+If ARMA(p,q) then both ACF and PACF will tail off. Then start from (ARMA(1,1) and add more lags as needed).
+
+Look at the following ACF and PACF functions and see if the ACF and PACF of the simulated time series follow expected pattern. 
+
+```{r}
+#AR(1)
+x <- arima.sim(list(order=c(1,0,0), ar=c(0.9)), n=100)
+plot(x,main="AR(1)") 
+#ACF, PACF from atsta package
+acf2(x)
+#Look the autocorrelation coefficients
+
+#AR(2)
+x <- arima.sim(list(order=c(2,0,0), ar=c(0.9, -0.4)), n=100)
+plot(x, main="AR(2)") 
+acf2(x)
+
+#MA(1)
+x <- arima.sim(list(order=c(0,0,1), ma=0.4), n=100)
+plot(x, main="MA(1)") 
+acf2(x)
+
+#ARMA(1,1)
+x <- arima.sim(list(order=c(1,0,1), ar=0.9, ma=-0.4), n=200)
+plot(x, main="ARMA(1,1)") 
+acf2(x)
+
+```
+
+### Estimation of ARIMA models
+
+Let's simulate a model and then estimate it with `arima` and `sarima` commands.
+
+```{r, warning=FALSE}
+#generate AR(2) process with mean
+x <- arima.sim(list(order=c(2,0,0), 
+                    ar=c(1.5, -.75)), 
+               n=200) + 50
+
+
+plot(x) 
+#use command sarima from astsa package
+#it provides a nice graph for residual diagnostics of the model
+x_fit <- sarima(x, p=2, d=0, q=0)
+x_fit$ttable
+# => residuals are white noise
+
+#alternatively may use command arima from the stats package
+x_fit2 <- arima(x, order=c(2, 0, 0))
+x_fit2
+#Let's have a quick look at residual diagnostics
+tsdiag(x_fit2)
+?Arima
+x_fit3 <- Arima(x, order=c(2,0,0))
+x_fit3
+
+Arima(x, order=c(2,0,0))  %>%  
+  forecast(h=20) %>%
+  autoplot
+```
+
+### Choosing between models
+
+1) Descriptive power and simplicity
+Use AIC or BIC criteria, which both have penalty on model errors (average[(observed-predicted)^2]) and number of parameters (k*(p+q). The larger the AIC or BIC, the worse is the model. BIC has larger penalty on model parameters (k=ln(n)) than AIC (k=2), hence prefers simpler models.
+
+Goal: find the model with the smallest AIC or BIC.
+
+2) Residual analysis
+Models residuals should be white noise, otherwise there is still some information left in the residuals.
+
+sarima() function provides graphical analysis of residuals:
+a) standardised residuals - are there obvious patterns in the residuals?
+b) ACF of residuals - any remaining correlation in residuals
+c) Normal Q-Q plot - if residuals are normal, then they should be along the line. It would be nice to have normal errors to rely on t-distribution, but that is not so large problem if violated (Caution: I am not an expert!)
+d) Ljung-Box Q-statistic p-values  - points must above the line in order to have statistically insignificant test-statistics.
+
+The standardized residuals should behave as a white noise sequence with mean zero and variance one. 
+The sample ACF of the residuals should also look like that of white noise. 
+Normality is important assumption when fitting ARMA models. Examine the Q-Q plot for departures from normality and to identify outliers. 
+
+
+
+```{r}
+
+## to compare models use BIC() and AIC() statistics; BIC() and AIC() would choose the smallest
+#Let's estimate two models
+#AR(2)
+x_fit2 <- arima(x, order=c(2, 0, 0))
+#AR(3)
+x_fit3 <- arima(x, order=c(3, 0, 1))
+x_fit3
+tsdiag(x_fit3)
+
+#Compare these models
+BIC(x_fit2, x_fit3) #=> x_fit2 better as BIC is smaller
+AIC(x_fit2, x_fit3) #=> x_fit2 still better in my case
+
+#You may compare several models at once
+BIC(arima(x, order=c(1, 0, 0)), 
+    arima(x, order=c(2, 0, 0)), #=> this is best accoding to BIC
+    arima(x, order=c(3, 0, 0)),
+    arima(x, order=c(1, 0, 1)),
+    arima(x, order=c(2, 0, 1)),
+    arima(x, order=c(3, 0, 1)))
+
+```
+
+### Automatic esimation
+
+You may let `auto.arima` function to decide automatically which model is the best one. It returns best ARIMA model according to either AIC, AICc or BIC value. The function conducts a search over possible model within the order constraints provided. See the help file for more details. The function can also be used on non-stationary time series and let it automatically test for unit roots.
+
+
+```{r}
+forecast::auto.arima(x, d=0, max.p = 5, max.q = 5, ic="aic")
+#surpisingly it ended up with ARMA(4,3) in my case when using AIC
+
+#and AR(3) when using BIC, although AR(3) is not statistically significant
+forecast::auto.arima(x, d=0, max.p = 5, max.q = 5, ic="bic")
+
+```
+
+###Prediction with ARMA models
+
+Prediction is straightforward, simply apply `predict` command to the estimated model.
+
+
+```{r}
+## An example of ARIMA forecasting three periods ahead:
+predict(x_fit2, n.ahead= 3)
+
+```
+
+### Testing for unit root
+
+To test for unit root we can use package `fUnitRoots`, which includes Augmented Dickey Fuller unit root test and Phillips-Perron test. We can also use package `urca`, which includes many tests.
+
+```{r}
+#Let's first use again simulated time series
+x1 <- arima.sim(list(order=c(1,1,1), ar=c(0.5), ma=-0.3), n=100)
+plot(x1)
+#clearly random walk process
+
+#Let's test using adfTest
+#The null hypothesis is that time series is not stationary and we cannot reject that
+adfTest(x1)
+#=> we cannot reject H0
+
+#type of the regression:  "nc" no constant nor time trend, "c" with a constant but no time trend, "ct" with an intercept constant and a time trend. The default is "c".
+adfTest(x1, type="ct")
+test1 <- adfTest(x1, type="ct")
+#the model behind the test regression
+summary(test1@test$lm)
+
+#we can cleary drop trend
+(test1 <- adfTest(x1, type="c"))
+#the model behind the test regression
+summary(test1@test$lm)
+#And perhaps also the constant
+test1 <- adfTest(x1, type="nc")
+#the model behind the test regression
+test1
+summary(test1@test$lm)
+#=> still we cannot reject H0
+
+#McKinnons's test statistics - corrects t-statistic and p-value for possible misspecification of lags in the ADF test equation
+unitrootTest(x1, lags = 1, type = "c")
+
+###################################################
+#More tests are available in urca package
+#Augmented Dickey--Fuller test statistic
+summary(ur.df(x1, type= c("drift"), lags=1, selectlags = "Fixed"))
+#Kwiatkowski et al. Unit Root Test - H0 is that we do not have unit root. We reject that.
+summary(ur.kpss(x1))
+#Phillips & Perron Unit Root Test
+summary(ur.pp(x1))
+#we cannot reject H0 that the parameter value is actually 1
+#See other tests
+#Elliott, Rothenberg & Stock Unit Root Test
+summary(ur.ers(x1))
+#Schmidt & Phillips Unit Root Test
+summary(ur.sp(x1))
+
+```
+
+

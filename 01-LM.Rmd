@@ -1415,6 +1415,7 @@ lm2 <- lm(I(bwght/16) ~ cigs + faminc, data = bwght)
 lm3 <- lm(bwght ~ I(cigs/20) + faminc, data = bwght)
 ```
 
+
 See table \@ref(tab:regressiontable).
 
 ```{r eval=is_html_output()}
@@ -1423,13 +1424,13 @@ huxreg(lm1, lm2, lm3) %>%
 ```
 
 
+
 ```{r eval=is_latex_output(), results='asis'}
 invisible(stargazer( # invisible supresses additional output such as the package author name when the regression table is compiled
   list(lm1, 
        lm2,
        lm3)
   ,keep.stat = c("n", "rsq"), type = "latex", header = FALSE))# to have number of observations and R^2 reported}
-
 ```
 
 

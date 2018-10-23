@@ -339,6 +339,7 @@ For instance, the marginal effect of grades on the probability of attending a fo
 ### Probit model 
 
 ```{r fig21, fig.cap='The shape of the probit function is the standard normal distribution', out.width='80%', fig.asp=.75, fig.align='center'}
+par(mfrow=c(1,2))  
 x <- seq(-3,3, .2)
 plot(x, pnorm(x), type="l", xlab="b1+b2x", ylab="P[y=1]")
 plot(x, dnorm(x), type="l")
