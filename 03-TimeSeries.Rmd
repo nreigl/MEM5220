@@ -182,6 +182,8 @@ We use functions `arima` from `stats` package, `auto.arima` and `Arima` from `fo
 We also look at autocorrelation functions and partial autocorrelation functions with `acf2` command from  `astsa` package.
 
 
+
+
 ```{r eval=FALSE, include=FALSE}
 #Linke endale
 #https://a-little-book-of-r-for-time-series.readthedocs.io/en/latest/src/timeseries.html
@@ -190,10 +192,9 @@ We also look at autocorrelation functions and partial autocorrelation functions 
 ```
 
 
-## Autoregressive-integrated-moving-average model
 
 ARMA models are suited to describe stationary time series.  Wold's composition says that every covariance-stationary time series can be represented as a linear combination of lags of white noise (+ a deterministic time series).
-$X(t) = W(t) + a_1 \times W(t-1)+ a_2 \times W(t-2) + ...$
+$X(t) = W(t) + a_1 \times W(t-1)+ a_2 \times W(t-2) + \dots $
 
 If the time series is not stationary, we need to take first difference of the series.
 
