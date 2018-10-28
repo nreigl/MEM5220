@@ -25,6 +25,7 @@ PACKAGES<-c("PoEdata", # R data sets for "Principles of Econometrics" by Hill, G
 "MASS",  #  Functions and datasets to support Venables and Ripley,  "Modern Applied Statistics with S"
 "eurostat", # query data from eurostat
 "stats", 
+"dynlm", # time series regression
 "fUnitRoots", # unit root testing
 "uroot", 
 "urca", # unit root testing
@@ -175,6 +176,95 @@ plot(m, p)
 ```
 
 
+## Finite Distributed Lags Model 
+
+
+A finite distributed lag model (FDL) assumes a linear relationship between a dependent variable $y$ and several lags of an independent variable $x$.
+
+Let us consider another example, the dataset phillips_aus, which containes quarterly data on unemploymnt and inflation over the period 1987Q1 to 2009Q3.
+
+$$inf_t = \beta_1 + \beta_2 Du_t + e_t$$
+
+```{r}
+data("phillips_aus", package="PoEdata")
+phill.ts <- ts(phillips_aus, 
+               start=c(1987,1), 
+               end=c(2009,3),
+               frequency=4)
+inflation <- phill.ts[,"inf"]
+Du <- diff(phill.ts[,"u"])
+```
+
+```{r}
+par(mfrow=c(2,1))
+plot(inflation)
+plot(Du)
+dev.off()
+```
+
+
+The plots definitely show patterns in the data for both inflation and unemployment rates. But we are interested to determine if the error term in Equation
+
+
+```{r}
+phill.dyn <- dynlm(inf~diff(u),data=phill.ts)
+ehat <- resid(phill.dyn)
+kable(tidy(phill.dyn), caption="Summary of the `phillips` model")
+```
+
+Can we trust the p-value of the estimated model? Let us first create function that gives us a similar plot as Eviews. 
+
+
+
+```{r}
+
+#' Eviews plot
+#' This function creates a plot similar to the the timeseries regression plot in Eviews
+#' Source: https://stackoverflow.com/questions/12699236/how-to-create-a-graph-showing-the-predictive-model-data-and-residuals-in-r
+#' @param y dependent variable
+#' @param model fitted model
+#'
+#' @return
+#' @export
+#'
+plotModel =  function(y, model) {
+  ymodel1 = range(y, fitted(model), na.rm=TRUE)
+  ymodel2 = c(2*ymodel1[1]-ymodel1[2], ymodel1[2])
+  yres1   = range(residuals(model), na.rm=TRUE)
+  yres2   = c(yres1[1], 2*yres1[2]-yres1[1])
+  plot(y, type="l", col="red", lwd=2, ylim=ymodel2, axes=FALSE,
+       ylab="", xlab="")
+  axis(1)
+  mtext("residuals", 1, adj=0.5, line=2.5)
+  axis(2, at=pretty(ymodel1))
+  mtext("observed/modeled", 2, adj=0.75, line=2.5)
+  lines(fitted(model), col="green", lwd=2)
+  par(new=TRUE)
+  plot(residuals(model), col="blue", type="l", ylim=yres2, axes=FALSE, 
+       ylab="", xlab="")
+  axis(4, at=pretty(yres1))
+  mtext("residuals", 4, adj=0.25, line=2.5)
+  abline(h=quantile(residuals(model), probs=c(0.1,0.9)), lty=2, col="gray")
+  abline(h=0)
+  box()  
+}  
+```
+
+
+```{r}
+par(oma=c(1,1,1,2))
+plotModel(inflation, phill.dyn) # works with models which accept 'predict' and 'residuals'
+```
+
+
+```{r}
+corrgm <- acf(ehat)
+plot(corrgm)
+```
+
+
+The time series plot suggests that some patterns exists in the residuals, which is confirmed by the correlogram. The previous result suggesting that there is a significant relationship between inflation and change in unemployment rate may not be, afterall, too reliable.
+
 ## ARIMA models
 
 
@@ -193,12 +283,15 @@ We also look at autocorrelation functions and partial autocorrelation functions 
 
 
 
-ARMA models are suited to describe stationary time series.  Wold's composition says that every covariance-stationary time series can be represented as a linear combination of lags of white noise (+ a deterministic time series).
-$X(t) = W(t) + a_1 \times W(t-1)+ a_2 \times W(t-2) + \dots $
+ARMA models are suited to describe stationary time series.  Wold's composition says that every covariance-stationary time series can be represented as a linear combination of lags of white noise (and a deterministic time series).
+
+$$
+X_t = W_t + a_1 \times W_{-1}+ a_2 \times W_{-2} + \dots
+$$
 
 If the time series is not stationary, we need to take first difference of the series.
 
-ARIMA models are denoted by ARIMA(p,d,q) where p is the order of AR terms, q is the order of MA terms and d is the order of integration. Full seasonal model is denoted by SARIMA(p,d,q)x(P,D,Q)S where capital letters denote respective the seasonal orders.
+ARIMA models are denoted by ARIMA(p,d,q) where p is the order of AR terms, q is the order of MA terms and d is the order of integration. Full seasonal model is denoted by SARIMA(p,d,q) $\times$ (P,D,Q)S where capital letters denote respective the seasonal orders.
 
 
 ### Simulation of ARIMA models
@@ -426,5 +519,3 @@ summary(ur.ers(x1))
 summary(ur.sp(x1))
 
 ```
-
-

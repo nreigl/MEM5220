@@ -1,7 +1,7 @@
 ---
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
 
@@ -68,11 +68,11 @@ We start off with a simple OLS Regression. We will work with multiple data sourc
 Classic examples of quantities modeled with simple linear regression:
 
 
-* College GPA ∼ SAT scores $\beta > 0$
-* Change in GDP ∼ change in unemployment $\beta < 0$
-* House price ∼ number of bedrooms $\beta > 0$
-* Species heart weight ∼ species body weight  $\beta > 0$
-* Fatalities per year ∼ speed limit  $\beta < 0$
+* College GPA $\sim$ SAT scores $\beta > 0$
+* Change in GDP $\sim$ change in unemployment $\beta < 0$
+* House price $\sim$ number of bedrooms $\beta > 0$
+* Species heart weight $\sim$ species body weight  $\beta > 0$
+* Fatalities per year $\sim$ speed limit  $\beta < 0$
 
 
 Notice that these simple linear regressions are simplifications of
@@ -265,6 +265,8 @@ head(lm1_ceosal1$residuals) # head() just prints out the first 6 residual values
 
 
 Another way to access stored information in *lm1_ceosal1* are the `coef()`, `resid()`, and `fitted()` functions. These return the coefficients, residuals, and fitted values, respectively.
+
+
 
 
 ```{r}
@@ -609,6 +611,8 @@ legend("topleft",c("Population","OLS regressions"),
 ```
 
 
+
+
 Even though the loop solution is transparent, let us take a look at a different, more *modern* approach.  
 
 ```{r, cache=TRUE}
@@ -622,7 +626,7 @@ iteration <- function() {
   
   lm(y~x) %>% 
     broom::tidy() # %>% 
-  # filter(term == 'x') # One could only extract the slope
+  # dplyr::filter(term == 'x') # One could only extract the slope
 }
 
 # 1000 iterations of the above simulation
@@ -645,8 +649,8 @@ MC_coef<- MC_coef %>%
 ```{r fig8, fig.cap='Histogram b0 and b1 and true parameter', out.width='80%', fig.asp=.75, fig.align='center'}
 ggplot(data= MC_coef, aes(estimate)) + 
   geom_histogram() + 
-  geom_vline(data = filter(MC_coef, OLScoeff == "b0hat"), aes(xintercept=b0), colour="pink") +
-  geom_vline(data = filter(MC_coef, OLScoeff == "b1hat"), aes(xintercept=b1), colour="darkgreen") + 
+  geom_vline(data = dplyr::filter(MC_coef, OLScoeff == "b0hat"), aes(xintercept=b0), colour="pink")  +  
+  geom_vline(data = dplyr::filter(MC_coef, OLScoeff == "b1hat"), aes(xintercept=b1), colour="darkgreen")  + 
   geom_text(data=MC_coef[3,], mapping=aes(x=estimate, y=8, label=paste("True parameter: ", MC_coef[3,7])), colour = "pink") +
   geom_text(data=MC_coef[4,], mapping=aes(x=estimate, y=8, label=paste("True parameter: ", MC_coef[4,7])), colour = "darkgreen") +
   facet_wrap( ~ OLScoeff, scales = "free")   +
@@ -657,9 +661,10 @@ ggplot(data= MC_coef, aes(estimate)) +
 ```
 
 
+
 ```{r}
 b1_sim <- MC_coef %>% 
-  filter(Simulated == "b1")
+  dplyr::filter(Simulated == "b1")
 
 mean(b1_sim$estimate)
 var(b1_sim$estimate) == (sd(b1_sim$estimate))^2
@@ -888,7 +893,6 @@ autoplot(lm_wage1, which = 1:6, colour = 'dodgerblue3',
 ```
 
 
-
 ```{r}
 p1_nonlinearities <- ggplot(wage1, aes(x = educ, y = wage )) +
   geom_point()   + 
@@ -962,7 +966,7 @@ lm_hprice <- lm(price ~ sqrft, data  = hprice1)
 and a regression model that includes a squared term 
 
 \begin{equation}
-  hprice ~ \beta_{0} +   \beta_{1} sqrft + \beta_{2} sqrft^2 + u  
+hprice ~ \beta_{0} +   \beta_{1} sqrft + \beta_{2} sqrft^2 + u  
 \end{equation}
 
 
@@ -1354,21 +1358,13 @@ knitr::kable(
 ```
 
 
-
-Reporting summary statistics (transposed)
-```{r}
-descr(gpa1[,1:3], stats = c("mean", "sd", "min", "med", "max"), transpose = TRUE, 
-      omit.headings = TRUE, style = "rmarkdown")
-```
-
-Including the `knitr::kable()` wrapper
-
 ```{r}
 knitr::kable(
   descr(gpa1[,1:3], stats = c("mean", "sd", "min", "med", "max"), transpose = TRUE, 
         omit.headings = TRUE, style = "rmarkdown")
 )
 ```
+
 
 
 
@@ -1387,6 +1383,7 @@ invisible(stargazer(
   ,keep.stat = c("n", "rsq"), type = "latex", header = FALSE))# to have number of observations and R^2 reported
 ```
 
+
 ```{r, is_html_output = TRUE, results='asis'}
 stargazer(
   list(model1, 
@@ -1394,6 +1391,9 @@ stargazer(
        model3)
   ,keep.stat = c("n", "rsq"), type = "html", header = FALSE) # to have number of observations and R^2 reported
 ```
+
+
+Including the `knitr::kable()` wrapper
 
 
 ### Model Formulae
@@ -1422,6 +1422,8 @@ See table \@ref(tab:regressiontable).
 huxreg(lm1, lm2, lm3) %>%  
   set_caption('(#tab:regressiontable) Regression table')  # #tab:foo allows to reference to a table directly in a dynamic document. 
 ```
+
+
 
 
 
@@ -1483,6 +1485,7 @@ lm_hprice2 <- lm(log(price)~  log(nox) +  log(dist) + rooms + I(rooms^2) + strat
 summary(lm_hprice2)
 ```
 
+
 - The quadratic term of rooms significantly positive coefficient $\hat\beta_4$  implying that the semi-elasticity increases with more rooms
 - The negative coefficient for rooms indicates that for small number of rooms the price decreases and 
 - the positive coefficient for $rooms^2$ implies that for "large" value of rooms the price increases
@@ -1499,9 +1502,6 @@ beta3 <- lm_hprice2$coefficients[[4]]
 beta4 <- lm_hprice2$coefficients[[5]]
 -beta3 / (2 * beta4)
 ```
-
-
-
 
 #### Interaction terms
 
@@ -1523,22 +1523,11 @@ Recall that R reads **x1** times **x2** as $y \sim x_1+x_2+x_1x_2$ and **x1:x2**
 
 
 
-```{r}
-data("attend")
-```
-
 
 ```{r}
-# Estimate model with interaction effect:
-(myres<-lm(stndfnl~atndrte*priGPA+ACT+I(priGPA^2)+I(ACT^2), data=attend))
-
-# Estimate for partial effect at priGPA=2.59:
-b <- coef(myres)
-b["atndrte"] + 2.59*b["atndrte:priGPA"] 
-
-# Test partial effect for priGPA=2.59:
-linearHypothesis(myres,c("atndrte+2.59*atndrte:priGPA"))
+data(attend)
 ```
+
 
 
 ### MLR Prediction
@@ -1548,40 +1537,52 @@ data(gpa2)
 ```
 
 ```{r}
+# Estimate model with interaction effect:
+myres<-lm(stndfnl~atndrte*priGPA+ACT+I(priGPA^2)+I(ACT^2), data=attend)
+
+# Estimate for partial effect at priGPA=2.59:
+b <- coef(myres)
+b["atndrte"] + 2.59*b["atndrte:priGPA"] 
+```
+
+
+
+```{r}
+# Test partial effect for priGPA=2.59:
+Hnull <- c("atndrte+2.59*atndrte:priGPA")
+linHyp <- linearHypothesis(myres,Hnull)
+# broom::tidy(linHyp)
+```
+
+
+```{r}
 # Regress and report coefficients
 reg <- lm(colgpa~sat+hsperc+hsize+I(hsize^2),data=gpa2)
 reg
+```
 
+
+
+
+```{r}
 # Generate data set containing the regressor values for predictions
 cvalues <- data.frame(sat=1200, hsperc=30, hsize=5)
 
 # Point estimate of prediction
 predict(reg, cvalues)
+```
 
+
+```{r}
 # Point estimate and 95% confidence interval
 predict(reg, cvalues, interval = "confidence")
 
 # Define three sets of regressor variables
 cvalues <- data.frame(sat=c(1200,900,1400), hsperc=c(30,20,5), 
                       hsize=c(5,3,1))
-cvalues
+
 # Point estimates and 99% confidence intervals for these
 predict(reg, cvalues, interval = "confidence", level=0.99)
-```
-
-
-#### Prediction intervals
-
-```{r}
-# Regress (as before)
-reg <- lm(colgpa~sat+hsperc+hsize+I(hsize^2),data=gpa2)
-
-# Define three sets of regressor variables (as before)
-cvalues <- data.frame(sat=c(1200,900,1400), hsperc=c(30,20,5), 
-                      hsize=c(5,3,1))
-
-# Point estimates and 95% prediction intervals for these
-predict(reg, cvalues, interval = "prediction")
 ```
 
 
@@ -1617,27 +1618,29 @@ summary(lm2_wage1)
 4. Ceteris paribus, how much less do married females make than single females?
 5. Do the results make sense economically. What socio-economic factors could explain the results? 
 
+
 ```{r}
 df_lm2_wage1 <- tidy(lm2_wage1)
 # Singe male
 marriedmale <- df_lm2_wage1 %>%
-  filter(term == "married") %>% 
+  dplyr::filter(term == "married") %>% 
   dplyr::select(estimate) %>% 
   pull() # pull out the single coefficient value of the dataframe
 # Single female
 singlefemale <- df_lm2_wage1 %>%
-  filter(term == "female") %>% 
+  dplyr::filter(term == "female") %>% 
   dplyr::select(estimate) %>% 
   pull() # pull out the single coefficient value of the dataframe
 marriedfemale <- df_lm2_wage1 %>%
-  filter(term == "married:female") %>% 
+  dplyr::filter(term == "married:female") %>% 
   dplyr::select(estimate) %>% 
   pull() # pull out the single coefficient value of the dataframe
 married<- df_lm2_wage1 %>%
-  filter(term == "married") %>% #  
+  dplyr::filter(term == "married") %>% #  
   dplyr::select(estimate) %>% 
   pull() # pull out the single coefficient value of the dataframe
 ```
+
 
 
 A: 
@@ -1651,6 +1654,7 @@ A:
 ---
 
 
+
 ### Logical variables
 
 ```{r}
@@ -1661,6 +1665,8 @@ table(wage1$female)
 # regression with logical variable
 lm(wage ~ female+educ+exper+tenure, data=wage1)
 ```
+
+
 
 ### Factor variables
 
@@ -1680,6 +1686,8 @@ levels(CPS1985$gender)
 ```
 
 
+
+
 ```{r}
 # Directly using factor variables in regression formula:
 lm(log(wage) ~ education+experience+gender+occupation, data=CPS1985)
@@ -1693,6 +1701,9 @@ CPS1985$occupation <- relevel(CPS1985$occupation,"management")
 lm(log(wage) ~ education+experience+gender+occupation, data=CPS1985)
 ```
 
+
+
+
 ```{r}
 # Robust method (tidyverse)
 # Manually redefine the  reference category (back to default): 
@@ -1702,6 +1713,87 @@ CPS1985 <- CPS1985 %>%
 
 lm(log(wage) ~ education+experience+gender+occupation, data=CPS1985)
 ```
+
+#### Breaking a numeric variable into categories
+
+
+
+```{r}
+data(lawsch85)
+str(lawsch85$rank)
+# Define cut points for the rank
+cutpts <- c(0,10,25,40,60,100,175)
+
+# Create factor variable containing ranges for the rank
+lawsch85$rankcat <- cut(lawsch85$rank, cutpts)
+
+```
+
+
+
+```{r}
+# Display frequencies
+table(lawsch85$rankcat)
+
+```
+
+
+
+
+```{r}
+
+# Choose reference category
+lawsch85$rankcat <- relevel(lawsch85$rankcat,"(100,175]")
+
+# Run regression
+res <- lm(log(salary)~rankcat+LSAT+GPA+log(libvol)+log(cost), data=lawsch85)
+
+```
+
+
+We can perform an Anova test on the regression object
+
+
+```{r}
+
+# ANOVA table
+car::Anova(res)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+The regression results imply that graduates from the top 100 schools collect a starting salary which is around 70% higher than those of the schools below rank 100. This approximation is inaccurate with these large numbers and the coefficient of 0.7 actually implies a difference of ex(0.7-1) = 1.103 or 101.3%. 
+
+
+
+```{r}
+# Robust method (tidyverse)
+# Manually redefine the  reference category (back to default): 
+CPS1985 <- CPS1985 %>% 
+  mutate(gender = fct_relevel(gender, "female")) %>% 
+  mutate(occupation = fct_relevel(occupation, "worker"))
+```
+
+
+```{r}
+
+lm(log(wage) ~ education+experience+gender+occupation, data=CPS1985)
+
+```
+
+
+
+
+
 
 #### Breaking a numeric variable into categories
 
@@ -2231,6 +2323,7 @@ stargazer(ols,lad,  type = "text")
 ```
 
 Note: LAD inferences are only valid asymptotically, so the results in this example with $n =32$ should be taken with caution. 
+
 
 
 

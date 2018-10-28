@@ -25,7 +25,7 @@
 <meta name="author" content="Nicolas Reigl">
 
 
-<meta name="date" content="2018-10-25">
+<meta name="date" content="2018-10-28">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,6 +36,7 @@
 <link rel="next" href="timeseries.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
@@ -190,13 +191,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="3.1" data-path="timeseries.html"><a href="timeseries.html#seasonal-decomposition-of-time-series"><i class="fa fa-check"></i><b>3.1</b> Seasonal decomposition of time Series</a></li>
 <li class="chapter" data-level="3.2" data-path="timeseries.html"><a href="timeseries.html#differences-and-lags"><i class="fa fa-check"></i><b>3.2</b> Differences and lags</a></li>
 <li class="chapter" data-level="3.3" data-path="timeseries.html"><a href="timeseries.html#exponential-smoothing-and-forecasting"><i class="fa fa-check"></i><b>3.3</b> Exponential smoothing and forecasting</a></li>
-<li class="chapter" data-level="3.4" data-path="timeseries.html"><a href="timeseries.html#arima-models"><i class="fa fa-check"></i><b>3.4</b> ARIMA models</a><ul>
-<li class="chapter" data-level="3.4.1" data-path="timeseries.html"><a href="timeseries.html#simulation-of-arima-models"><i class="fa fa-check"></i><b>3.4.1</b> Simulation of ARIMA models</a></li>
-<li class="chapter" data-level="3.4.2" data-path="timeseries.html"><a href="timeseries.html#acf-and-pacf"><i class="fa fa-check"></i><b>3.4.2</b> ACF and PACF</a></li>
-<li class="chapter" data-level="3.4.3" data-path="timeseries.html"><a href="timeseries.html#estimation-of-arima-models"><i class="fa fa-check"></i><b>3.4.3</b> Estimation of ARIMA models</a></li>
-<li class="chapter" data-level="3.4.4" data-path="timeseries.html"><a href="timeseries.html#choosing-between-models"><i class="fa fa-check"></i><b>3.4.4</b> Choosing between models</a></li>
-<li class="chapter" data-level="3.4.5" data-path="timeseries.html"><a href="timeseries.html#automatic-esimation"><i class="fa fa-check"></i><b>3.4.5</b> Automatic esimation</a></li>
-<li class="chapter" data-level="3.4.6" data-path="timeseries.html"><a href="timeseries.html#testing-for-unit-root"><i class="fa fa-check"></i><b>3.4.6</b> Testing for unit root</a></li>
+<li class="chapter" data-level="3.4" data-path="timeseries.html"><a href="timeseries.html#finite-distributed-lags-model"><i class="fa fa-check"></i><b>3.4</b> Finite Distributed Lags Model</a></li>
+<li class="chapter" data-level="3.5" data-path="timeseries.html"><a href="timeseries.html#arima-models"><i class="fa fa-check"></i><b>3.5</b> ARIMA models</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="timeseries.html"><a href="timeseries.html#simulation-of-arima-models"><i class="fa fa-check"></i><b>3.5.1</b> Simulation of ARIMA models</a></li>
+<li class="chapter" data-level="3.5.2" data-path="timeseries.html"><a href="timeseries.html#acf-and-pacf"><i class="fa fa-check"></i><b>3.5.2</b> ACF and PACF</a></li>
+<li class="chapter" data-level="3.5.3" data-path="timeseries.html"><a href="timeseries.html#estimation-of-arima-models"><i class="fa fa-check"></i><b>3.5.3</b> Estimation of ARIMA models</a></li>
+<li class="chapter" data-level="3.5.4" data-path="timeseries.html"><a href="timeseries.html#choosing-between-models"><i class="fa fa-check"></i><b>3.5.4</b> Choosing between models</a></li>
+<li class="chapter" data-level="3.5.5" data-path="timeseries.html"><a href="timeseries.html#automatic-esimation"><i class="fa fa-check"></i><b>3.5.5</b> Automatic esimation</a></li>
+<li class="chapter" data-level="3.5.6" data-path="timeseries.html"><a href="timeseries.html#testing-for-unit-root"><i class="fa fa-check"></i><b>3.5.6</b> Testing for unit root</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
@@ -1096,7 +1098,7 @@ tabMCMC &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(sclo
 <span class="kw">kable</span>(tabMCMC, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,
       <span class="dt">caption=</span><span class="st">&quot;Conditional logit estimates for the &#39;cola&#39; problem&quot;</span>)</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-152">Table 2.1: </span>Conditional logit estimates for the ‘cola’ problem</caption>
+<caption><span id="tab:unnamed-chunk-159">Table 2.1: </span>Conditional logit estimates for the ‘cola’ problem</caption>
 <thead>
 <tr class="header">
 <th></th>
@@ -1160,7 +1162,7 @@ tabOprobit &lt;-<span class="st"> </span>sOprobit<span class="op">$</span>statis
 <span class="kw">kable</span>(tabOprobit, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,
       <span class="dt">caption=</span><span class="st">&quot;Ordered probit estimates for the &#39;nels&#39; problem&quot;</span>)</code></pre>
 <table>
-<caption><span id="tab:unnamed-chunk-154">Table 2.2: </span>Ordered probit estimates for the ‘nels’ problem</caption>
+<caption><span id="tab:unnamed-chunk-161">Table 2.2: </span>Ordered probit estimates for the ‘nels’ problem</caption>
 <thead>
 <tr class="header">
 <th></th>
@@ -1512,7 +1514,7 @@ Figure 2.2: Predictions from binary response models (simulated data)
 </table>
 
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(effects_logit_participation)</code></pre>
-<p><img src="MEM5220_R_files/figure-html/unnamed-chunk-161-1.png" width="672" /></p>
+<p><img src="MEM5220_R_files/figure-html/unnamed-chunk-168-1.png" width="672" /></p>
 <p>If one desires subgroup effects, simply pass a subset of data to the data argument:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(<span class="kw">margins</span>(logitres, <span class="dt">data =</span> <span class="kw">subset</span>(mroz, kidslt6 <span class="op">==</span><span class="st"> </span><span class="dv">0</span>))) <span class="co"># no kids &lt; 6 years</span></code></pre>
 <table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto; ">

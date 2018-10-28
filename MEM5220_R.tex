@@ -125,9 +125,11 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{2018-10-25}
+    \date{2018-10-28}
 
 \usepackage{booktabs}
+\usepackage{amssymb}
+\DeclareUnicodeCharacter{2212}{-}
 \usepackage{array}
 \usepackage{caption}
 \usepackage{graphicx}
@@ -201,7 +203,10 @@ Our primary resource is \citet{heiss2016using} \footnote{Heiss (2016)
   using R.}. The book is available as free
 \href{http://www.urfie.net/read.html}{online} version. For theoretical
 concepts I refer to \citet{wooldridge2015introductory}\footnote{\href{https://books.google.ee/books/about/Introductory_Econometrics_A_Modern_Appro.html?id=wUF4BwAAQBAJ\&source=kp_cover\&redir_esc=y}{Introductory
-  Econometrics: A Modern Approach}.}.
+  Econometrics: A Modern Approach}.}.\\
+For the timeseries part of the course a good reference material is
+\href{https://www.cambridge.org/pt/academic/subjects/economics/finance/introductory-econometrics-finance-3rd-edition?format=PB\&isbn=9781107661455}{Introductory
+Econometircs for Finance}.
 
 \textbf{Standing on the shoulders of giants}
 
@@ -269,11 +274,20 @@ The R session information when compiling this book is shown below:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] compiler_3.5.1  backports_1.1.2 magrittr_1.5    bookdown_0.7.20
-##  [5] rprojroot_1.3-2 tools_3.5.1     htmltools_0.3.6 rstudioapi_0.8 
-##  [9] yaml_2.2.0      Rcpp_0.12.19    stringi_1.2.4   rmarkdown_1.10 
-## [13] knitr_1.20      stringr_1.3.1   xfun_0.3        digest_0.6.18  
-## [17] evaluate_0.12
+##  [1] zip_1.0.0         Rcpp_0.12.19      cellranger_1.1.0 
+##  [4] pillar_1.3.0      compiler_3.5.1    forcats_0.3.0    
+##  [7] tools_3.5.1       htmldeps_0.1.1    digest_0.6.18    
+## [10] evaluate_0.12     tibble_1.4.2      lattice_0.20-35  
+## [13] pkgconfig_2.0.2   rlang_0.3.0.1     openxlsx_4.1.0   
+## [16] rstudioapi_0.8    curl_3.2          yaml_2.2.0       
+## [19] xfun_0.4          haven_1.1.2       rio_0.5.10       
+## [22] stringr_1.3.1     knitr_1.20        hms_0.4.2.9001   
+## [25] lmtest_0.9-36     grid_3.5.1        data.table_1.11.8
+## [28] readxl_1.1.0      dynlm_0.3-5       foreign_0.8-71   
+## [31] rmarkdown_1.10.14 bookdown_0.7.21   carData_3.0-2    
+## [34] car_3.0-2         magrittr_1.5      htmltools_0.3.6  
+## [37] abind_1.4-5       stringi_1.2.4     crayon_1.3.4     
+## [40] zoo_1.8-4
 \end{verbatim}
 
 I do not add prompts (\texttt{\textgreater{}} and \texttt{+}) to R
@@ -363,15 +377,15 @@ Classic examples of quantities modeled with simple linear regression:
 \begin{itemize}
 \tightlist
 \item
-  College GPA ∼ SAT scores \(\beta > 0\)
+  College GPA \(\sim\) SAT scores \(\beta > 0\)
 \item
-  Change in GDP ∼ change in unemployment \(\beta < 0\)
+  Change in GDP \(\sim\) change in unemployment \(\beta < 0\)
 \item
-  House price ∼ number of bedrooms \(\beta > 0\)
+  House price \(\sim\) number of bedrooms \(\beta > 0\)
 \item
-  Species heart weight ∼ species body weight \(\beta > 0\)
+  Species heart weight \(\sim\) species body weight \(\beta > 0\)
 \item
-  Fatalities per year ∼ speed limit \(\beta < 0\)
+  Fatalities per year \(\sim\) speed limit \(\beta < 0\)
 \end{itemize}
 
 Notice that these simple linear regressions are simplifications of more
@@ -1296,7 +1310,7 @@ different, more \emph{modern} approach.
   
   \KeywordTok{lm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{    }\NormalTok{broom}\OperatorTok{::}\KeywordTok{tidy}\NormalTok{() }\CommentTok{# %>% }
-  \CommentTok{# filter(term == 'x') # One could only extract the slope}
+  \CommentTok{# dplyr::filter(term == 'x') # One could only extract the slope}
 \NormalTok{\}}
 
 \CommentTok{# 1000 iterations of the above simulation}
@@ -1348,8 +1362,8 @@ and \(\beta_{1}\) the theoretical one.
 \begin{Highlighting}[]
 \KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{ MC_coef, }\KeywordTok{aes}\NormalTok{(estimate)) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{geom_histogram}\NormalTok{() }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{geom_vline}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(MC_coef, OLScoeff }\OperatorTok{==}\StringTok{ "b0hat"}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{xintercept=}\NormalTok{b0), }\DataTypeTok{colour=}\StringTok{"pink"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_vline}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{filter}\NormalTok{(MC_coef, OLScoeff }\OperatorTok{==}\StringTok{ "b1hat"}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{xintercept=}\NormalTok{b1), }\DataTypeTok{colour=}\StringTok{"darkgreen"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_vline}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ dplyr}\OperatorTok{::}\KeywordTok{filter}\NormalTok{(MC_coef, OLScoeff }\OperatorTok{==}\StringTok{ "b0hat"}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{xintercept=}\NormalTok{b0), }\DataTypeTok{colour=}\StringTok{"pink"}\NormalTok{)  }\OperatorTok{+}\StringTok{  }
+\StringTok{  }\KeywordTok{geom_vline}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ dplyr}\OperatorTok{::}\KeywordTok{filter}\NormalTok{(MC_coef, OLScoeff }\OperatorTok{==}\StringTok{ "b1hat"}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{xintercept=}\NormalTok{b1), }\DataTypeTok{colour=}\StringTok{"darkgreen"}\NormalTok{)  }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{geom_text}\NormalTok{(}\DataTypeTok{data=}\NormalTok{MC_coef[}\DecValTok{3}\NormalTok{,], }\DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{estimate, }\DataTypeTok{y=}\DecValTok{8}\NormalTok{, }\DataTypeTok{label=}\KeywordTok{paste}\NormalTok{(}\StringTok{"True parameter: "}\NormalTok{, MC_coef[}\DecValTok{3}\NormalTok{,}\DecValTok{7}\NormalTok{])), }\DataTypeTok{colour =} \StringTok{"pink"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom_text}\NormalTok{(}\DataTypeTok{data=}\NormalTok{MC_coef[}\DecValTok{4}\NormalTok{,], }\DataTypeTok{mapping=}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{estimate, }\DataTypeTok{y=}\DecValTok{8}\NormalTok{, }\DataTypeTok{label=}\KeywordTok{paste}\NormalTok{(}\StringTok{"True parameter: "}\NormalTok{, MC_coef[}\DecValTok{4}\NormalTok{,}\DecValTok{7}\NormalTok{])), }\DataTypeTok{colour =} \StringTok{"darkgreen"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{facet_wrap}\NormalTok{( }\OperatorTok{~}\StringTok{ }\NormalTok{OLScoeff, }\DataTypeTok{scales =} \StringTok{"free"}\NormalTok{)   }\OperatorTok{+}
@@ -1375,7 +1389,7 @@ and \(\beta_{1}\) the theoretical one.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{b1_sim <-}\StringTok{ }\NormalTok{MC_coef }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{(Simulated }\OperatorTok{==}\StringTok{ "b1"}\NormalTok{)}
+\StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{filter}\NormalTok{(Simulated }\OperatorTok{==}\StringTok{ "b1"}\NormalTok{)}
 
 \KeywordTok{mean}\NormalTok{(b1_sim}\OperatorTok{$}\NormalTok{estimate)}
 \end{Highlighting}
@@ -1969,7 +1983,7 @@ hprice ~ \beta_{0} +   \beta_{1} sqrft + u
 and a regression model that includes a squared term
 
 \begin{equation}
-  hprice ~ \beta_{0} +   \beta_{1} sqrft + \beta_{2} sqrft^2 + u  
+hprice ~ \beta_{0} +   \beta_{1} sqrft + \beta_{2} sqrft^2 + u  
 \end{equation}
 
 \begin{Shaded}
@@ -2800,31 +2814,6 @@ age & soph & junior & senior & senior5 & male & campus & business\\
 \end{tabular}
 \end{table}
 
-Reporting summary statistics (transposed)
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{descr}\NormalTok{(gpa1[,}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{], }\DataTypeTok{stats =} \KeywordTok{c}\NormalTok{(}\StringTok{"mean"}\NormalTok{, }\StringTok{"sd"}\NormalTok{, }\StringTok{"min"}\NormalTok{, }\StringTok{"med"}\NormalTok{, }\StringTok{"max"}\NormalTok{), }\DataTypeTok{transpose =} \OtherTok{TRUE}\NormalTok{, }
-      \DataTypeTok{omit.headings =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{style =} \StringTok{"rmarkdown"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\textbackslash{}begin\{table\}{[}h{]}
-\textbackslash{}begin\{raggedright\}
-
-\providecommand{\huxb}[2][0,0,0]{\arrayrulecolor[RGB]{#1}\global\arrayrulewidth=#2pt}
-    \providecommand{\huxvb}[2][0,0,0]{\color[RGB]{#1}\vrule width #2pt}
-    \providecommand{\huxtpad}[1]{\rule{0pt}{\baselineskip+#1}}
-    \providecommand{\huxbpad}[1]{\rule[-#1]{0pt}{#1}}
-  \begin{tabularx}{0.455555555555556\textwidth}{p{0.0911111111111111\textwidth} p{0.0911111111111111\textwidth} p{0.0911111111111111\textwidth} p{0.0911111111111111\textwidth} p{0.0911111111111111\textwidth}}
-
-
-\par
-
-\textbackslash{}end\{raggedright\} \textbackslash{}end\{table\}
-
-Including the \texttt{knitr::kable()} wrapper
-
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{knitr}\OperatorTok{::}\KeywordTok{kable}\NormalTok{(}
@@ -2979,6 +2968,8 @@ R2
 Note:
 
 \emph{p\textless{}0.1; \textbf{p\textless{}0.05; }}p\textless{}0.01
+
+Including the \texttt{knitr::kable()} wrapper
 
 \hypertarget{model-formulae}{%
 \subsection{Model Formulae}\label{model-formulae}}
@@ -3225,32 +3216,24 @@ Recall that R reads \textbf{x1} times \textbf{x2} as
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{data}\NormalTok{(}\StringTok{"attend"}\NormalTok{)}
+\KeywordTok{data}\NormalTok{(attend)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{mlr-prediction}{%
+\subsection{MLR Prediction}\label{mlr-prediction}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{data}\NormalTok{(gpa2)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Estimate model with interaction effect:}
-\NormalTok{(myres<-}\KeywordTok{lm}\NormalTok{(stndfnl}\OperatorTok{~}\NormalTok{atndrte}\OperatorTok{*}\NormalTok{priGPA}\OperatorTok{+}\NormalTok{ACT}\OperatorTok{+}\KeywordTok{I}\NormalTok{(priGPA}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{+}\KeywordTok{I}\NormalTok{(ACT}\OperatorTok{^}\DecValTok{2}\NormalTok{), }\DataTypeTok{data=}\NormalTok{attend))}
-\end{Highlighting}
-\end{Shaded}
+\NormalTok{myres<-}\KeywordTok{lm}\NormalTok{(stndfnl}\OperatorTok{~}\NormalTok{atndrte}\OperatorTok{*}\NormalTok{priGPA}\OperatorTok{+}\NormalTok{ACT}\OperatorTok{+}\KeywordTok{I}\NormalTok{(priGPA}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{+}\KeywordTok{I}\NormalTok{(ACT}\OperatorTok{^}\DecValTok{2}\NormalTok{), }\DataTypeTok{data=}\NormalTok{attend)}
 
-\begin{verbatim}
-## 
-## Call:
-## lm(formula = stndfnl ~ atndrte * priGPA + ACT + I(priGPA^2) + 
-##     I(ACT^2), data = attend)
-## 
-## Coefficients:
-##    (Intercept)         atndrte          priGPA             ACT  
-##       2.050293       -0.006713       -1.628540       -0.128039  
-##    I(priGPA^2)        I(ACT^2)  atndrte:priGPA  
-##       0.295905        0.004533        0.005586
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \CommentTok{# Estimate for partial effect at priGPA=2.59:}
 \NormalTok{b <-}\StringTok{ }\KeywordTok{coef}\NormalTok{(myres)}
 \NormalTok{b[}\StringTok{"atndrte"}\NormalTok{] }\OperatorTok{+}\StringTok{ }\FloatTok{2.59}\OperatorTok{*}\NormalTok{b[}\StringTok{"atndrte:priGPA"}\NormalTok{] }
@@ -3265,30 +3248,9 @@ Recall that R reads \textbf{x1} times \textbf{x2} as
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Test partial effect for priGPA=2.59:}
-\KeywordTok{linearHypothesis}\NormalTok{(myres,}\KeywordTok{c}\NormalTok{(}\StringTok{"atndrte+2.59*atndrte:priGPA"}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-
-\textbackslash{}begin\{table\}{[}h{]}
-\textbackslash{}begin\{raggedright\}
-
-\providecommand{\huxb}[2][0,0,0]{\arrayrulecolor[RGB]{#1}\global\arrayrulewidth=#2pt}
-    \providecommand{\huxvb}[2][0,0,0]{\color[RGB]{#1}\vrule width #2pt}
-    \providecommand{\huxtpad}[1]{\rule{0pt}{\baselineskip+#1}}
-    \providecommand{\huxbpad}[1]{\rule[-#1]{0pt}{#1}}
-  \begin{tabularx}{0.788888888888889\textwidth}{p{0.131481481481481\textwidth} p{0.131481481481481\textwidth} p{0.131481481481481\textwidth} p{0.131481481481481\textwidth} p{0.131481481481481\textwidth} p{0.131481481481481\textwidth}}
-
-
-\par
-
-\textbackslash{}end\{raggedright\} \textbackslash{}end\{table\}
-
-\hypertarget{mlr-prediction}{%
-\subsection{MLR Prediction}\label{mlr-prediction}}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{data}\NormalTok{(gpa2)}
+\NormalTok{Hnull <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"atndrte+2.59*atndrte:priGPA"}\NormalTok{)}
+\NormalTok{linHyp <-}\StringTok{ }\KeywordTok{linearHypothesis}\NormalTok{(myres,Hnull)}
+\CommentTok{# broom::tidy(linHyp)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -3342,26 +3304,7 @@ Recall that R reads \textbf{x1} times \textbf{x2} as
 \CommentTok{# Define three sets of regressor variables}
 \NormalTok{cvalues <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{sat=}\KeywordTok{c}\NormalTok{(}\DecValTok{1200}\NormalTok{,}\DecValTok{900}\NormalTok{,}\DecValTok{1400}\NormalTok{), }\DataTypeTok{hsperc=}\KeywordTok{c}\NormalTok{(}\DecValTok{30}\NormalTok{,}\DecValTok{20}\NormalTok{,}\DecValTok{5}\NormalTok{), }
                       \DataTypeTok{hsize=}\KeywordTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{1}\NormalTok{))}
-\NormalTok{cvalues}
-\end{Highlighting}
-\end{Shaded}
 
-\textbackslash{}begin\{table\}{[}h{]}
-\textbackslash{}begin\{raggedright\}
-
-\providecommand{\huxb}[2][0,0,0]{\arrayrulecolor[RGB]{#1}\global\arrayrulewidth=#2pt}
-    \providecommand{\huxvb}[2][0,0,0]{\color[RGB]{#1}\vrule width #2pt}
-    \providecommand{\huxtpad}[1]{\rule{0pt}{\baselineskip+#1}}
-    \providecommand{\huxbpad}[1]{\rule[-#1]{0pt}{#1}}
-  \begin{tabularx}{0.2\textwidth}{p{0.0666666666666667\textwidth} p{0.0666666666666667\textwidth} p{0.0666666666666667\textwidth}}
-
-
-\par
-
-\textbackslash{}end\{raggedright\} \textbackslash{}end\{table\}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \CommentTok{# Point estimates and 99% confidence intervals for these}
 \KeywordTok{predict}\NormalTok{(reg, cvalues, }\DataTypeTok{interval =} \StringTok{"confidence"}\NormalTok{, }\DataTypeTok{level=}\FloatTok{0.99}\NormalTok{)}
 \end{Highlighting}
@@ -3372,30 +3315,6 @@ Recall that R reads \textbf{x1} times \textbf{x2} as
 ## 1 2.700075 2.648850 2.751301
 ## 2 2.425282 2.388540 2.462025
 ## 3 3.457448 3.385572 3.529325
-\end{verbatim}
-
-\hypertarget{prediction-intervals}{%
-\subsubsection{Prediction intervals}\label{prediction-intervals}}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{# Regress (as before)}
-\NormalTok{reg <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(colgpa}\OperatorTok{~}\NormalTok{sat}\OperatorTok{+}\NormalTok{hsperc}\OperatorTok{+}\NormalTok{hsize}\OperatorTok{+}\KeywordTok{I}\NormalTok{(hsize}\OperatorTok{^}\DecValTok{2}\NormalTok{),}\DataTypeTok{data=}\NormalTok{gpa2)}
-
-\CommentTok{# Define three sets of regressor variables (as before)}
-\NormalTok{cvalues <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{sat=}\KeywordTok{c}\NormalTok{(}\DecValTok{1200}\NormalTok{,}\DecValTok{900}\NormalTok{,}\DecValTok{1400}\NormalTok{), }\DataTypeTok{hsperc=}\KeywordTok{c}\NormalTok{(}\DecValTok{30}\NormalTok{,}\DecValTok{20}\NormalTok{,}\DecValTok{5}\NormalTok{), }
-                      \DataTypeTok{hsize=}\KeywordTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{1}\NormalTok{))}
-
-\CommentTok{# Point estimates and 95% prediction intervals for these}
-\KeywordTok{predict}\NormalTok{(reg, cvalues, }\DataTypeTok{interval =} \StringTok{"prediction"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-##        fit      lwr      upr
-## 1 2.700075 1.601749 3.798402
-## 2 2.425282 1.327292 3.523273
-## 3 3.457448 2.358452 4.556444
 \end{verbatim}
 
 \hypertarget{mlr-analysis-with-qualitative-regressors}{%
@@ -3509,20 +3428,20 @@ education, experience, and tenure.
 \NormalTok{df_lm2_wage1 <-}\StringTok{ }\KeywordTok{tidy}\NormalTok{(lm2_wage1)}
 \CommentTok{# Singe male}
 \NormalTok{marriedmale <-}\StringTok{ }\NormalTok{df_lm2_wage1 }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "married"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "married"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{select}\NormalTok{(estimate) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{pull}\NormalTok{() }\CommentTok{# pull out the single coefficient value of the dataframe}
 \CommentTok{# Single female}
 \NormalTok{singlefemale <-}\StringTok{ }\NormalTok{df_lm2_wage1 }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "female"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "female"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{select}\NormalTok{(estimate) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{pull}\NormalTok{() }\CommentTok{# pull out the single coefficient value of the dataframe}
 \NormalTok{marriedfemale <-}\StringTok{ }\NormalTok{df_lm2_wage1 }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "married:female"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "married:female"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{select}\NormalTok{(estimate) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{pull}\NormalTok{() }\CommentTok{# pull out the single coefficient value of the dataframe}
 \NormalTok{married<-}\StringTok{ }\NormalTok{df_lm2_wage1 }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "married"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\CommentTok{#  }
+\StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{filter}\NormalTok{(term }\OperatorTok{==}\StringTok{ "married"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\CommentTok{#  }
 \StringTok{  }\NormalTok{dplyr}\OperatorTok{::}\KeywordTok{select}\NormalTok{(estimate) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{pull}\NormalTok{() }\CommentTok{# pull out the single coefficient value of the dataframe}
 \end{Highlighting}
@@ -3748,6 +3667,114 @@ has \(g\) outcomes.
 \hypertarget{breaking-a-numeric-variable-into-categories}{%
 \subsubsection{Breaking a numeric variable into
 categories}\label{breaking-a-numeric-variable-into-categories}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{data}\NormalTok{(lawsch85)}
+\KeywordTok{str}\NormalTok{(lawsch85}\OperatorTok{$}\NormalTok{rank)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  int [1:156] 128 104 34 49 95 98 124 157 145 91 ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Define cut points for the rank}
+\NormalTok{cutpts <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{10}\NormalTok{,}\DecValTok{25}\NormalTok{,}\DecValTok{40}\NormalTok{,}\DecValTok{60}\NormalTok{,}\DecValTok{100}\NormalTok{,}\DecValTok{175}\NormalTok{)}
+
+\CommentTok{# Create factor variable containing ranges for the rank}
+\NormalTok{lawsch85}\OperatorTok{$}\NormalTok{rankcat <-}\StringTok{ }\KeywordTok{cut}\NormalTok{(lawsch85}\OperatorTok{$}\NormalTok{rank, cutpts)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Display frequencies}
+\KeywordTok{table}\NormalTok{(lawsch85}\OperatorTok{$}\NormalTok{rankcat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##    (0,10]   (10,25]   (25,40]   (40,60]  (60,100] (100,175] 
+##        10        16        13        18        37        62
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Choose reference category}
+\NormalTok{lawsch85}\OperatorTok{$}\NormalTok{rankcat <-}\StringTok{ }\KeywordTok{relevel}\NormalTok{(lawsch85}\OperatorTok{$}\NormalTok{rankcat,}\StringTok{"(100,175]"}\NormalTok{)}
+
+\CommentTok{# Run regression}
+\NormalTok{res <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(}\KeywordTok{log}\NormalTok{(salary)}\OperatorTok{~}\NormalTok{rankcat}\OperatorTok{+}\NormalTok{LSAT}\OperatorTok{+}\NormalTok{GPA}\OperatorTok{+}\KeywordTok{log}\NormalTok{(libvol)}\OperatorTok{+}\KeywordTok{log}\NormalTok{(cost), }\DataTypeTok{data=}\NormalTok{lawsch85)}
+\end{Highlighting}
+\end{Shaded}
+
+We can perform an Anova test on the regression object
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# ANOVA table}
+\NormalTok{car}\OperatorTok{::}\KeywordTok{Anova}\NormalTok{(res)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbackslash{}begin\{table\}{[}h{]}
+\textbackslash{}begin\{raggedright\}
+
+\providecommand{\huxb}[2][0,0,0]{\arrayrulecolor[RGB]{#1}\global\arrayrulewidth=#2pt}
+    \providecommand{\huxvb}[2][0,0,0]{\color[RGB]{#1}\vrule width #2pt}
+    \providecommand{\huxtpad}[1]{\rule{0pt}{\baselineskip+#1}}
+    \providecommand{\huxbpad}[1]{\rule[-#1]{0pt}{#1}}
+  \begin{tabularx}{0.688888888888889\textwidth}{p{0.172222222222222\textwidth} p{0.172222222222222\textwidth} p{0.172222222222222\textwidth} p{0.172222222222222\textwidth}}
+
+
+\par
+
+\textbackslash{}end\{raggedright\} \textbackslash{}end\{table\}
+
+The regression results imply that graduates from the top 100 schools
+collect a starting salary which is around 70\% higher than those of the
+schools below rank 100. This approximation is inaccurate with these
+large numbers and the coefficient of 0.7 actually implies a difference
+of ex(0.7-1) = 1.103 or 101.3\%.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Robust method (tidyverse)}
+\CommentTok{# Manually redefine the  reference category (back to default): }
+\NormalTok{CPS1985 <-}\StringTok{ }\NormalTok{CPS1985 }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{gender =} \KeywordTok{fct_relevel}\NormalTok{(gender, }\StringTok{"female"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{occupation =} \KeywordTok{fct_relevel}\NormalTok{(occupation, }\StringTok{"worker"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{lm}\NormalTok{(}\KeywordTok{log}\NormalTok{(wage) }\OperatorTok{~}\StringTok{ }\NormalTok{education}\OperatorTok{+}\NormalTok{experience}\OperatorTok{+}\NormalTok{gender}\OperatorTok{+}\NormalTok{occupation, }\DataTypeTok{data=}\NormalTok{CPS1985)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = log(wage) ~ education + experience + gender + occupation, 
+##     data = CPS1985)
+## 
+## Coefficients:
+##          (Intercept)             education            experience  
+##              0.75244               0.07586               0.01188  
+##           gendermale  occupationmanagement   occupationtechnical  
+##              0.22385               0.15254               0.14246  
+##   occupationservices      occupationoffice       occupationsales  
+##             -0.21004              -0.05477              -0.20757
+\end{verbatim}
+
+\hypertarget{breaking-a-numeric-variable-into-categories-1}{%
+\subsubsection{Breaking a numeric variable into
+categories}\label{breaking-a-numeric-variable-into-categories-1}}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -4753,7 +4780,7 @@ methods.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-132-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-139-1.pdf}
 
 An O3 plot of stackloss using the methods HDoutliers, adjOutlyingness
 and DectectDeviatingCells. The darker the cell, the more methods agree.
@@ -4798,7 +4825,7 @@ different measures of leverage and influence for all observations.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-133-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-140-1.pdf}
 
 \hypertarget{missing-data}{%
 \subsubsection{Missing Data}\label{missing-data}}
@@ -5911,7 +5938,7 @@ is not shown as it is the baseline choice.
 
 \begin{table}
 
-\caption{\label{tab:unnamed-chunk-152}Conditional logit estimates for the 'cola' problem}
+\caption{\label{tab:unnamed-chunk-159}Conditional logit estimates for the 'cola' problem}
 \centering
 \begin{tabular}[t]{l|c|c}
 \hline
@@ -5994,7 +6021,7 @@ The R package \textbf{MCMCpack} is again used here, with its function
 
 \begin{table}
 
-\caption{\label{tab:unnamed-chunk-154}Ordered probit estimates for the 'nels' problem}
+\caption{\label{tab:unnamed-chunk-161}Ordered probit estimates for the 'nels' problem}
 \centering
 \begin{tabular}[t]{l|c|c}
 \hline
@@ -6378,7 +6405,7 @@ one has to use \texttt{margins()} command:
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-161-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-168-1.pdf}
 
 If one desires subgroup effects, simply pass a subset of data to the
 data argument:
@@ -6853,7 +6880,7 @@ We download monthly CPI from Eurostat
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-171-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-178-1.pdf}
 
 The \texttt{data.frame} object is not designed to work efficiently with
 time series data. The default plotting methods in R are not designed for
@@ -6976,7 +7003,7 @@ you. If the date does not matter, then simple time series object
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-172-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-179-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7109,7 +7136,7 @@ illustrate how we can use the components.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-173-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-180-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7120,7 +7147,7 @@ illustrate how we can use the components.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-173-2.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-180-2.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7133,7 +7160,7 @@ illustrate how we can use the components.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-173-3.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-180-3.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7142,7 +7169,7 @@ illustrate how we can use the components.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-173-4.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-180-4.pdf}
 
 \begin{verbatim}
 ##         ACF  PACF
@@ -7241,7 +7268,7 @@ annual inflation rates.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-174-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-181-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7371,7 +7398,7 @@ annual inflation rates.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-174-2.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-181-2.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7402,7 +7429,7 @@ that we must not have missing data.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-175-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-182-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7446,7 +7473,7 @@ that we must not have missing data.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-175-2.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-182-2.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7456,7 +7483,7 @@ that we must not have missing data.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-175-3.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-182-3.pdf}
 
 \hypertarget{arima-models}{%
 \section{ARIMA models}\label{arima-models}}
@@ -7468,17 +7495,20 @@ functions with \texttt{acf2} command from \texttt{astsa} package.
 
 ARMA models are suited to describe stationary time series. Wold's
 composition says that every covariance-stationary time series can be
-represented as a linear combination of lags of white noise (+ a
-deterministic time series). \$X(t) = W(t) + a\_1 \times W(t-1)+ a\_2
-\times W(t-2) + \dots \$
+represented as a linear combination of lags of white noise (and a
+deterministic time series).
+
+\[
+X_t = W_t + a_1 \times W_{-1}+ a_2 \times W_{-2} + \dots
+\]
 
 If the time series is not stationary, we need to take first difference
 of the series.
 
 ARIMA models are denoted by ARIMA(p,d,q) where p is the order of AR
 terms, q is the order of MA terms and d is the order of integration.
-Full seasonal model is denoted by SARIMA(p,d,q)x(P,D,Q)S where capital
-letters denote respective the seasonal orders.
+Full seasonal model is denoted by SARIMA(p,d,q) \(\times\) (P,D,Q)S
+where capital letters denote respective the seasonal orders.
 
 \hypertarget{simulation-of-arima-models}{%
 \subsection{Simulation of ARIMA
@@ -7495,7 +7525,7 @@ To simulate ARMA models we use function \texttt{arima.sim}.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-177-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-184-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7505,7 +7535,7 @@ To simulate ARMA models we use function \texttt{arima.sim}.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-177-2.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-184-2.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7515,7 +7545,7 @@ To simulate ARMA models we use function \texttt{arima.sim}.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-177-3.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-184-3.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7525,7 +7555,7 @@ To simulate ARMA models we use function \texttt{arima.sim}.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-177-4.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-184-4.pdf}
 
 \hypertarget{acf-and-pacf}{%
 \subsection{ACF and PACF}\label{acf-and-pacf}}
@@ -7547,7 +7577,7 @@ autocorrelation functions (ACF) and partial autocorrelation functions
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-178-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-185-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7578,7 +7608,7 @@ of the simulated time series follow expected pattern.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-179-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-186-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7587,7 +7617,7 @@ of the simulated time series follow expected pattern.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-179-2.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-186-2.pdf}
 
 \begin{verbatim}
 ##         ACF  PACF
@@ -7623,7 +7653,7 @@ of the simulated time series follow expected pattern.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-179-3.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-186-3.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7631,7 +7661,7 @@ of the simulated time series follow expected pattern.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-179-4.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-186-4.pdf}
 
 \begin{verbatim}
 ##         ACF  PACF
@@ -7665,7 +7695,7 @@ of the simulated time series follow expected pattern.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-179-5.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-186-5.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7673,7 +7703,7 @@ of the simulated time series follow expected pattern.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-179-6.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-186-6.pdf}
 
 \begin{verbatim}
 ##         ACF  PACF
@@ -7707,7 +7737,7 @@ of the simulated time series follow expected pattern.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-179-7.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-186-7.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7715,7 +7745,7 @@ of the simulated time series follow expected pattern.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-179-8.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-186-8.pdf}
 
 \begin{verbatim}
 ##         ACF  PACF
@@ -7765,7 +7795,7 @@ Let's simulate a model and then estimate it with \texttt{arima} and
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-180-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-187-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7806,7 +7836,7 @@ Let's simulate a model and then estimate it with \texttt{arima} and
 ## converged
 \end{verbatim}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-180-2.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-187-2.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7851,7 +7881,7 @@ Let's simulate a model and then estimate it with \texttt{arima} and
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-180-3.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-187-3.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -7882,7 +7912,7 @@ Let's simulate a model and then estimate it with \texttt{arima} and
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-180-4.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-187-4.pdf}
 
 \hypertarget{choosing-between-models}{%
 \subsection{Choosing between models}\label{choosing-between-models}}
@@ -7955,7 +7985,7 @@ and to identify outliers.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-181-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-188-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8118,7 +8148,7 @@ test. We can also use package \texttt{urca}, which includes many tests.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-184-1.pdf}
+\includegraphics{MEM5220_R_files/figure-latex/unnamed-chunk-191-1.pdf}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -8144,7 +8174,7 @@ test. We can also use package \texttt{urca}, which includes many tests.
 ##     0.2951 
 ## 
 ## Description:
-##  Thu Oct 25 16:19:23 2018 by user:
+##  Sun Oct 28 21:27:56 2018 by user:
 \end{verbatim}
 
 \begin{Shaded}
@@ -8170,7 +8200,7 @@ test. We can also use package \texttt{urca}, which includes many tests.
 ##     0.1348 
 ## 
 ## Description:
-##  Thu Oct 25 16:19:23 2018 by user:
+##  Sun Oct 28 21:27:56 2018 by user:
 \end{verbatim}
 
 \begin{Shaded}
@@ -8225,7 +8255,7 @@ test. We can also use package \texttt{urca}, which includes many tests.
 ##     0.5049 
 ## 
 ## Description:
-##  Thu Oct 25 16:19:23 2018 by user:
+##  Sun Oct 28 21:27:56 2018 by user:
 \end{verbatim}
 
 \begin{Shaded}
@@ -8280,7 +8310,7 @@ test. We can also use package \texttt{urca}, which includes many tests.
 ##     0.2951 
 ## 
 ## Description:
-##  Thu Oct 25 16:19:23 2018 by user:
+##  Sun Oct 28 21:27:56 2018 by user:
 \end{verbatim}
 
 \begin{Shaded}
@@ -8334,7 +8364,7 @@ test. We can also use package \texttt{urca}, which includes many tests.
 ##     n: 0.8346 
 ## 
 ## Description:
-##  Thu Oct 25 16:19:23 2018 by user:
+##  Sun Oct 28 21:27:56 2018 by user:
 \end{verbatim}
 
 \begin{Shaded}
@@ -8532,6 +8562,9 @@ test. We can also use package \texttt{urca}, which includes many tests.
 ## Critical value for a significance level of 0.01 
 ## is: -3.61
 \end{verbatim}
+
+to do: - include statistc of acp and pacf similar to eviews - dynlm -
+plot similar to eviews
 
 \bibliography{MEM5220.bib,packages.bib}
 

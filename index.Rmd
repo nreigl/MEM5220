@@ -51,6 +51,7 @@ Install R first and then proceed with RStudio. Afterwards start RStudio. For acc
 
 
 Our primary resource is @heiss2016using ^[Heiss (2016) builds on the popular Introductory Econometrics by Wooldridge (2016) and demonstrates how to replicate the applications discussed therein using R.]. The book is available as free [online](http://www.urfie.net/read.html) version. For theoretical concepts I refer to @wooldridge2015introductory^[[Introductory Econometrics: A Modern Approach](https://books.google.ee/books/about/Introductory_Econometrics_A_Modern_Appro.html?id=wUF4BwAAQBAJ&source=kp_cover&redir_esc=y).].  
+For the timeseries part of the course a good reference material is  [Introductory Econometircs for Finance](https://www.cambridge.org/pt/academic/subjects/economics/finance/introductory-econometrics-finance-3rd-edition?format=PB&isbn=9781107661455). 
 
 **Standing on the shoulders of giants**
 

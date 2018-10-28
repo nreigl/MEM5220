@@ -25,7 +25,7 @@
 <meta name="author" content="Nicolas Reigl">
 
 
-<meta name="date" content="2018-10-25">
+<meta name="date" content="2018-10-28">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,6 +36,7 @@
 <link rel="next" href="linearregression.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
@@ -190,13 +191,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="3.1" data-path="timeseries.html"><a href="timeseries.html#seasonal-decomposition-of-time-series"><i class="fa fa-check"></i><b>3.1</b> Seasonal decomposition of time Series</a></li>
 <li class="chapter" data-level="3.2" data-path="timeseries.html"><a href="timeseries.html#differences-and-lags"><i class="fa fa-check"></i><b>3.2</b> Differences and lags</a></li>
 <li class="chapter" data-level="3.3" data-path="timeseries.html"><a href="timeseries.html#exponential-smoothing-and-forecasting"><i class="fa fa-check"></i><b>3.3</b> Exponential smoothing and forecasting</a></li>
-<li class="chapter" data-level="3.4" data-path="timeseries.html"><a href="timeseries.html#arima-models"><i class="fa fa-check"></i><b>3.4</b> ARIMA models</a><ul>
-<li class="chapter" data-level="3.4.1" data-path="timeseries.html"><a href="timeseries.html#simulation-of-arima-models"><i class="fa fa-check"></i><b>3.4.1</b> Simulation of ARIMA models</a></li>
-<li class="chapter" data-level="3.4.2" data-path="timeseries.html"><a href="timeseries.html#acf-and-pacf"><i class="fa fa-check"></i><b>3.4.2</b> ACF and PACF</a></li>
-<li class="chapter" data-level="3.4.3" data-path="timeseries.html"><a href="timeseries.html#estimation-of-arima-models"><i class="fa fa-check"></i><b>3.4.3</b> Estimation of ARIMA models</a></li>
-<li class="chapter" data-level="3.4.4" data-path="timeseries.html"><a href="timeseries.html#choosing-between-models"><i class="fa fa-check"></i><b>3.4.4</b> Choosing between models</a></li>
-<li class="chapter" data-level="3.4.5" data-path="timeseries.html"><a href="timeseries.html#automatic-esimation"><i class="fa fa-check"></i><b>3.4.5</b> Automatic esimation</a></li>
-<li class="chapter" data-level="3.4.6" data-path="timeseries.html"><a href="timeseries.html#testing-for-unit-root"><i class="fa fa-check"></i><b>3.4.6</b> Testing for unit root</a></li>
+<li class="chapter" data-level="3.4" data-path="timeseries.html"><a href="timeseries.html#finite-distributed-lags-model"><i class="fa fa-check"></i><b>3.4</b> Finite Distributed Lags Model</a></li>
+<li class="chapter" data-level="3.5" data-path="timeseries.html"><a href="timeseries.html#arima-models"><i class="fa fa-check"></i><b>3.5</b> ARIMA models</a><ul>
+<li class="chapter" data-level="3.5.1" data-path="timeseries.html"><a href="timeseries.html#simulation-of-arima-models"><i class="fa fa-check"></i><b>3.5.1</b> Simulation of ARIMA models</a></li>
+<li class="chapter" data-level="3.5.2" data-path="timeseries.html"><a href="timeseries.html#acf-and-pacf"><i class="fa fa-check"></i><b>3.5.2</b> ACF and PACF</a></li>
+<li class="chapter" data-level="3.5.3" data-path="timeseries.html"><a href="timeseries.html#estimation-of-arima-models"><i class="fa fa-check"></i><b>3.5.3</b> Estimation of ARIMA models</a></li>
+<li class="chapter" data-level="3.5.4" data-path="timeseries.html"><a href="timeseries.html#choosing-between-models"><i class="fa fa-check"></i><b>3.5.4</b> Choosing between models</a></li>
+<li class="chapter" data-level="3.5.5" data-path="timeseries.html"><a href="timeseries.html#automatic-esimation"><i class="fa fa-check"></i><b>3.5.5</b> Automatic esimation</a></li>
+<li class="chapter" data-level="3.5.6" data-path="timeseries.html"><a href="timeseries.html#testing-for-unit-root"><i class="fa fa-check"></i><b>3.5.6</b> Testing for unit root</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
@@ -223,7 +225,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="header">
 <h1 class="title">MEM52220 - Applied Econometrics</h1>
 <p class="author"><em>Nicolas Reigl</em></p>
-<p class="date"><em>2018-10-25</em></p>
+<p class="date"><em>2018-10-28</em></p>
 </div>
 <div id="introduction" class="section level1 unnumbered">
 <h1>Introduction</h1>
@@ -250,7 +252,8 @@ Figure .: Normal and simulated Gaussian densities on a regression line
 </div>
 <div id="resources" class="section level2 unnumbered">
 <h2>Resources</h2>
-<p>Our primary resource is <span class="citation">Heiss (<a href="#ref-heiss2016using">2016</a>)</span>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> The book is available as free <a href="http://www.urfie.net/read.html">online</a> version. For theoretical concepts I refer to <span class="citation">Wooldridge (<a href="#ref-wooldridge2015introductory">2015</a>)</span><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>.</p>
+<p>Our primary resource is <span class="citation">Heiss (<a href="#ref-heiss2016using">2016</a>)</span>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> The book is available as free <a href="http://www.urfie.net/read.html">online</a> version. For theoretical concepts I refer to <span class="citation">Wooldridge (<a href="#ref-wooldridge2015introductory">2015</a>)</span><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>.<br />
+For the timeseries part of the course a good reference material is <a href="https://www.cambridge.org/pt/academic/subjects/economics/finance/introductory-econometrics-finance-3rd-edition?format=PB&amp;isbn=9781107661455">Introductory Econometircs for Finance</a>.</p>
 <p><strong>Standing on the shoulders of giants</strong></p>
 <p>This lecture material would not possible without many other open-source econometrics teaching materials and of course the R package developers. In addition to the main resources, examples and code of this workbook have been drawn from a number of free econometrics eBooks, blogs, R-vignette help pages and other researchers teaching materials.</p>
 <div id="attribution" class="section level3 unnumbered">
@@ -284,11 +287,20 @@ Figure .: Normal and simulated Gaussian densities on a regression line
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.19    bookdown_0.7.20 digest_0.6.18   rprojroot_1.3-2
-##  [5] backports_1.1.2 magrittr_1.5    evaluate_0.12   highr_0.7      
-##  [9] stringi_1.2.4   rstudioapi_0.8  rmarkdown_1.10  tools_3.5.1    
-## [13] stringr_1.3.1   xfun_0.3        yaml_2.2.0      compiler_3.5.1 
-## [17] htmltools_0.3.6 knitr_1.20</code></pre>
+##  [1] zip_1.0.0         Rcpp_0.12.19      highr_0.7        
+##  [4] cellranger_1.1.0  pillar_1.3.0      compiler_3.5.1   
+##  [7] forcats_0.3.0     tools_3.5.1       htmldeps_0.1.1   
+## [10] digest_0.6.18     evaluate_0.12     tibble_1.4.2     
+## [13] lattice_0.20-35   pkgconfig_2.0.2   rlang_0.3.0.1    
+## [16] openxlsx_4.1.0    rstudioapi_0.8    curl_3.2         
+## [19] yaml_2.2.0        xfun_0.4          haven_1.1.2      
+## [22] rio_0.5.10        stringr_1.3.1     knitr_1.20       
+## [25] hms_0.4.2.9001    lmtest_0.9-36     grid_3.5.1       
+## [28] data.table_1.11.8 readxl_1.1.0      dynlm_0.3-5      
+## [31] foreign_0.8-71    rmarkdown_1.10.14 bookdown_0.7.21  
+## [34] carData_3.0-2     car_3.0-2         magrittr_1.5     
+## [37] htmltools_0.3.6   abind_1.4-5       stringi_1.2.4    
+## [40] crayon_1.3.4      zoo_1.8-4</code></pre>
 <p>I do not add prompts (<code>&gt;</code> and <code>+</code>) to R source code in this book, and I comment out the text output with two hashes <code>##</code> by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out). Package names are in bold text (e.g., <strong>rmarkdown</strong>), and inline code and function arguments are formatted in a typewriter font (e.g., <code>knitr::knit('foo.Rmd')</code>). Function names are followed by parentheses (e.g., <code>bookdown::render_book()</code>). The double-colon operator <code>::</code> means accessing an object from a package.
 Content with <strong>Note</strong>, <strong>Your turn</strong> and <strong>Overthinking</strong> is surrounded by two horizontal lines. <strong>Overthinking</strong> sections serve as additional information for the interested reader but will not be covered in detail in class.</p>
 </div>
