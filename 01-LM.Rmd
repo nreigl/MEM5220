@@ -17,7 +17,7 @@ knitr::opts_chunk$set(dev.args=list(bg="transparent"))
 ```
 
 
-# Linear Regression {#linearregression}
+# Linear Regression {#linearregression} 
 
 
 To load the dataset and necessary functions: 
