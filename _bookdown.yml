@@ -4,11 +4,12 @@ delete_merged_file: TRUE
 rmd_files: [
   "index.Rmd",
   
-  "01-LM.Rmd",
-  "02-GLM.Rmd",
-  "03-TimeSeries.Rmd",
+  "LM.Rmd",
+  "GLM.Rmd",
+  "IV.RMD",
+  "TimeSeries.Rmd",
   
-  "04-references.Rmd"
+  "references.Rmd"
 ]
 
 language:
