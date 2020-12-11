@@ -1,3 +1,34 @@
+--- 
+title: "MEM52220 - Applied Econometrics"
+author: "Nicolas Reigl"
+date: "`r Sys.Date()`"
+output: pdf_document
+description: This manual constitutues the classroom material of the applied econometrics
+  course at Tallinn University of Technology
+documentclass: book
+link-citations: yes
+bibliography:
+- MEM5220.bib
+- packages.bib
+site: bookdown::bookdown_site
+citation_package: biblatex
+biblatexoptions: [backend=bibtex]
+---
+
+# Introduction {-}
+
+Placeholder
+
+
+## Prerequisites {-}
+### Installation of R and RStudio  {-}
+## Resources {-}
+### Attribution {-}
+## Software information and conventions {-}
+## Acknowledgements {-}
+
+<!--chapter:end:index.Rmd-->
+
 ---
 output:
   html_document: default
@@ -2438,4 +2469,55 @@ Note: LAD inferences are only valid asymptotically, so the results in this examp
 
 
 
+
+
+<!--chapter:end:01-LM.Rmd-->
+
+
+# Qualitative and LDV Models {#binarymodels}
+
+Placeholder
+
+
+## Linear probability models
+## Logit and Probit Models: Estimation
+### Multinomial Logit
+### The Conditional Logit Model
+### Ordered Choice Models
+### Probit model 
+### Inference
+### Predictions
+### Marginal (partial) effects
+## Count data: The Poisson Regression Model 
+### Corner Solution Response: The Tobit Model
+## Censored and Truncated Regression Models
+### The Heckman, or Sample Selection Model
+
+<!--chapter:end:02-GLM.Rmd-->
+
+
+# Time Series {#timeseries}
+
+Placeholder
+
+
+## Seasonal decomposition of time Series
+## Differences and lags
+## Exponential smoothing and forecasting
+## Finite Distributed Lags Model 
+## ARIMA models
+### Simulation of ARIMA models
+### ACF and PACF
+### Estimation of ARIMA models
+### Choosing between models
+### Automatic esimation
+### Testing for unit root
+
+<!--chapter:end:03-TimeSeries.Rmd-->
+
+`r if (knitr::is_html_output()) '
+# References {-}
+'`
+
+<!--chapter:end:04-references.Rmd-->
 

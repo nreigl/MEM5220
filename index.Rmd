@@ -59,7 +59,7 @@ This lecture material would not possible without many other open-source economet
 
 ### Attribution {-}
 
-Chapter 1.1.2 Simulating SLR is based on @heiss2016using but adds parts of @dalpiaz2016 and @colonescu2018 teaching materials. Chapter 1.2.2 includes additonal material from @Hanck2018.  Chapter 1.4 Heteroskedasticity has been amended with material from @Rodrigues2018 blog. 
+Chapter 1.1.2 Simulating SLR is based on @heiss2016using but adds parts of @dalpiaz2016 and @colonescu2018 teaching materials. Chapter 1.2.2 includes additonal material from @Hanck2018.  Chapter 1.4 Heteroskedasticity has been amended with material from @Rodrigues2018 blog. The time series part is closely related to the teaching material of Andres Vörk. The fininte distributed lags model is adepted from Constantin Colonescu. 
 
 
 - [Using R for Introduction to Econometrics](https://emwikts1970.github.io/URFITE-Bookdown/), @Hanck2018

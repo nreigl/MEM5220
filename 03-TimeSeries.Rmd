@@ -219,8 +219,9 @@ Can we trust the p-value of the estimated model? Let us first create function th
 ```{r}
 
 #' Eviews plot
-#' This function creates a plot similar to the the timeseries regression plot in Eviews
+#' This function creates a plot similar to the timeseries regression plot in Eviews
 #' Source: https://stackoverflow.com/questions/12699236/how-to-create-a-graph-showing-the-predictive-model-data-and-residuals-in-r
+#' Note that that the stackoverflow code follows the notation of dynlm(x ~ y) whereas my function uses the notation dynlm(y ~ x)! 
 #' @param y dependent variable
 #' @param model fitted model
 #'
