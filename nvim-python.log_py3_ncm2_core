@@ -1,3 +1,0 @@
-2020-02-09 23:48:52,246 [INFO @ ncm2_core.py:load_plugin:101] 31284 - send vimscript plugin /Users/nicolasreigl/.config/nvim/.cache/init.vim/.dein/ncm2-plugin/ncm2_path.vim
-2020-02-09 23:48:52,248 [INFO @ ncm2_core.py:load_plugin:101] 31284 - send vimscript plugin /Users/nicolasreigl/.config/nvim/.cache/init.vim/.dein/ncm2-plugin/ncm2_tmux.vim
-2020-02-09 23:48:52,248 [INFO @ ncm2_core.py:load_plugin:101] 31284 - send vimscript plugin /Users/nicolasreigl/.config/nvim/.cache/init.vim/.dein/ncm2-plugin/ncm2_bufword.vim

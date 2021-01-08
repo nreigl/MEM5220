@@ -1678,11 +1678,13 @@ data(gpa2)
 
 ```{r}
 # Estimate model with interaction effect:
-myres<-lm(stndfnl~atndrte*priGPA+ACT+I(priGPA^2)+I(ACT^2), data=attend)
+myres <-
+  lm(stndfnl ~ atndrte * priGPA + ACT + I(priGPA ^ 2) + I(ACT ^ 2), data =
+       attend)
 
 # Estimate for partial effect at priGPA=2.59:
 b <- coef(myres)
-b["atndrte"] + 2.59*b["atndrte:priGPA"]
+b["atndrte"] + 2.59 * b["atndrte:priGPA"]
 ```
 
 
