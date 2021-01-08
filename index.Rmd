@@ -1,18 +1,19 @@
 --- 
 title: "MEM52220 - Applied Econometrics"
 author: "Nicolas Reigl"
+description: "This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology"
 date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
 output: pdf_document
-description: This manual constitutues the classroom material of the applied econometrics
-  course at Tallinn University of Technology
 documentclass: book
+classoption: oneside, openany
 link-citations: yes
 bibliography:
 - MEM5220.bib
 - packages.bib
-site: bookdown::bookdown_site
 citation_package: biblatex
 biblatexoptions: [backend=bibtex]
+subparagraph: yes
 ---
 
 # Introduction {-}
@@ -21,8 +22,6 @@ biblatexoptions: [backend=bibtex]
 ```{r fig.align='center', echo=FALSE, include= identical(knitr:::pandoc_to(), "html") ,  fig.cap="Normal and simulated Gaussian densities on a regression line",  fig.link='https://stackoverflow.com/questions/31794876/ggplot2-how-to-curve-small-gaussian-densities-on-a-regression-line'}
 knitr::include_graphics('images/cover.jpeg', dpi = NA)
 ```
-
-
 
 
 

@@ -1,5 +1,17 @@
 book_filename: "MEM5220_R"
-delete_merged_file: true
+before_chapter_script: "before-chapter.R"
+delete_merged_file: TRUE
+rmd_files: [
+  "index.Rmd",
+  
+  "LM.Rmd",
+  "GLM.Rmd",
+  "IV.RMD",
+  "TimeSeries.Rmd",
+  
+  "references.Rmd"
+]
+
 language:
   ui:
     chapter_name: "Chapter "

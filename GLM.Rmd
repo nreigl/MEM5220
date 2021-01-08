@@ -33,7 +33,7 @@ PACKAGES<-c(
             "magrittr") #  pipes
 inst<-match(PACKAGES, .packages(all=TRUE))
 need<-which(is.na(inst))
-if (length(need)>0) install.packages(PACKAGES[need])
+if (length(need)>0) install.packages(PACKAGES[need], repos = "http://cran.us.r-project.org")
 lapply(PACKAGES, require, character.only=T)
 ```
 

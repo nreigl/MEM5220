@@ -1,31 +1,135 @@
 --- 
 title: "MEM52220 - Applied Econometrics"
 author: "Nicolas Reigl"
+description: "This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology"
 date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
 output: pdf_document
-description: This manual constitutues the classroom material of the applied econometrics
-  course at Tallinn University of Technology
 documentclass: book
+classoption: oneside, openany
 link-citations: yes
 bibliography:
 - MEM5220.bib
 - packages.bib
-site: bookdown::bookdown_site
 citation_package: biblatex
 biblatexoptions: [backend=bibtex]
+subparagraph: yes
 ---
+```{r include=FALSE, cache=FALSE}
+# LIBRARY CONFIGURATION
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  comment = NA,
+  dev = "png",
+  dpi = 150,
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = 0.618,  # 1 / phi
+  fig.show = "hold",
+  include = TRUE,
+  message = FALSE,
+  out.width = "70%",
+  tidy = FALSE,
+  warning = FALSE
+)
+
+
+# UTILITY FUNCTIONS
+
+printf <- function(pattern, ...) {
+  cat(sprintf(pattern, ...))
+}
+
+print_file <- function(file) {
+  cat(paste(readLines(file), "\n", sep=""), sep="")
+}
+
+# GENERAL R CONFIGURATION
+
+# options(digits = 2)
+options(htmltools.dir.version = FALSE)
+
+
+# set.seed(1123)
+```
 
 # Introduction {-}
 
-Placeholder
 
+```{r fig.align='center', echo=FALSE, include= identical(knitr:::pandoc_to(), "html") ,  fig.cap="Normal and simulated Gaussian densities on a regression line",  fig.link='https://stackoverflow.com/questions/31794876/ggplot2-how-to-curve-small-gaussian-densities-on-a-regression-line'}
+knitr::include_graphics('images/cover.jpeg', dpi = NA)
+```
+
+
+
+Welcome to MEM5220 - Applied Econometrics. This handout is designed for the use with MEM5220 - Applied Econometrics at Tallinn University of Technology. Note that this workbook is still under heavy development!  
 
 ## Prerequisites {-}
+
+A basic knowledge of the R [@team2013r] programming language  is required. 
+
+
+In order to reproduce the examples in this script You need the statistical software package R. Additionally we recommend using the [RStudio](https://www.rstudio.com) integrated developer environment (IDE) which will improve Your R working experience.
+
 ### Installation of R and RStudio  {-}
+
+Go to the following webpages and download the software adequate for Your operating system:
+
+
+1. [The Statistical Software Package R:](http://cran.r-project.org)
+2. The GUI [RStudio:](https://www.rstudio.com)
+
+
+Install R first and then proceed with RStudio. Afterwards start RStudio. For accessing packages and datasets from [github](https://github.com/) we need to install the **devtools** package. On Windows, download and install [Rtools](https://cran.r-project.org/bin/windows/Rtools/), and devtools takes care of the rest. On Mac, install the Xcode command line tools. On Linux, install the R development package, usually called r-devel or r-base-dev. 
+
+
 ## Resources {-}
+
+
+Our primary resource is @heiss2016using ^[Heiss (2016) builds on the popular Introductory Econometrics by Wooldridge (2016) and demonstrates how to replicate the applications discussed therein using R.]. The book is available as free [online](http://www.urfie.net/read.html) version. For theoretical concepts I refer to @wooldridge2015introductory^[[Introductory Econometrics: A Modern Approach](https://books.google.ee/books/about/Introductory_Econometrics_A_Modern_Appro.html?id=wUF4BwAAQBAJ&source=kp_cover&redir_esc=y).].  
+For the timeseries part of the course a good reference material is  [Introductory Econometircs for Finance](https://www.cambridge.org/pt/academic/subjects/economics/finance/introductory-econometrics-finance-3rd-edition?format=PB&isbn=9781107661455). 
+
+**Standing on the shoulders of giants**
+
+This lecture material would not possible without many other open-source econometrics teaching materials and of course the R package developers. In addition to the main resources, examples and code of this workbook have been drawn from a number of free econometrics eBooks, blogs, R-vignette help pages and other researchers teaching materials. 
+
 ### Attribution {-}
+
+Chapter 1.1.2 Simulating SLR is based on @heiss2016using but adds parts of @dalpiaz2016 and @colonescu2018 teaching materials. Chapter 1.2.2 includes additonal material from @Hanck2018.  Chapter 1.4 Heteroskedasticity has been amended with material from @Rodrigues2018 blog. The time series part is closely related to the teaching material of Andres Vörk. The fininte distributed lags model is adepted from Constantin Colonescu. 
+
+
+- [Using R for Introduction to Econometrics](https://emwikts1970.github.io/URFITE-Bookdown/), @Hanck2018
+- [Applied Statistics with R](https://daviddalpiaz.github.io/appliedstats/), @dalpiaz2016
+- [Principles of Econometrics with R](https://bookdown.org/ccolonescu/RPoE4/), @colonescu2018
+- [Introduction to Econometrics with R](https://scpoecon.github.io/ScPoEconometrics/), @oswald2018introduction
+- [Broadening Your Statistical Horizons](https://bookdown.org/roback/bookdown-bysh/)
+
+
+
 ## Software information and conventions {-}
+
+
+The R session information when compiling this book is shown below:
+
+```{r}
+sessionInfo()
+```
+
+I do not add prompts (`>` and `+`) to R source code in this book, and I comment out the text output with two hashes `##` by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out). Package names are in bold text (e.g., **rmarkdown**), and inline code and function arguments are formatted in a typewriter font (e.g., `knitr::knit('foo.Rmd')`). Function names are followed by parentheses (e.g., `bookdown::render_book()`). The double-colon operator `::` means accessing an object from a package. 
+Content with **Note**, **Your turn** and **Overthinking** is surrounded by two horizontal lines. **Overthinking** sections serve as additional information for the interested reader but will not be covered in detail in class. 
+
 ## Acknowledgements {-}
+
+I thank Kadri Männasoo and Juan Carlos Cuestas for proofreading and their useful comments.
+
+
+
 
 <!--chapter:end:index.Rmd-->
 
@@ -34,6 +138,49 @@ output:
   html_document: default
   pdf_document: default
 ---
+```{r include=FALSE, cache=FALSE}
+# LIBRARY CONFIGURATION
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  comment = NA,
+  dev = "png",
+  dpi = 150,
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = 0.618,  # 1 / phi
+  fig.show = "hold",
+  include = TRUE,
+  message = FALSE,
+  out.width = "70%",
+  tidy = FALSE,
+  warning = FALSE
+)
+
+
+# UTILITY FUNCTIONS
+
+printf <- function(pattern, ...) {
+  cat(sprintf(pattern, ...))
+}
+
+print_file <- function(file) {
+  cat(paste(readLines(file), "\n", sep=""), sep="")
+}
+
+# GENERAL R CONFIGURATION
+
+# options(digits = 2)
+options(htmltools.dir.version = FALSE)
+
+
+# set.seed(1123)
+```
 
 
 ```{r setup, include=FALSE}
@@ -48,7 +195,7 @@ knitr::opts_chunk$set(dev.args=list(bg="transparent"))
 ```
 
 
-# Linear Regression {#linearregression}
+# Linear Regression {#linearregression} 
 
 
 To load the dataset and necessary functions:
@@ -85,7 +232,7 @@ PACKAGES<-c("PoEdata", # R data sets for "Principles of Econometrics" by Hill, G
             "magrittr") #  pipes
 inst<-match(PACKAGES, .packages(all=TRUE))
 need<-which(is.na(inst))
-if (length(need)>0) install.packages(PACKAGES[need])
+if (length(need)>0) install.packages(PACKAGES[need], repos = "http://cran.us.r-project.org")
 lapply(PACKAGES, require, character.only=T)
 ```
 
@@ -1678,13 +1825,11 @@ data(gpa2)
 
 ```{r}
 # Estimate model with interaction effect:
-myres <-
-  lm(stndfnl ~ atndrte * priGPA + ACT + I(priGPA ^ 2) + I(ACT ^ 2), data =
-       attend)
+myres<-lm(stndfnl~atndrte*priGPA+ACT+I(priGPA^2)+I(ACT^2), data=attend)
 
 # Estimate for partial effect at priGPA=2.59:
 b <- coef(myres)
-b["atndrte"] + 2.59 * b["atndrte:priGPA"]
+b["atndrte"] + 2.59*b["atndrte:priGPA"]
 ```
 
 
@@ -2473,53 +2618,1330 @@ Note: LAD inferences are only valid asymptotically, so the results in this examp
 
 
 
-<!--chapter:end:01-LM.Rmd-->
+<!--chapter:end:LM.Rmd-->
+
+```{r include=FALSE, cache=FALSE}
+# LIBRARY CONFIGURATION
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  comment = NA,
+  dev = "png",
+  dpi = 150,
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = 0.618,  # 1 / phi
+  fig.show = "hold",
+  include = TRUE,
+  message = FALSE,
+  out.width = "70%",
+  tidy = FALSE,
+  warning = FALSE
+)
 
 
+# UTILITY FUNCTIONS
+
+printf <- function(pattern, ...) {
+  cat(sprintf(pattern, ...))
+}
+
+print_file <- function(file) {
+  cat(paste(readLines(file), "\n", sep=""), sep="")
+}
+
+# GENERAL R CONFIGURATION
+
+# options(digits = 2)
+options(htmltools.dir.version = FALSE)
+
+
+# set.seed(1123)
+```
 # Qualitative and LDV Models {#binarymodels}
 
-Placeholder
+
+To load the dataset and necessary functions: 
+
+
+```{r, echo=TRUE, message=FALSE, results='hide'}
+# This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
+# devtools::install_github("ccolonescu/PoEdata")
+PACKAGES<-c(
+            "tidyverse",  # for data manipulation and ggplots
+            "broom",  # Tidy regression output
+            "Hmisc", # Harrell Miscellaneous functions
+            "psych", # Procedures for Psychometric research
+            "car", # Companion to applied regression
+            "knitr", # knit functions
+            # "kableExtra", # extended knit functions for objects exported from other packages
+            "huxtable", #  Regression tables, broom compatible
+            "stargazer", # Regression tables
+            "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
+            "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+            "wooldridge",  # Wooldrige Datasets
+            "MCMCpack", # Contains functions to perform Bayesian inference using posterior simulation for a number of ssatistical models.
+            "sampleSelection", # Two-step and maximum likelihood estimation of Heckman-type sample selection models
+            "scales", # scale helper functions such as percent 
+            "lmtest", 
+            "margins", # Stata like margin functions
+            "prediction", # Type stable predictions
+            "nnet", # Multinomial logit
+            "survival", # Survival Analysis
+            "sampleSelection", # Heckman type sample selection
+            "censReg", # Censored Regression models
+            "magrittr") #  pipes
+inst<-match(PACKAGES, .packages(all=TRUE))
+need<-which(is.na(inst))
+if (length(need)>0) install.packages(PACKAGES[need], repos = "http://cran.us.r-project.org")
+lapply(PACKAGES, require, character.only=T)
+```
+
+
+Binary dependent variables are frequently studied in applied economics. Because a dummy variable $y$ can only take values 0 and 1, its (conditional) expected value is equal to the (conditional) probability that $y=1$: 
+
+
+$E(y|x) = 0 \times P(y = 0|x) + 1 \times P(y = 1|x) = P(y=1|x)$
+
+An important class of models specifies the success probability as
+
+$P(y = 1 | x) = G(\beta_0 + \beta_1 + \dots \beta_k x_k) = G(\boldsymbol{x} \boldsymbol{\beta})$
+
+
+
+The following table is taken from @dalpiaz2016 and summarizes three examples of a generalized linear model:
+
+|                 |Linear Regression | Poisson Regression | Logistic Regression |
+|-----------------|------------------|--------------------|---------------------|
+| $Y \mid {\bf X} = {\bf x}$ | $N(\mu({\bf x}), \sigma^2)$    | $\text{Pois}(\lambda({\bf x}))$          | $\text{Bern}(p({\bf x}))$                                              |
+| **Distribution Name**                           | Normal                         | Poisson                                  | Bernoulli (Binomial)                                                   |
+| $\text{E}[Y \mid {\bf X} = {\bf x}]$            | $\mu({\bf x})$                 | $\lambda({\bf x})$                       | $p({\bf x})$                                                           |
+| **Support**                                     | Real: $(-\infty, \infty)$      | Integer: $0, 1, 2, \ldots$               | Integer: $0, 1$                                                        |
+| **Usage**                                       | Numeric Data                   | Count (Integer) Data                     | Binary (Class ) Data                                            |
+| **Link Name**                                   | Identity                       | Log                                      | Logit                                                                  |
+| **Link Function**                               | $\eta({\bf x}) = \mu({\bf x})$ | $\eta({\bf x}) = \log(\lambda({\bf x}))$ | $\eta({\bf x}) = \log \left(\frac{p({\bf x})}{1 - p({\bf x})} \right)$          |
+| **Mean Function**                               | $\mu({\bf x}) = \eta({\bf x})$ | $\lambda({\bf x}) = e^{\eta({\bf x})}$   | $p({\bf x}) = \frac{e^{\eta({\bf x})}}{1 + e^{\eta({\bf x})}} = \frac{1}{1 + e^{-\eta({\bf x})}}$ |
+
+Like ordinary linear regression, we will seek to "fit" the model by estimating the $\beta$ parameters. To do so, we will use the method of maximum likelihood.
+
+Note that a Bernoulli distribution is a specific case of a binomial distribution where the $n$ parameter of a binomial is $1$. Binomial regression is also possible, but we'll focus on the much more popular Bernoulli case.
+
+So, in general, GLMs relate the mean of the response to a linear combination of the predictors, $\eta({\bf x})$, through the use of a link function, $g()$. That is,
+
+$$
+\eta({\bf x}) = g\left(\text{E}[Y \mid {\bf X} = {\bf x}]\right).
+$$
+
+The mean is then
+
+$$
+\text{E}[Y \mid {\bf X} = {\bf x}] = g^{-1}(\eta({\bf x})).
+$$
+
+
 
 
 ## Linear probability models
+
+
+If a dummy variable is used as the dependent variable $y$, we can still use OLS to estimate its relation to the regressors $x$. 
+
+
+
+```{r}
+data("mroz", package = "wooldridge")
+```
+
+Let us use the `describe()` function from the **Hmisc** package to use a different way to describe the datatset. 
+
+```{r}
+describe(mroz)
+```
+
+The function `rcorr()` can be useful to check visually for correlation. 
+
+
+```{r}
+rcorr(as.matrix(mroz))
+```
+
+Estimate linear probability model
+
+```{r}
+linprob <- lm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,data=mroz)
+# Regression table with heteroscedasticity-robust SE and t tests:
+coeftest(linprob,vcov=hccm)
+```
+
+
+The estimated coefficient *educ* can be interpreted as: an additional year of schooling increases the probability that a woman is in the labor force *ceteris paribus* by `r percent(coef(linprob)["educ"])`. 
+
+One problem with linear probability models is that $P(y=1|x)$ is specified as a linear function of the regressors. By construction, there are more or less realistic combinations of regressor values that yield $\hat{y} <	0$ or $\hat{y} >	1$.   
+
+Predictions for two "extreme" women:
+
+```{r}
+xpred <- list(nwifeinc=c(100,0),educ=c(5,17),exper=c(0,30),
+              age=c(20,52),kidslt6=c(2,0),kidsge6=c(0,0))
+predict(linprob,xpred)
+```
+
+
 ## Logit and Probit Models: Estimation
+
+
+For binary response models, the most widely used specification for G are
+
+- the **probit** model with $G(z) = \phi(z)$, the standard cdf and 
+- the **logit** model with $G(z) = \Lambda(z) = \frac{exp(z)}{1+ exp(z)}$, the cdf of the logistic distribution. 
+
+
+In R  many generalized linear models can be estimated by the `glm()` command. It accepts the additional option 
+
+- `family = binomial (link = logit)` for the logit model or 
+- `family = binomial (link = probit)` for the probit model 
+
+
+```{r}
+# Estimate logit model
+logitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
+              family=binomial(link=logit),data=mroz)
+# Summary of results:
+summary(logitres)
+
+# Log likelihood value:
+logLik(logitres) 
+# McFadden's pseudo R2:
+1 - logitres$deviance/logitres$null.deviance
+```
+
+
+We can also extract the fitted values from the specified model and compare them the observed predicated binomial explained variable. 
+
+```{r}
+fit <- data.frame(response = mroz$inlf, predicted = round(fitted(logitres), 0))
+xtabs(~ predicted + response, data = fit)
+```
+
+If you want to interpret the estimated effects as relative odds ratios (plus their confidence intervals):  
+
+
+```{r}
+exp(logitres$coefficients)
+exp(confint(logitres)) # Lets convert the confidence intervals the same way
+
+resultsTable <- exp(cbind(OddsRatios = coef(logitres), confint(logitres)))
+round(resultsTable, digits = 5)
+```
+
+
+This gives you $e^\beta$, the multiplicative change in the odds ratio for $y=1$ if the covariate associated with $\beta$ increases by 1. 
+
+
+
 ### Multinomial Logit
+
+A relatively common R function that fits multinomial logit models is `multinom()` from package **nnet**. Let us use the dataset *nels_small* for an example of how multinom works. The variable grades in this dataset is an index, with best grades represented by lower values of grade. We try to explain the choice of a secondary institution (psechoice) only by the high school grade. The variable pschoice
+
+can take one of three values:
+
+- psechoice = 1 no college,
+- psechoice = 2 two year college
+- psechoice = 3 four year college
+
+```{r}
+data("nels_small", package="PoEdata")
+```
+
+```{r}
+nels.multinom <- multinom(psechoice~grades, data=nels_small)
+summary(nels.multinom)
+```
+
+
+
+```{r}
+medGrades <- median(nels_small$grades)
+fifthPercentileGrades <- quantile(nels_small$grades, .05)
+newdat <- data.frame(grades=c(medGrades, fifthPercentileGrades))
+pred <- predict(nels.multinom, newdat, "probs")
+pred
+```
+
+
+
 ### The Conditional Logit Model
+
+In the multinomial logit model all individuals faced the same external conditions and each individual’s choice is only determined by an individual’s circumstances or preferences. The conditional logit model allows for individuals to face individual-specific external conditions, such as the price of a product.
+
+Suppose we want to study the effect of price on an individual’s decision about choosing one of three brands of soft drinks:
+
+- pepsi
+- sevenup
+- coke
+
+R offers several alternatives that allow fitting conditional logit models, one of which is the function `MCMCmnl()` from the package **MCMCpack** (others are, for instance, `clogit()` in the **survival** package and `mclogit()` in the **mclogit** package). The following code is adapted from @Adkins2014.
+
+```{r}
+data("cola", package="PoEdata")
+N <- nrow(cola)
+N3 <- N/3
+price1 <- cola$price[seq(1,N,by=3)]
+price2 <- cola$price[seq(2,N,by=3)]
+price3 <- cola$price[seq(3,N,by=3)]
+
+bchoice <- rep("1", N3)
+for (j in 1:N3){
+  if(cola$choice[3*j-1]==1) bchoice[j] <- "2"
+  if(cola$choice[3*j]==1) bchoice[j] <- "3"
+}
+cola.clogit <- MCMCmnl(bchoice ~
+                         choicevar(price1, "b2", "1")+
+                         choicevar(price2, "b2", "2")+
+                         choicevar(price3, "b2", "3"),
+                       baseline="3", mcmc.method="IndMH")
+```
+
+The output from function multinom gives coefficient estimates for each level of the response variable psechoice, except for the first level, which is the benchmark.
+
+We can calculate the probability that individual  $i$  chooses  pepsi  and  sevenup  for some given values of the prices that individual  $i$.  Coke is not shown as it is the baseline choice. 
+
+
+```{r}
+sclogit <- summary(cola.clogit)
+tabMCMC <- as.data.frame(sclogit$statistics)[,1:2]
+row.names(tabMCMC)<- c("b2","b11","b12")
+kable(tabMCMC, digits=4, align="c",
+      caption="Conditional logit estimates for the 'cola' problem")
+```
+
+
+
+We can also estimate the probabilities of individual $i$ choosing Pepsi or Sevenup for a given price. 
+
+```{r}
+pPepsi <- 1
+pSevenup <- 1.25
+pCoke <- 1.10
+b13 <- 0
+b2  <- tabMCMC$Mean[1]
+b11 <- tabMCMC$Mean[2]
+b12 <- tabMCMC$Mean[3]
+
+# The probability that individual i chooses Pepsi:
+PiPepsi <- exp(b11+b2*pPepsi)/
+          (exp(b11+b2*pPepsi)+exp(b12+b2*pSevenup)+
+                              exp(b13+b2*pCoke))
+# The probability that individual i chooses Sevenup:
+PiSevenup <- exp(b12+b2*pSevenup)/
+          (exp(b11+b2*pPepsi)+exp(b12+b2*pSevenup)+
+                              exp(b13+b2*pCoke))
+# The probability that individual i chooses Coke:
+PiCoke <- 1-PiPepsi-PiSevenup
+```
+
+The calculatred probabilities are:
+
+ - $p_{i,pepsi}=0.483$ 
+ - $p_{i,sevenup}=0.227$ 
+ - $p_{i,coke}=0.289$ 
+
+The three probabilities are different for different individuals because different individuals face different prices; in a more complex model other regressors may be included, some of which may reflect individual characteristics.
+
+
+
+
 ### Ordered Choice Models
+
+The order of choices in these models is meaningful, unlike the multinomial and conditional logit model we have studied so far. The following example explains the choice of higher education, when the choice variable is psechoice and the only regressor is grades; the dataset, *nels_small* , is already known to us.
+
+The R package **MCMCpack** is again used here, with its function `MCMCoprobit()`.
+
+```{r}
+nels.oprobit <- MCMCoprobit(psechoice ~ grades, 
+                            data=nels_small, mcmc=10000)
+sOprobit <- summary(nels.oprobit)
+tabOprobit <- sOprobit$statistics[, 1:2]
+kable(tabOprobit, digits=4, align="c",
+      caption="Ordered probit estimates for the 'nels' problem")
+```
+
+
+The results from MCMCoprobit can be translated into the textbook notations as follows:
+
+- $\mu_1$ =− (Intercept)
+- $\beta$ = grades
+- $\mu_2$ = gamma2 − (Intercept)
+
+The probabilities for each choice can be calculated as in the next code fragment:
+
+```{r}
+mu1 <- -tabOprobit[1]
+b <- tabOprobit[2]
+mu2 <- tabOprobit[3]-tabOprobit[1]
+xGrade <- c(mean(nels_small$grades), 
+            quantile(nels_small$grades, 0.05))
+
+# Probabilities:
+prob1 <- pnorm(mu1-b*xGrade)
+prob2 <- pnorm(mu2-b*xGrade)-pnorm(mu1-b*xGrade)
+prob3 <- 1-pnorm(mu2-b*xGrade)
+
+# Marginal effects:
+Dp1DGrades <- -pnorm(mu1-b*xGrade)*b
+Dp2DGrades <- (pnorm(mu1-b*xGrade)-pnorm(mu2-b*xGrade))*b
+Dp3DGrades <- pnorm(mu2-b*xGrade)*b
+```
+
+For instance, the marginal effect of grades on the probability of attending a four-year college for a student with average grade and for a student in the top 5 percent are, respectively, `r round(Dp3DGrades[1], digits = 3)` and `r round(Dp3DGrades[[2]], digits = 3)`.
+
+
 ### Probit model 
+
+```{r fig21, fig.cap='The shape of the probit function is the standard normal distribution', out.width='80%', fig.asp=.75, fig.align='center'}
+par(mfrow=c(1,2))  
+x <- seq(-3,3, .2)
+plot(x, pnorm(x), type="l", xlab="b1+b2x", ylab="P[y=1]")
+plot(x, dnorm(x), type="l")
+```
+
+
+
+```{r}
+detach("package:PoEdata", unload=TRUE)
+data("mroz", package='wooldridge')
+attach(mroz)
+# Estimate probit model
+probitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
+               family=binomial(link=probit),data=mroz)
+# Summary of results:
+summary(probitres)
+# Log likelihood value:
+logLik(probitres) 
+# McFadden's pseudo R2:
+1 - probitres$deviance/probitres$null.deviance
+```
+
+
+Take a boostrap sample for the 95% confidence interval for each parameter. 
+
+
+```{r, cache=TRUE}
+data("mroz", package='wooldridge')
+
+boot_probitres <- mroz %>% 
+  bootstrap(500) %>% 
+  do(tidy(glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
+               family=binomial(link=probit),.)))
+boot_probitres %>% 
+  group_by(term) %>% 
+  dplyr::summarise(low = quantile(estimate, .025), 
+                   high = quantile(estimate, .0975))
+```
+
+
 ### Inference
+
+We can implement the test for overall significance for the probit model using both manual and automatic calculations. 
+
+
+```{r}
+# Test of overall significance:
+# Manual calculation of the LR test statistic:
+probitres$null.deviance - probitres$deviance
+
+# Automatic calculations including p-values,...:
+lrtest(probitres)
+
+# Test of H0: experience and age are irrelevant
+restr <- glm(inlf~nwifeinc+educ+ kidslt6+kidsge6, 
+             family=binomial(link=logit),data=mroz)
+lrtest(restr,probitres)
+
+```
+
 ### Predictions
+
+The command `predict()` can calculate predicted values for the estimation sample or arbitrary sets of regressor values. 
+
+We can calculate 
+
+
+```{r}
+# predictions for two "extreme" women:
+xpred <- list(nwifeinc=c(100,0),educ=c(5,17),exper=c(0,30),
+              age=c(20,52),kidslt6=c(2,0),kidsge6=c(0,0))
+# Predictions from linear probability, probit and logit model:
+predict(linprob,  xpred,type = "response")
+predict(logitres, xpred,type = "response")
+predict(probitres,xpred,type = "response")
+```
+
+```{r}
+# Simulated data
+set.seed(12345)
+y <- rbinom(100, 1, 0.5)
+x <- rnorm(100) + 2 * y
+
+# Estimation 
+linpr.res <- lm(y~x)
+logit.res <-glm(y ~x, family = binomial(link = logit))
+probit.res <-glm(y ~x, family = binomial(link = probit))
+
+# Prediction from a regular grid of x values
+xp <- seq(from= min(x), to=max(x), length=50)
+linpr.p <- predict(linpr.res, list(x = xp), type = "response")
+logit.p <- predict(logit.res, list(x = xp), type = "response")
+probit.p <- predict(probit.res, list(x = xp), type = "response")
+```
+
+
+
+```{r fig22, fig.cap='Predictions from binary response models (simulated data)', out.width='80%', fig.asp=.75, fig.align='center'}
+plot(x,y)
+lines(xp, linpr.p, lwd=2, lty = 1)
+lines(xp, logit.p, lwd=2, lty = 2)
+lines(xp, probit.p, lwd=1, lty = 1)
+legend("topleft", 
+       c("linear prob.", "logit", "probit"), 
+       lwd = c(2,2,1), lty = c(1,2,1))
+```
+
+
 ### Marginal (partial) effects
+
+Several packages provide estimates of marginal effects for different types of models. Among these are **car**, **alr3**, **mfx**, **erer**, among others. Unfortunately, none of these packages implement marginal effects correctly (i.e., correctly account for interrelated variables such as interaction terms (e.g., a:b) or power terms (e.g., I(a^2)) and the packages all implement quite different interfaces for different types of models. The **margins** and **prediction** packages are a combined effort to calculate marginal effects that include complex terms and provide a uniform interface for doing those calculations.
+
+
+To know how much a variable influences the labour force participation, one has to use `margins()` command:
+
+```{r}
+effects_logit_participation <- margins(logitres) 
+summary(effects_logit_participation)
+plot(effects_logit_participation)
+```
+
+If one desires subgroup effects, simply pass a subset of data to the data argument:
+
+```{r}
+summary(margins(logitres, data = subset(mroz, kidslt6 == 0))) # no kids < 6 years
+```
+
+
+```{r fig23, fig.cap='Logit effect plot', out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(data = summary(effects_logit_participation)) +
+  geom_point(aes(factor, AME)) +
+  geom_errorbar(aes(x = factor, ymin = lower, ymax = upper)) +
+  geom_hline(yintercept = 0, color="lightgrey") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+You can also extract the marginal effects of a single variable, with `dydx`:
+
+```{r}
+head(dydx(mroz, logitres, "educ"))
+```
+
+The function `cplot()` provides the commonly needed visual summaries of predictions or average marginal effects conditional on a covariate.
+
+```{r fig24, fig.cap='Marginal effects for logit model', out.width='80%', fig.asp=.75, fig.align='center'}
+cplot(logitres, x = "educ", se.type = "shade")
+```
+
+
 ## Count data: The Poisson Regression Model 
+
+Instead of just 0/1-coded binary data, count data can take any non-negative integer $0, 1, 2, \dots$. If they take very large numbers (like the number of students in a school), they can be approximated reasonably well as contiouns variables in a linear models and estimated using OLS. If the numbers are relativly small, this approximation might not work well. 
+
+The Poisson regression model is the most basic and convenient model explicitly model explicitly designed for count data. 
+
+Poisson regression models can be estimated in R via the `glm()` function with the specification **family= poisson**
+
+Estimating the model with **quasipoisson** is to adjust for potential vioalations of the Poisson distribution. 
+
+```{r}
+data(crime1, package='wooldridge')
+
+# Estimate linear model
+lm.res      <-  lm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                     black+hispan+born60, data=crime1)
+# Estimate Poisson model
+Poisson.res <- glm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                     black+hispan+born60, data=crime1, family=poisson)
+# Quasi-Poisson model
+QPoisson.res<- glm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                     black+hispan+born60, data=crime1, family=quasipoisson)
+```
+
+
+```{r}
+stargazer(lm.res,Poisson.res,QPoisson.res,type="text",keep.stat="n")
+```
+
+By construction, the parameter estiamtes are the same but the standard errors are larger for the QMLE. 
+
+
 ### Corner Solution Response: The Tobit Model
+
+Corner solutions describe situations where the variable of interest is continous but restricted in range. Typically, it cannot be negative. 
+
+The package **censReg** offers the command `censReg()` for estimating a Tobit model. 
+
+
+We have already estimated labor supply mdoeld for the women in the dataset *mroz*, ignoring the fact that the hours worked is necessarily non-negative. 
+
+```{r}
+# Estimate Tobit model using censReg:
+TobitRes <- censReg(hours~nwifeinc+educ+exper+I(exper^2)+ 
+                      age+kidslt6+kidsge6, data=mroz )
+summary(TobitRes)
+
+# Partial Effects at the average x:
+margEff(TobitRes)
+```
+
+Another alternative for estimating Tobit models is the command **survreg** from the package survival. It is less straightforward to use but more flexible. 
+
+```{r}
+# Estimate Tobit model using survreg:
+res <- survreg(Surv(hours, hours>0, type="left") ~ nwifeinc+educ+exper+
+                 I(exper^2)+age+kidslt6+kidsge6, data=mroz, dist="gaussian")
+summary(res)
+```
+
+
+
 ## Censored and Truncated Regression Models
+
+Censored regression models are closely related to Tobit models. In the basic Tobit model we observe $y = y^*$ in the "uncensored" cases with $y^* > 0$ and we only know an upper bound for $y^* \le 0$ if we observe $y 0 = $.  
+
+
+In this example we are are interested in criminal prognosis of individuals released from prison to reoffend.  
+
+
+```{r}
+data(recid, package='wooldridge')
+
+# Define Dummy for UNcensored observations
+recid$uncensored <- recid$cens==0
+# Estimate censored regression model:
+res<-survreg(Surv(log(durat),uncensored, type="right") ~ workprg+priors+
+               tserved+felon+alcohol+drugs+black+married+educ+age, 
+             data=recid, dist="gaussian")
+# Output:
+summary(res)
+```
+
 ### The Heckman, or Sample Selection Model
 
-<!--chapter:end:02-GLM.Rmd-->
+The models are useful when the sample selection is not random, but whehter an individual is in the sample depends on individual characteristics. For example, when studying wage determination for married women, some women are not in the labour force, therefore their wages are zero.
+
+The Heckit procedure involves two steps, estimating both the selection equation and the equation of interest. Function `selection()` in the **sampleSelection** package performs both steps; therefore, it needs both equations among its arguments. (The selection equation is, in fact, a probit model.)
+
+
+```{r}
+data("mroz", package='wooldridge')
+wage.heckit <- selection(inlf~age+educ+I(kidslt6+kidsge6)+mtr,
+                         log(wage)~educ+exper, 
+                         data=mroz, method="ml")
+summary(wage.heckit)
+```
+
+
+
+<!--chapter:end:GLM.Rmd-->
+
+```{r include=FALSE, cache=FALSE}
+# LIBRARY CONFIGURATION
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  comment = NA,
+  dev = "png",
+  dpi = 150,
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = 0.618,  # 1 / phi
+  fig.show = "hold",
+  include = TRUE,
+  message = FALSE,
+  out.width = "70%",
+  tidy = FALSE,
+  warning = FALSE
+)
+
+
+# UTILITY FUNCTIONS
+
+printf <- function(pattern, ...) {
+  cat(sprintf(pattern, ...))
+}
+
+print_file <- function(file) {
+  cat(paste(readLines(file), "\n", sep=""), sep="")
+}
+
+# GENERAL R CONFIGURATION
+
+# options(digits = 2)
+options(htmltools.dir.version = FALSE)
+
+
+# set.seed(1123)
+```
+# Instrumental Variables and Two Stage Least Squares {#IV}
+
+
+To load the dataset and necessary functions: 
+
+
+```{r, echo=TRUE, message=FALSE, results='hide'}
+# This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
+# devtools::install_github("ccolonescu/PoEdata")
+PACKAGES<-c(
+            "tidyverse",  # for data manipulation and ggplots
+            "knitr", # knit functions
+            # "kableExtra", # extended knit functions for objects exported from other packages
+            "huxtable", #  Regression tables, broom compatible
+            "stargazer", # Regression tables
+            "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
+            "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+            "wooldridge",  # Wooldrige Datasets
+            "magrittr") #  pipes
+inst<-match(PACKAGES, .packages(all=TRUE))
+need<-which(is.na(inst))
+if (length(need)>0) install.packages(PACKAGES[need], repos = "http://cran.us.r-project.org")
+lapply(PACKAGES, require, character.only=T)
+```
+
+
+<!--chapter:end:IV.RMD-->
+
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r include=FALSE, cache=FALSE}
+# LIBRARY CONFIGURATION
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  comment = NA,
+  dev = "png",
+  dpi = 150,
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = 0.618,  # 1 / phi
+  fig.show = "hold",
+  include = TRUE,
+  message = FALSE,
+  out.width = "70%",
+  tidy = FALSE,
+  warning = FALSE
+)
+
+
+# UTILITY FUNCTIONS
+
+printf <- function(pattern, ...) {
+  cat(sprintf(pattern, ...))
+}
+
+print_file <- function(file) {
+  cat(paste(readLines(file), "\n", sep=""), sep="")
+}
+
+# GENERAL R CONFIGURATION
+
+# options(digits = 2)
+options(htmltools.dir.version = FALSE)
+
+
+# set.seed(1123)
+```
 
 
 # Time Series {#timeseries}
 
-Placeholder
+To load the dataset and necessary functions: 
+
+```{r, echo=TRUE, message=FALSE, results='hide'}
+# This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
+# devtools::install_github("ccolonescu/PoEdata")
+PACKAGES<-c("PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, an d Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+"wooldridge",  # Wooldrige Datasets
+"tidyverse",  # for data manipulation and ggplots
+"broom",  # Tidy regression output
+"car", # Companion to applied regression
+"knitr", # knit functions
+# "kableExtra", # extended knit functions for objects exported from other packages
+"huxtable", #  Regression tables, broom compatible
+"stargazer", # Regression tables
+"AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
+"MASS",  #  Functions and datasets to support Venables and Ripley,  "Modern Applied Statistics with S"
+"eurostat", # query data from eurostat
+"stats", 
+"dynlm", # time series regression
+"fUnitRoots", # unit root testing
+"uroot", 
+"urca", # unit root testing
+"forecast", # forecast functions
+"astsa", # applied statistcal time series analysis 
+"modelr", # model simulation/ boostraping the modern way
+"magrittr") #  pipes
+inst<-match(PACKAGES, .packages(all=TRUE))
+need<-which(is.na(inst))
+if (length(need)>0) install.packages(PACKAGES[need])
+lapply(PACKAGES, require, character.only=T)
+```
+
+In this tutorial we discuss various time series objects in R. We will cover objects time series, zoo and xts. Base R has limited functionality for handling time series data.  There are several R packages with functions for creating, manipulating and visualizing time date and time series objects. 
+The packages that we will use are `lubridate`,  `quantmod`, `timeDate`, `timeSeries`, `zoo`, `xts`, `xtsExtra`, `tsibble`.
+
+
+We download monthly CPI from Eurostat
+
+```{r warning=TRUE, cache=TRUE}
+#Since 1996
+cpi<- get_eurostat("prc_hicp_midx", filters = list(geo = "EE", coicop="CP00", unit="I15")) %>%
+  dplyr::filter(time>=as.Date("1992-01-01")) %>%  dplyr::select(time, values) %>% 
+  rename(cpi=values, Date=time)
+plot(cpi, type="l")
+```
+
+
+The `data.frame` object is not designed to work efficiently with time series data. 
+The default plotting methods in R are not designed for handling time series data. 
+Depending on your data set and the purpose of your analysis you may need more flexible objects. 
+
+
+| object      |         package | explanation |  
+|-------------| ----------------|-------------------------------------------------------------------|
+| fts |  from package	fts |   	An R interfact to tslib (a time series library in C++) |  
+| its	 | its |  	for handling irregular time series |  
+| irts	|  tseries |  	irregular time‐series objects |  
+| timeSeries | 	timeSeries	|  Rmetrics package of time series tools and utilities |  
+| ti | 	tis |  	Functions for time indexes and time indexed series|  
+| ts, mts | 	stats |  	Regularly spaced time series objects |  
+| zoo	| zoo |  	indexed totally ordered observations which includes irregular time series |  
+| xts | 	xts	|   Extension of the zoo class |  
+
+
+For simple regularly spaced time series (e.g monthly, quarterly and yearly data), you may use `ts` object from `stats` package. For irregular time series data (e.g. daily data with gaps), you may prefer `zoo` or `irts`object if date is important for you. If the date does not matter, then simple time series object `ts`should be enough.
+
+```{r}
+head(cpi)
+cpits <-  ts(cpi$cpi, start=c(1996,1), frequency = 12)
+#check structure
+str(cpits)
+plot(cpits)
+
+#Some functions to characterise time series
+#Position in the cycle
+cycle(cpits)
+#to check frequency
+frequency(cpits)
+#How time is represented? As a fraction of the year!
+time(cpits)
+#average difference between time units (0.08333 years or =1/12)
+deltat(cpits)
+```
 
 
 ## Seasonal decomposition of time Series
+
+We use `stl` from package `stats` to decompose time series. See the options of the command for details. 
+In addition, we apply the command `acf2` from package `astsa` to illustrate how we can use the components.
+
+
+```{r}
+#Fixed seasonal components, s.window - seasonal window
+plot(stl(cpits, s.window="periodic"))
+#vertical bars on the right reflect the scale of the components
+
+#smoothed seasonal component
+plot(stl(cpits, s.window=7))
+
+#remainder component seem to follow AR process
+#We can make the stl components as object and analyse these separately
+cpicomponents <- stl(cpits, s.window=7)
+
+#remainder
+plot(cpicomponents$time.series[,3])
+
+#Autocorrelation function of the remainder
+acf2(cpicomponents$time.series[,3])
+
+```
+
+
+
 ## Differences and lags
+We can apply standard functions to time series, such as differences, seasonal differences, logs, etc.
+Let's use CPI to calculate monthly and annual inflation rates.
+
+
+```{r}
+head(cpi)
+cpits <-  ts(cpi$cpi, start=c(1996,1), frequency = 12)
+#check structure
+str(cpits)
+plot(cpits)
+
+#Some functions to characterise time series
+#Position in the cycle
+cycle(cpits)
+#to check frequency
+frequency(cpits)
+#How time is represented? As a fraction of the year!
+time(cpits)
+#average difference between time units (0.08333 years or =1/12)
+deltat(cpits)
+
+#Let's plot four graphs in 2x2
+par(mfrow=c(2,2))
+plot(cpits)
+plot(log(cpits))
+#monthly growth rate
+plot(diff(log(cpits)))
+#annual growth rate
+plot(diff(log(cpits), lag=12))
+
+#close the graph
+dev.off()
+
+```
+
 ## Exponential smoothing and forecasting
+
+Let's forecast monthly inflation rate based using Holt-Winters exponential smoothing with trend and additive seasonal component. Note that we must not have missing data.
+
+```{r}
+dlcpi <- diff(log(cpits), lag=1)
+#omit missing values, we had one in October 2018
+dlcpi <- na.omit(dlcpi)
+plot(dlcpi)
+
+#Additive Holt-Winters
+(m <- HoltWinters(dlcpi, seasonal = "additive"))
+plot(m)
+
+#Predict 12 months ahead
+p <- predict(m, n.ahead = 12, prediction.interval = TRUE)
+plot(m, p)
+```
+
+
 ## Finite Distributed Lags Model 
+
+
+A finite distributed lag model (FDL) assumes a linear relationship between a dependent variable $y$ and several lags of an independent variable $x$.
+
+Let us consider another example, the dataset phillips_aus, which containes quarterly data on unemploymnt and inflation over the period 1987Q1 to 2009Q3.
+
+$$inf_t = \beta_1 + \beta_2 Du_t + e_t$$
+
+```{r}
+data("phillips_aus", package="PoEdata")
+phill.ts <- ts(phillips_aus, 
+               start=c(1987,1), 
+               end=c(2009,3),
+               frequency=4)
+inflation <- phill.ts[,"inf"]
+Du <- diff(phill.ts[,"u"])
+```
+
+```{r}
+par(mfrow=c(2,1))
+plot(inflation)
+plot(Du)
+dev.off()
+```
+
+
+The plots definitely show patterns in the data for both inflation and unemployment rates. But we are interested to determine if the error term in Equation
+
+
+```{r}
+phill.dyn <- dynlm(inf~diff(u),data=phill.ts)
+ehat <- resid(phill.dyn)
+kable(tidy(phill.dyn), caption="Summary of the `phillips` model")
+```
+
+Can we trust the p-value of the estimated model? Let us first create function that gives us a similar plot as Eviews. 
+
+
+
+```{r}
+
+#' Eviews plot
+#' This function creates a plot similar to the timeseries regression plot in Eviews
+#' Source: https://stackoverflow.com/questions/12699236/how-to-create-a-graph-showing-the-predictive-model-data-and-residuals-in-r
+#' Note that that the stackoverflow code follows the notation of dynlm(x ~ y) whereas my function uses the notation dynlm(y ~ x)! 
+#' @param y dependent variable
+#' @param model fitted model
+#'
+#' @return
+#' @export
+#'
+plotModel =  function(y, model) {
+  ymodel1 = range(y, fitted(model), na.rm=TRUE)
+  ymodel2 = c(2*ymodel1[1]-ymodel1[2], ymodel1[2])
+  yres1   = range(residuals(model), na.rm=TRUE)
+  yres2   = c(yres1[1], 2*yres1[2]-yres1[1])
+  plot(y, type="l", col="red", lwd=2, ylim=ymodel2, axes=FALSE,
+       ylab="", xlab="")
+  axis(1)
+  mtext("residuals", 1, adj=0.5, line=2.5)
+  axis(2, at=pretty(ymodel1))
+  mtext("observed/modeled", 2, adj=0.75, line=2.5)
+  lines(fitted(model), col="green", lwd=2)
+  par(new=TRUE)
+  plot(residuals(model), col="blue", type="l", ylim=yres2, axes=FALSE, 
+       ylab="", xlab="")
+  axis(4, at=pretty(yres1))
+  mtext("residuals", 4, adj=0.25, line=2.5)
+  abline(h=quantile(residuals(model), probs=c(0.1,0.9)), lty=2, col="gray")
+  abline(h=0)
+  box()  
+}  
+```
+
+
+```{r}
+par(oma=c(1,1,1,2))
+plotModel(inflation, phill.dyn) # works with models which accept 'predict' and 'residuals'
+```
+
+
+```{r}
+corrgm <- acf(ehat)
+plot(corrgm)
+```
+
+
+The time series plot suggests that some patterns exists in the residuals, which is confirmed by the correlogram. The previous result suggesting that there is a significant relationship between inflation and change in unemployment rate may not be, afterall, too reliable.
+
 ## ARIMA models
+
+
+We use functions `arima` from `stats` package, `auto.arima` and `Arima` from `forecast` package.
+We also look at autocorrelation functions and partial autocorrelation functions with `acf2` command from  `astsa` package.
+
+
+
+
+```{r eval=FALSE, include=FALSE}
+#Linke endale
+#https://a-little-book-of-r-for-time-series.readthedocs.io/en/latest/src/timeseries.html
+#https://faculty.washington.edu/ezivot/econ424/Working%20with%20Time%20Series%20Data%20in%20R.pdf
+
+```
+
+
+
+ARMA models are suited to describe stationary time series.  Wold's composition says that every covariance-stationary time series can be represented as a linear combination of lags of white noise (and a deterministic time series).
+
+$$
+X_t = W_t + a_1 \times W_{-1}+ a_2 \times W_{-2} + \dots
+$$
+
+If the time series is not stationary, we need to take first difference of the series.
+
+ARIMA models are denoted by ARIMA(p,d,q) where p is the order of AR terms, q is the order of MA terms and d is the order of integration. Full seasonal model is denoted by SARIMA(p,d,q) $\times$ (P,D,Q)S where capital letters denote respective the seasonal orders.
+
+
 ### Simulation of ARIMA models
+
+To simulate ARMA models we use function `arima.sim`. 
+
+```{r}
+#To simulate ARIMA process
+#MA(1) process
+xma1 <- arima.sim(list(order=c(0,0,1), ma=0.9), n=100)
+plot(xma1)
+#AR(1)
+xar1 <- arima.sim(list(order=c(1,0,0), ar=0.8), n=100)
+plot(xar1)
+#ARMA(1,1)
+xarma11 <- arima.sim(list(order=c(1,0,1), ar=0.8, ma=0.5), n=100)
+plot(xarma11)
+#ARMA(2,1)
+xarma21 <- arima.sim(list(order=c(2,0,1), ar=c(0.8,-0.5), ma=0.5), n=100)
+plot(xarma21)
+
+```
+
 ### ACF and PACF
+
+Next let's have a quick look how to identify ARMA model from the data. Very difficult to distinguish from the graphs, therefore we also use autocorrelation functions (ACF) and partial autocorrelation functions (PACF).
+
+```{r}
+#Compare the following time series in the graph
+x <- arima.sim(list(order=c(1,0,0), ar=-.7), n=200)
+y <- arima.sim(list(order=c(0,0,1), ma=-.7), n=200)
+
+par(mfrow=c(1,2))
+plot(x, main = "AR(1)")
+plot(y, main = "MA(1)")
+
+dev.off()
+
+```
+
+Autocorrelation function and partial autocorrelation function help to identify lag structure of ARMA models.
+If pure AR(p) process then ACF will tail off (changes to smaller) and PACF cuts off lag p.
+If pure MA(q) process then PACF will tail off (changes to smaller) and ACF cuts off lag q.
+If ARMA(p,q) then both ACF and PACF will tail off. Then start from (ARMA(1,1) and add more lags as needed).
+
+Look at the following ACF and PACF functions and see if the ACF and PACF of the simulated time series follow expected pattern. 
+
+```{r}
+#AR(1)
+x <- arima.sim(list(order=c(1,0,0), ar=c(0.9)), n=100)
+plot(x,main="AR(1)") 
+#ACF, PACF from atsta package
+acf2(x)
+#Look the autocorrelation coefficients
+
+#AR(2)
+x <- arima.sim(list(order=c(2,0,0), ar=c(0.9, -0.4)), n=100)
+plot(x, main="AR(2)") 
+acf2(x)
+
+#MA(1)
+x <- arima.sim(list(order=c(0,0,1), ma=0.4), n=100)
+plot(x, main="MA(1)") 
+acf2(x)
+
+#ARMA(1,1)
+x <- arima.sim(list(order=c(1,0,1), ar=0.9, ma=-0.4), n=200)
+plot(x, main="ARMA(1,1)") 
+acf2(x)
+
+```
+
 ### Estimation of ARIMA models
+
+Let's simulate a model and then estimate it with `arima` and `sarima` commands.
+
+```{r, warning=FALSE}
+#generate AR(2) process with mean
+x <- arima.sim(list(order=c(2,0,0), 
+                    ar=c(1.5, -.75)), 
+               n=200) + 50
+
+
+plot(x) 
+#use command sarima from astsa package
+#it provides a nice graph for residual diagnostics of the model
+x_fit <- sarima(x, p=2, d=0, q=0)
+x_fit$ttable
+# => residuals are white noise
+
+#alternatively may use command arima from the stats package
+x_fit2 <- arima(x, order=c(2, 0, 0))
+x_fit2
+#Let's have a quick look at residual diagnostics
+tsdiag(x_fit2)
+?Arima
+x_fit3 <- Arima(x, order=c(2,0,0))
+x_fit3
+
+Arima(x, order=c(2,0,0))  %>%  
+  forecast(h=20) %>%
+  autoplot
+```
+
 ### Choosing between models
+
+1) Descriptive power and simplicity
+Use AIC or BIC criteria, which both have penalty on model errors (average[(observed-predicted)^2]) and number of parameters (k*(p+q). The larger the AIC or BIC, the worse is the model. BIC has larger penalty on model parameters (k=ln(n)) than AIC (k=2), hence prefers simpler models.
+
+Goal: find the model with the smallest AIC or BIC.
+
+2) Residual analysis
+Models residuals should be white noise, otherwise there is still some information left in the residuals.
+
+sarima() function provides graphical analysis of residuals:
+a) standardised residuals - are there obvious patterns in the residuals?
+b) ACF of residuals - any remaining correlation in residuals
+c) Normal Q-Q plot - if residuals are normal, then they should be along the line. It would be nice to have normal errors to rely on t-distribution, but that is not so large problem if violated (Caution: I am not an expert!)
+d) Ljung-Box Q-statistic p-values  - points must above the line in order to have statistically insignificant test-statistics.
+
+The standardized residuals should behave as a white noise sequence with mean zero and variance one. 
+The sample ACF of the residuals should also look like that of white noise. 
+Normality is important assumption when fitting ARMA models. Examine the Q-Q plot for departures from normality and to identify outliers. 
+
+
+
+```{r}
+
+## to compare models use BIC() and AIC() statistics; BIC() and AIC() would choose the smallest
+#Let's estimate two models
+#AR(2)
+x_fit2 <- arima(x, order=c(2, 0, 0))
+#AR(3)
+x_fit3 <- arima(x, order=c(3, 0, 1))
+x_fit3
+tsdiag(x_fit3)
+
+#Compare these models
+BIC(x_fit2, x_fit3) #=> x_fit2 better as BIC is smaller
+AIC(x_fit2, x_fit3) #=> x_fit2 still better in my case
+
+#You may compare several models at once
+BIC(arima(x, order=c(1, 0, 0)), 
+    arima(x, order=c(2, 0, 0)), #=> this is best accoding to BIC
+    arima(x, order=c(3, 0, 0)),
+    arima(x, order=c(1, 0, 1)),
+    arima(x, order=c(2, 0, 1)),
+    arima(x, order=c(3, 0, 1)))
+
+```
+
 ### Automatic esimation
+
+You may let `auto.arima` function to decide automatically which model is the best one. It returns best ARIMA model according to either AIC, AICc or BIC value. The function conducts a search over possible model within the order constraints provided. See the help file for more details. The function can also be used on non-stationary time series and let it automatically test for unit roots.
+
+
+```{r}
+forecast::auto.arima(x, d=0, max.p = 5, max.q = 5, ic="aic")
+#surpisingly it ended up with ARMA(4,3) in my case when using AIC
+
+#and AR(3) when using BIC, although AR(3) is not statistically significant
+forecast::auto.arima(x, d=0, max.p = 5, max.q = 5, ic="bic")
+
+```
+
+###Prediction with ARMA models
+
+Prediction is straightforward, simply apply `predict` command to the estimated model.
+
+
+```{r}
+## An example of ARIMA forecasting three periods ahead:
+predict(x_fit2, n.ahead= 3)
+
+```
+
 ### Testing for unit root
 
-<!--chapter:end:03-TimeSeries.Rmd-->
+To test for unit root we can use package `fUnitRoots`, which includes Augmented Dickey Fuller unit root test and Phillips-Perron test. We can also use package `urca`, which includes many tests.
 
+```{r}
+#Let's first use again simulated time series
+x1 <- arima.sim(list(order=c(1,1,1), ar=c(0.5), ma=-0.3), n=100)
+plot(x1)
+#clearly random walk process
+
+#Let's test using adfTest
+#The null hypothesis is that time series is not stationary and we cannot reject that
+adfTest(x1)
+#=> we cannot reject H0
+
+#type of the regression:  "nc" no constant nor time trend, "c" with a constant but no time trend, "ct" with an intercept constant and a time trend. The default is "c".
+adfTest(x1, type="ct")
+test1 <- adfTest(x1, type="ct")
+#the model behind the test regression
+summary(test1@test$lm)
+
+#we can cleary drop trend
+(test1 <- adfTest(x1, type="c"))
+#the model behind the test regression
+summary(test1@test$lm)
+#And perhaps also the constant
+test1 <- adfTest(x1, type="nc")
+#the model behind the test regression
+test1
+summary(test1@test$lm)
+#=> still we cannot reject H0
+
+#McKinnons's test statistics - corrects t-statistic and p-value for possible misspecification of lags in the ADF test equation
+unitrootTest(x1, lags = 1, type = "c")
+
+###################################################
+#More tests are available in urca package
+#Augmented Dickey--Fuller test statistic
+summary(ur.df(x1, type= c("drift"), lags=1, selectlags = "Fixed"))
+#Kwiatkowski et al. Unit Root Test - H0 is that we do not have unit root. We reject that.
+summary(ur.kpss(x1))
+#Phillips & Perron Unit Root Test
+summary(ur.pp(x1))
+#we cannot reject H0 that the parameter value is actually 1
+#See other tests
+#Elliott, Rothenberg & Stock Unit Root Test
+summary(ur.ers(x1))
+#Schmidt & Phillips Unit Root Test
+summary(ur.sp(x1))
+
+```
+
+<!--chapter:end:TimeSeries.Rmd-->
+
+```{r include=FALSE, cache=FALSE}
+# LIBRARY CONFIGURATION
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  comment = NA,
+  dev = "png",
+  dpi = 150,
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = 0.618,  # 1 / phi
+  fig.show = "hold",
+  include = TRUE,
+  message = FALSE,
+  out.width = "70%",
+  tidy = FALSE,
+  warning = FALSE
+)
+
+
+# UTILITY FUNCTIONS
+
+printf <- function(pattern, ...) {
+  cat(sprintf(pattern, ...))
+}
+
+print_file <- function(file) {
+  cat(paste(readLines(file), "\n", sep=""), sep="")
+}
+
+# GENERAL R CONFIGURATION
+
+# options(digits = 2)
+options(htmltools.dir.version = FALSE)
+
+
+# set.seed(1123)
+```
 `r if (knitr::is_html_output()) '
 # References {-}
 '`
 
-<!--chapter:end:04-references.Rmd-->
+<!--chapter:end:references.Rmd-->
 

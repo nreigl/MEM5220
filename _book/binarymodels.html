@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html >
-
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>MEM52220 - Applied Econometrics</title>
-  <meta name="description" content="This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology">
-  <meta name="generator" content="bookdown  and GitBook 2.6.7">
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 2 Qualitative and LDV Models | MEM52220 - Applied Econometrics</title>
+  <meta name="description" content="This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology" />
+  <meta name="generator" content="bookdown 0.11 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="MEM52220 - Applied Econometrics" />
+  <meta property="og:title" content="Chapter 2 Qualitative and LDV Models | MEM52220 - Applied Econometrics" />
   <meta property="og:type" content="book" />
   
   
@@ -17,19 +16,19 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="MEM52220 - Applied Econometrics" />
+  <meta name="twitter:title" content="Chapter 2 Qualitative and LDV Models | MEM52220 - Applied Econometrics" />
   
   <meta name="twitter:description" content="This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology" />
   
 
-<meta name="author" content="Nicolas Reigl">
+<meta name="author" content="Nicolas Reigl" />
 
 
-<meta name="date" content="2018-10-28">
+<meta name="date" content="2019-07-05" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
 <link rel="prev" href="linearregression.html">
@@ -51,9 +50,9 @@
 
 
 <style type="text/css">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode { white-space: pre; position: relative; }
 div.sourceCode { margin: 1em 0; }
@@ -63,14 +62,16 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(data-line-number);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -79,9 +80,9 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -225,41 +226,41 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="binarymodels" class="section level1">
 <h1><span class="header-section-number">Chapter 2</span> Qualitative and LDV Models</h1>
 <p>To load the dataset and necessary functions:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace</span>
-<span class="co"># devtools::install_github(&quot;ccolonescu/PoEdata&quot;)</span>
-PACKAGES&lt;-<span class="kw">c</span>(
-            <span class="st">&quot;tidyverse&quot;</span>,  <span class="co"># for data manipulation and ggplots</span>
-            <span class="st">&quot;broom&quot;</span>,  <span class="co"># Tidy regression output</span>
-            <span class="st">&quot;Hmisc&quot;</span>, <span class="co"># Harrell Miscellaneous functions</span>
-            <span class="st">&quot;psych&quot;</span>, <span class="co"># Procedures for Psychometric research</span>
-            <span class="st">&quot;car&quot;</span>, <span class="co"># Companion to applied regression</span>
-            <span class="st">&quot;knitr&quot;</span>, <span class="co"># knit functions</span>
-            <span class="co"># &quot;kableExtra&quot;, # extended knit functions for objects exported from other packages</span>
-            <span class="st">&quot;huxtable&quot;</span>, <span class="co">#  Regression tables, broom compatible</span>
-            <span class="st">&quot;stargazer&quot;</span>, <span class="co"># Regression tables</span>
-            <span class="st">&quot;AER&quot;</span>, <span class="co">#  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)</span>
-            <span class="st">&quot;PoEdata&quot;</span>, <span class="co"># R data sets for &quot;Principles of Econometrics&quot; by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata</span>
-            <span class="st">&quot;wooldridge&quot;</span>,  <span class="co"># Wooldrige Datasets</span>
-            <span class="st">&quot;MCMCpack&quot;</span>, <span class="co"># Contains functions to perform Bayesian inference using posterior simulation for a number of ssatistical models.</span>
-            <span class="st">&quot;sampleSelection&quot;</span>, <span class="co"># Two-step and maximum likelihood estimation of Heckman-type sample selection models</span>
-            <span class="st">&quot;scales&quot;</span>, <span class="co"># scale helper functions such as percent </span>
-            <span class="st">&quot;lmtest&quot;</span>, 
-            <span class="st">&quot;margins&quot;</span>, <span class="co"># Stata like margin functions</span>
-            <span class="st">&quot;prediction&quot;</span>, <span class="co"># Type stable predictions</span>
-            <span class="st">&quot;nnet&quot;</span>, <span class="co"># Multinomial logit</span>
-            <span class="st">&quot;survival&quot;</span>, <span class="co"># Survival Analysis</span>
-            <span class="st">&quot;sampleSelection&quot;</span>, <span class="co"># Heckman type sample selection</span>
-            <span class="st">&quot;censReg&quot;</span>, <span class="co"># Censored Regression models</span>
-            <span class="st">&quot;magrittr&quot;</span>) <span class="co">#  pipes</span>
-inst&lt;-<span class="kw">match</span>(PACKAGES, <span class="kw">.packages</span>(<span class="dt">all=</span><span class="ot">TRUE</span>))
-need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
-<span class="cf">if</span> (<span class="kw">length</span>(need)<span class="op">&gt;</span><span class="dv">0</span>) <span class="kw">install.packages</span>(PACKAGES[need])
-<span class="kw">lapply</span>(PACKAGES, require, <span class="dt">character.only=</span>T)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb354-1"><a href="binarymodels.html#cb354-1"></a><span class="co"># This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace</span></span>
+<span id="cb354-2"><a href="binarymodels.html#cb354-2"></a><span class="co"># devtools::install_github(&quot;ccolonescu/PoEdata&quot;)</span></span>
+<span id="cb354-3"><a href="binarymodels.html#cb354-3"></a>PACKAGES&lt;-<span class="kw">c</span>(</span>
+<span id="cb354-4"><a href="binarymodels.html#cb354-4"></a>            <span class="st">&quot;tidyverse&quot;</span>,  <span class="co"># for data manipulation and ggplots</span></span>
+<span id="cb354-5"><a href="binarymodels.html#cb354-5"></a>            <span class="st">&quot;broom&quot;</span>,  <span class="co"># Tidy regression output</span></span>
+<span id="cb354-6"><a href="binarymodels.html#cb354-6"></a>            <span class="st">&quot;Hmisc&quot;</span>, <span class="co"># Harrell Miscellaneous functions</span></span>
+<span id="cb354-7"><a href="binarymodels.html#cb354-7"></a>            <span class="st">&quot;psych&quot;</span>, <span class="co"># Procedures for Psychometric research</span></span>
+<span id="cb354-8"><a href="binarymodels.html#cb354-8"></a>            <span class="st">&quot;car&quot;</span>, <span class="co"># Companion to applied regression</span></span>
+<span id="cb354-9"><a href="binarymodels.html#cb354-9"></a>            <span class="st">&quot;knitr&quot;</span>, <span class="co"># knit functions</span></span>
+<span id="cb354-10"><a href="binarymodels.html#cb354-10"></a>            <span class="co"># &quot;kableExtra&quot;, # extended knit functions for objects exported from other packages</span></span>
+<span id="cb354-11"><a href="binarymodels.html#cb354-11"></a>            <span class="st">&quot;huxtable&quot;</span>, <span class="co">#  Regression tables, broom compatible</span></span>
+<span id="cb354-12"><a href="binarymodels.html#cb354-12"></a>            <span class="st">&quot;stargazer&quot;</span>, <span class="co"># Regression tables</span></span>
+<span id="cb354-13"><a href="binarymodels.html#cb354-13"></a>            <span class="st">&quot;AER&quot;</span>, <span class="co">#  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)</span></span>
+<span id="cb354-14"><a href="binarymodels.html#cb354-14"></a>            <span class="st">&quot;PoEdata&quot;</span>, <span class="co"># R data sets for &quot;Principles of Econometrics&quot; by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata</span></span>
+<span id="cb354-15"><a href="binarymodels.html#cb354-15"></a>            <span class="st">&quot;wooldridge&quot;</span>,  <span class="co"># Wooldrige Datasets</span></span>
+<span id="cb354-16"><a href="binarymodels.html#cb354-16"></a>            <span class="st">&quot;MCMCpack&quot;</span>, <span class="co"># Contains functions to perform Bayesian inference using posterior simulation for a number of ssatistical models.</span></span>
+<span id="cb354-17"><a href="binarymodels.html#cb354-17"></a>            <span class="st">&quot;sampleSelection&quot;</span>, <span class="co"># Two-step and maximum likelihood estimation of Heckman-type sample selection models</span></span>
+<span id="cb354-18"><a href="binarymodels.html#cb354-18"></a>            <span class="st">&quot;scales&quot;</span>, <span class="co"># scale helper functions such as percent </span></span>
+<span id="cb354-19"><a href="binarymodels.html#cb354-19"></a>            <span class="st">&quot;lmtest&quot;</span>, </span>
+<span id="cb354-20"><a href="binarymodels.html#cb354-20"></a>            <span class="st">&quot;margins&quot;</span>, <span class="co"># Stata like margin functions</span></span>
+<span id="cb354-21"><a href="binarymodels.html#cb354-21"></a>            <span class="st">&quot;prediction&quot;</span>, <span class="co"># Type stable predictions</span></span>
+<span id="cb354-22"><a href="binarymodels.html#cb354-22"></a>            <span class="st">&quot;nnet&quot;</span>, <span class="co"># Multinomial logit</span></span>
+<span id="cb354-23"><a href="binarymodels.html#cb354-23"></a>            <span class="st">&quot;survival&quot;</span>, <span class="co"># Survival Analysis</span></span>
+<span id="cb354-24"><a href="binarymodels.html#cb354-24"></a>            <span class="st">&quot;sampleSelection&quot;</span>, <span class="co"># Heckman type sample selection</span></span>
+<span id="cb354-25"><a href="binarymodels.html#cb354-25"></a>            <span class="st">&quot;censReg&quot;</span>, <span class="co"># Censored Regression models</span></span>
+<span id="cb354-26"><a href="binarymodels.html#cb354-26"></a>            <span class="st">&quot;magrittr&quot;</span>) <span class="co">#  pipes</span></span>
+<span id="cb354-27"><a href="binarymodels.html#cb354-27"></a>inst&lt;-<span class="kw">match</span>(PACKAGES, <span class="kw">.packages</span>(<span class="dt">all=</span><span class="ot">TRUE</span>))</span>
+<span id="cb354-28"><a href="binarymodels.html#cb354-28"></a>need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))</span>
+<span id="cb354-29"><a href="binarymodels.html#cb354-29"></a><span class="cf">if</span> (<span class="kw">length</span>(need)<span class="op">&gt;</span><span class="dv">0</span>) <span class="kw">install.packages</span>(PACKAGES[need], <span class="dt">repos =</span> <span class="st">&quot;http://cran.us.r-project.org&quot;</span>)</span>
+<span id="cb354-30"><a href="binarymodels.html#cb354-30"></a><span class="kw">lapply</span>(PACKAGES, require, <span class="dt">character.only=</span>T)</span></code></pre></div>
 <p>Binary dependent variables are frequently studied in applied economics. Because a dummy variable <span class="math inline">\(y\)</span> can only take values 0 and 1, its (conditional) expected value is equal to the (conditional) probability that <span class="math inline">\(y=1\)</span>:</p>
 <p><span class="math inline">\(E(y|x) = 0 \times P(y = 0|x) + 1 \times P(y = 1|x) = P(y=1|x)\)</span></p>
 <p>An important class of models specifies the success probability as</p>
 <p><span class="math inline">\(P(y = 1 | x) = G(\beta_0 + \beta_1 + \dots \beta_k x_k) = G(\boldsymbol{x} \boldsymbol{\beta})\)</span></p>
-<p>The following table is taken from <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016">2016</a>)</span> and summarizes three examples of a generalized linear model:</p>
+<p>The following table is taken from <span class="citation">Dalpiaz (<a href="#ref-dalpiaz2016" role="doc-biblioref">2016</a>)</span> and summarizes three examples of a generalized linear model:</p>
 <table>
 <colgroup>
 <col width="22%" />
@@ -339,10 +340,10 @@ need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
 <div id="linear-probability-models" class="section level2">
 <h2><span class="header-section-number">2.1</span> Linear probability models</h2>
 <p>If a dummy variable is used as the dependent variable <span class="math inline">\(y\)</span>, we can still use OLS to estimate its relation to the regressors <span class="math inline">\(x\)</span>.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;wooldridge&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb355-1"><a href="binarymodels.html#cb355-1"></a><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;wooldridge&quot;</span>)</span></code></pre></div>
 <p>Let us use the <code>describe()</code> function from the <strong>Hmisc</strong> package to use a different way to describe the datatset.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">describe</span>(mroz)</code></pre>
-<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto; ">
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb356-1"><a href="binarymodels.html#cb356-1"></a><span class="kw">describe</span>(mroz)</span></code></pre></div>
+<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto;  ">
 <col><col><col><col><col><col><col><col><col><col><col><col><col><tr>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">vars</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">n</td>
@@ -691,7 +692,7 @@ need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
 </table>
 
 <p>The function <code>rcorr()</code> can be useful to check visually for correlation.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rcorr</span>(<span class="kw">as.matrix</span>(mroz))</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb357-1"><a href="binarymodels.html#cb357-1"></a><span class="kw">rcorr</span>(<span class="kw">as.matrix</span>(mroz))</span></code></pre></div>
 <pre><code>##           inlf hours kidslt6 kidsge6   age  educ  wage repwage hushrs
 ## inlf      1.00  0.74   -0.21    0.00 -0.08  0.19   NaN    0.63  -0.07
 ## hours     0.74  1.00   -0.22   -0.09 -0.03  0.11 -0.10    0.61  -0.06
@@ -904,9 +905,9 @@ need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
 ## lwage    0.0446 0.0004 0.0034          0.0090 
 ## expersq  0.7565 0.0000 0.0000   0.0090</code></pre>
 <p>Estimate linear probability model</p>
-<pre class="sourceCode r"><code class="sourceCode r">linprob &lt;-<span class="st"> </span><span class="kw">lm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,<span class="dt">data=</span>mroz)
-<span class="co"># Regression table with heteroscedasticity-robust SE and t tests:</span>
-<span class="kw">coeftest</span>(linprob,<span class="dt">vcov=</span>hccm)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb359-1"><a href="binarymodels.html#cb359-1"></a>linprob &lt;-<span class="st"> </span><span class="kw">lm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,<span class="dt">data=</span>mroz)</span>
+<span id="cb359-2"><a href="binarymodels.html#cb359-2"></a><span class="co"># Regression table with heteroscedasticity-robust SE and t tests:</span></span>
+<span id="cb359-3"><a href="binarymodels.html#cb359-3"></a><span class="kw">coeftest</span>(linprob,<span class="dt">vcov=</span>hccm)</span></code></pre></div>
 <pre><code>## 
 ## t test of coefficients:
 ## 
@@ -924,9 +925,9 @@ need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
 <p>The estimated coefficient <em>educ</em> can be interpreted as: an additional year of schooling increases the probability that a woman is in the labor force <em>ceteris paribus</em> by 3.80%.</p>
 <p>One problem with linear probability models is that <span class="math inline">\(P(y=1|x)\)</span> is specified as a linear function of the regressors. By construction, there are more or less realistic combinations of regressor values that yield <span class="math inline">\(\hat{y} &lt; 0\)</span> or <span class="math inline">\(\hat{y} &gt; 1\)</span>.</p>
 <p>Predictions for two “extreme” women:</p>
-<pre class="sourceCode r"><code class="sourceCode r">xpred &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">nwifeinc=</span><span class="kw">c</span>(<span class="dv">100</span>,<span class="dv">0</span>),<span class="dt">educ=</span><span class="kw">c</span>(<span class="dv">5</span>,<span class="dv">17</span>),<span class="dt">exper=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">30</span>),
-              <span class="dt">age=</span><span class="kw">c</span>(<span class="dv">20</span>,<span class="dv">52</span>),<span class="dt">kidslt6=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">0</span>),<span class="dt">kidsge6=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>))
-<span class="kw">predict</span>(linprob,xpred)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb361-1"><a href="binarymodels.html#cb361-1"></a>xpred &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">nwifeinc=</span><span class="kw">c</span>(<span class="dv">100</span>,<span class="dv">0</span>),<span class="dt">educ=</span><span class="kw">c</span>(<span class="dv">5</span>,<span class="dv">17</span>),<span class="dt">exper=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">30</span>),</span>
+<span id="cb361-2"><a href="binarymodels.html#cb361-2"></a>              <span class="dt">age=</span><span class="kw">c</span>(<span class="dv">20</span>,<span class="dv">52</span>),<span class="dt">kidslt6=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">0</span>),<span class="dt">kidsge6=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>))</span>
+<span id="cb361-3"><a href="binarymodels.html#cb361-3"></a><span class="kw">predict</span>(linprob,xpred)</span></code></pre></div>
 <pre><code>##          1          2 
 ## -0.4104582  1.0428084</code></pre>
 </div>
@@ -942,11 +943,11 @@ need&lt;-<span class="kw">which</span>(<span class="kw">is.na</span>(inst))
 <li><code>family = binomial (link = logit)</code> for the logit model or</li>
 <li><code>family = binomial (link = probit)</code> for the probit model</li>
 </ul>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Estimate logit model</span>
-logitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,
-              <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>logit),<span class="dt">data=</span>mroz)
-<span class="co"># Summary of results:</span>
-<span class="kw">summary</span>(logitres)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb363-1"><a href="binarymodels.html#cb363-1"></a><span class="co"># Estimate logit model</span></span>
+<span id="cb363-2"><a href="binarymodels.html#cb363-2"></a>logitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,</span>
+<span id="cb363-3"><a href="binarymodels.html#cb363-3"></a>              <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>logit),<span class="dt">data=</span>mroz)</span>
+<span id="cb363-4"><a href="binarymodels.html#cb363-4"></a><span class="co"># Summary of results:</span></span>
+<span id="cb363-5"><a href="binarymodels.html#cb363-5"></a><span class="kw">summary</span>(logitres)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = inlf ~ nwifeinc + educ + exper + I(exper^2) + age + 
@@ -976,26 +977,26 @@ logitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<s
 ## AIC: 819.53
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Log likelihood value:</span>
-<span class="kw">logLik</span>(logitres) </code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb365-1"><a href="binarymodels.html#cb365-1"></a><span class="co"># Log likelihood value:</span></span>
+<span id="cb365-2"><a href="binarymodels.html#cb365-2"></a><span class="kw">logLik</span>(logitres) </span></code></pre></div>
 <pre><code>## &#39;log Lik.&#39; -401.7652 (df=8)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># McFadden&#39;s pseudo R2:</span>
-<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>logitres<span class="op">$</span>deviance<span class="op">/</span>logitres<span class="op">$</span>null.deviance</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb367-1"><a href="binarymodels.html#cb367-1"></a><span class="co"># McFadden&#39;s pseudo R2:</span></span>
+<span id="cb367-2"><a href="binarymodels.html#cb367-2"></a><span class="dv">1</span> <span class="op">-</span><span class="st"> </span>logitres<span class="op">$</span>deviance<span class="op">/</span>logitres<span class="op">$</span>null.deviance</span></code></pre></div>
 <pre><code>## [1] 0.2196814</code></pre>
 <p>We can also extract the fitted values from the specified model and compare them the observed predicated binomial explained variable.</p>
-<pre class="sourceCode r"><code class="sourceCode r">fit &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">response =</span> mroz<span class="op">$</span>inlf, <span class="dt">predicted =</span> <span class="kw">round</span>(<span class="kw">fitted</span>(logitres), <span class="dv">0</span>))
-<span class="kw">xtabs</span>(<span class="op">~</span><span class="st"> </span>predicted <span class="op">+</span><span class="st"> </span>response, <span class="dt">data =</span> fit)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb369-1"><a href="binarymodels.html#cb369-1"></a>fit &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">response =</span> mroz<span class="op">$</span>inlf, <span class="dt">predicted =</span> <span class="kw">round</span>(<span class="kw">fitted</span>(logitres), <span class="dv">0</span>))</span>
+<span id="cb369-2"><a href="binarymodels.html#cb369-2"></a><span class="kw">xtabs</span>(<span class="op">~</span><span class="st"> </span>predicted <span class="op">+</span><span class="st"> </span>response, <span class="dt">data =</span> fit)</span></code></pre></div>
 <pre><code>##          response
 ## predicted   0   1
 ##         0 207  81
 ##         1 118 347</code></pre>
 <p>If you want to interpret the estimated effects as relative odds ratios (plus their confidence intervals):</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(logitres<span class="op">$</span>coefficients)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb371-1"><a href="binarymodels.html#cb371-1"></a><span class="kw">exp</span>(logitres<span class="op">$</span>coefficients)</span></code></pre></div>
 <pre><code>## (Intercept)    nwifeinc        educ       exper  I(exper^2)         age 
 ##   1.5302825   0.9788810   1.2475360   1.2285929   0.9968509   0.9157386 
 ##     kidslt6     kidsge6 
 ##   0.2361344   1.0619557</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="kw">confint</span>(logitres)) <span class="co"># Lets convert the confidence intervals the same way</span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb373-1"><a href="binarymodels.html#cb373-1"></a><span class="kw">exp</span>(<span class="kw">confint</span>(logitres)) <span class="co"># Lets convert the confidence intervals the same way</span></span></code></pre></div>
 <pre><code>## Waiting for profiling to be done...</code></pre>
 <pre><code>##                 2.5 %    97.5 %
 ## (Intercept) 0.2829827 8.2907776
@@ -1006,9 +1007,9 @@ logitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<s
 ## age         0.8894633 0.9418229
 ## kidslt6     0.1567171 0.3485513
 ## kidsge6     0.9175642 1.2306237</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">resultsTable &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="kw">cbind</span>(<span class="dt">OddsRatios =</span> <span class="kw">coef</span>(logitres), <span class="kw">confint</span>(logitres)))</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb376-1"><a href="binarymodels.html#cb376-1"></a>resultsTable &lt;-<span class="st"> </span><span class="kw">exp</span>(<span class="kw">cbind</span>(<span class="dt">OddsRatios =</span> <span class="kw">coef</span>(logitres), <span class="kw">confint</span>(logitres)))</span></code></pre></div>
 <pre><code>## Waiting for profiling to be done...</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">round</span>(resultsTable, <span class="dt">digits =</span> <span class="dv">5</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb378-1"><a href="binarymodels.html#cb378-1"></a><span class="kw">round</span>(resultsTable, <span class="dt">digits =</span> <span class="dv">5</span>)</span></code></pre></div>
 <pre><code>##             OddsRatios   2.5 %  97.5 %
 ## (Intercept)    1.53028 0.28298 8.29078
 ## nwifeinc       0.97888 0.96254 0.99492
@@ -1028,14 +1029,14 @@ logitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<s
 <li>psechoice = 2 two year college</li>
 <li>psechoice = 3 four year college</li>
 </ul>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;nels_small&quot;</span>, <span class="dt">package=</span><span class="st">&quot;PoEdata&quot;</span>)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">nels.multinom &lt;-<span class="st"> </span><span class="kw">multinom</span>(psechoice<span class="op">~</span>grades, <span class="dt">data=</span>nels_small)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb380-1"><a href="binarymodels.html#cb380-1"></a><span class="kw">data</span>(<span class="st">&quot;nels_small&quot;</span>, <span class="dt">package=</span><span class="st">&quot;PoEdata&quot;</span>)</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb381-1"><a href="binarymodels.html#cb381-1"></a>nels.multinom &lt;-<span class="st"> </span><span class="kw">multinom</span>(psechoice<span class="op">~</span>grades, <span class="dt">data=</span>nels_small)</span></code></pre></div>
 <pre><code>## # weights:  9 (4 variable)
 ## initial  value 1098.612289 
 ## iter  10 value 875.313116
 ## final  value 875.313099 
 ## converged</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(nels.multinom)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb383-1"><a href="binarymodels.html#cb383-1"></a><span class="kw">summary</span>(nels.multinom)</span></code></pre></div>
 <pre><code>## Call:
 ## multinom(formula = psechoice ~ grades, data = nels_small)
 ## 
@@ -1051,11 +1052,11 @@ logitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<s
 ## 
 ## Residual Deviance: 1750.626 
 ## AIC: 1758.626</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">medGrades &lt;-<span class="st"> </span><span class="kw">median</span>(nels_small<span class="op">$</span>grades)
-fifthPercentileGrades &lt;-<span class="st"> </span><span class="kw">quantile</span>(nels_small<span class="op">$</span>grades, <span class="fl">.05</span>)
-newdat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">grades=</span><span class="kw">c</span>(medGrades, fifthPercentileGrades))
-pred &lt;-<span class="st"> </span><span class="kw">predict</span>(nels.multinom, newdat, <span class="st">&quot;probs&quot;</span>)
-pred</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb385-1"><a href="binarymodels.html#cb385-1"></a>medGrades &lt;-<span class="st"> </span><span class="kw">median</span>(nels_small<span class="op">$</span>grades)</span>
+<span id="cb385-2"><a href="binarymodels.html#cb385-2"></a>fifthPercentileGrades &lt;-<span class="st"> </span><span class="kw">quantile</span>(nels_small<span class="op">$</span>grades, <span class="fl">.05</span>)</span>
+<span id="cb385-3"><a href="binarymodels.html#cb385-3"></a>newdat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">grades=</span><span class="kw">c</span>(medGrades, fifthPercentileGrades))</span>
+<span id="cb385-4"><a href="binarymodels.html#cb385-4"></a>pred &lt;-<span class="st"> </span><span class="kw">predict</span>(nels.multinom, newdat, <span class="st">&quot;probs&quot;</span>)</span>
+<span id="cb385-5"><a href="binarymodels.html#cb385-5"></a>pred</span></code></pre></div>
 <pre><code>##             1          2         3
 ##    0.18101808 0.28557312 0.5334088
 ## 5% 0.01781764 0.09662199 0.8855604</code></pre>
@@ -1069,34 +1070,36 @@ pred</code></pre>
 <li>sevenup</li>
 <li>coke</li>
 </ul>
-<p>R offers several alternatives that allow fitting conditional logit models, one of which is the function <code>MCMCmnl()</code> from the package <strong>MCMCpack</strong> (others are, for instance, <code>clogit()</code> in the <strong>survival</strong> package and <code>mclogit()</code> in the <strong>mclogit</strong> package). The following code is adapted from <span class="citation">Adkins (<a href="#ref-Adkins2014">2014</a>)</span>.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;cola&quot;</span>, <span class="dt">package=</span><span class="st">&quot;PoEdata&quot;</span>)
-N &lt;-<span class="st"> </span><span class="kw">nrow</span>(cola)
-N3 &lt;-<span class="st"> </span>N<span class="op">/</span><span class="dv">3</span>
-price1 &lt;-<span class="st"> </span>cola<span class="op">$</span>price[<span class="kw">seq</span>(<span class="dv">1</span>,N,<span class="dt">by=</span><span class="dv">3</span>)]
-price2 &lt;-<span class="st"> </span>cola<span class="op">$</span>price[<span class="kw">seq</span>(<span class="dv">2</span>,N,<span class="dt">by=</span><span class="dv">3</span>)]
-price3 &lt;-<span class="st"> </span>cola<span class="op">$</span>price[<span class="kw">seq</span>(<span class="dv">3</span>,N,<span class="dt">by=</span><span class="dv">3</span>)]
-
-bchoice &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="st">&quot;1&quot;</span>, N3)
-<span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>N3){
-  <span class="cf">if</span>(cola<span class="op">$</span>choice[<span class="dv">3</span><span class="op">*</span>j<span class="dv">-1</span>]<span class="op">==</span><span class="dv">1</span>) bchoice[j] &lt;-<span class="st"> &quot;2&quot;</span>
-  <span class="cf">if</span>(cola<span class="op">$</span>choice[<span class="dv">3</span><span class="op">*</span>j]<span class="op">==</span><span class="dv">1</span>) bchoice[j] &lt;-<span class="st"> &quot;3&quot;</span>
-}
-cola.clogit &lt;-<span class="st"> </span><span class="kw">MCMCmnl</span>(bchoice <span class="op">~</span>
-<span class="st">                         </span><span class="kw">choicevar</span>(price1, <span class="st">&quot;b2&quot;</span>, <span class="st">&quot;1&quot;</span>)<span class="op">+</span>
-<span class="st">                         </span><span class="kw">choicevar</span>(price2, <span class="st">&quot;b2&quot;</span>, <span class="st">&quot;2&quot;</span>)<span class="op">+</span>
-<span class="st">                         </span><span class="kw">choicevar</span>(price3, <span class="st">&quot;b2&quot;</span>, <span class="st">&quot;3&quot;</span>),
-                       <span class="dt">baseline=</span><span class="st">&quot;3&quot;</span>, <span class="dt">mcmc.method=</span><span class="st">&quot;IndMH&quot;</span>)</code></pre>
+<p>R offers several alternatives that allow fitting conditional logit models, one of which is the function <code>MCMCmnl()</code> from the package <strong>MCMCpack</strong> (others are, for instance, <code>clogit()</code> in the <strong>survival</strong> package and <code>mclogit()</code> in the <strong>mclogit</strong> package). The following code is adapted from <span class="citation">Adkins (<a href="#ref-Adkins2014" role="doc-biblioref">2014</a>)</span>.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb387-1"><a href="binarymodels.html#cb387-1"></a><span class="kw">data</span>(<span class="st">&quot;cola&quot;</span>, <span class="dt">package=</span><span class="st">&quot;PoEdata&quot;</span>)</span>
+<span id="cb387-2"><a href="binarymodels.html#cb387-2"></a>N &lt;-<span class="st"> </span><span class="kw">nrow</span>(cola)</span>
+<span id="cb387-3"><a href="binarymodels.html#cb387-3"></a>N3 &lt;-<span class="st"> </span>N<span class="op">/</span><span class="dv">3</span></span>
+<span id="cb387-4"><a href="binarymodels.html#cb387-4"></a>price1 &lt;-<span class="st"> </span>cola<span class="op">$</span>price[<span class="kw">seq</span>(<span class="dv">1</span>,N,<span class="dt">by=</span><span class="dv">3</span>)]</span>
+<span id="cb387-5"><a href="binarymodels.html#cb387-5"></a>price2 &lt;-<span class="st"> </span>cola<span class="op">$</span>price[<span class="kw">seq</span>(<span class="dv">2</span>,N,<span class="dt">by=</span><span class="dv">3</span>)]</span>
+<span id="cb387-6"><a href="binarymodels.html#cb387-6"></a>price3 &lt;-<span class="st"> </span>cola<span class="op">$</span>price[<span class="kw">seq</span>(<span class="dv">3</span>,N,<span class="dt">by=</span><span class="dv">3</span>)]</span>
+<span id="cb387-7"><a href="binarymodels.html#cb387-7"></a></span>
+<span id="cb387-8"><a href="binarymodels.html#cb387-8"></a>bchoice &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="st">&quot;1&quot;</span>, N3)</span>
+<span id="cb387-9"><a href="binarymodels.html#cb387-9"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>N3){</span>
+<span id="cb387-10"><a href="binarymodels.html#cb387-10"></a>  <span class="cf">if</span>(cola<span class="op">$</span>choice[<span class="dv">3</span><span class="op">*</span>j<span class="dv">-1</span>]<span class="op">==</span><span class="dv">1</span>) bchoice[j] &lt;-<span class="st"> &quot;2&quot;</span></span>
+<span id="cb387-11"><a href="binarymodels.html#cb387-11"></a>  <span class="cf">if</span>(cola<span class="op">$</span>choice[<span class="dv">3</span><span class="op">*</span>j]<span class="op">==</span><span class="dv">1</span>) bchoice[j] &lt;-<span class="st"> &quot;3&quot;</span></span>
+<span id="cb387-12"><a href="binarymodels.html#cb387-12"></a>}</span>
+<span id="cb387-13"><a href="binarymodels.html#cb387-13"></a>cola.clogit &lt;-<span class="st"> </span><span class="kw">MCMCmnl</span>(bchoice <span class="op">~</span></span>
+<span id="cb387-14"><a href="binarymodels.html#cb387-14"></a><span class="st">                         </span><span class="kw">choicevar</span>(price1, <span class="st">&quot;b2&quot;</span>, <span class="st">&quot;1&quot;</span>)<span class="op">+</span></span>
+<span id="cb387-15"><a href="binarymodels.html#cb387-15"></a><span class="st">                         </span><span class="kw">choicevar</span>(price2, <span class="st">&quot;b2&quot;</span>, <span class="st">&quot;2&quot;</span>)<span class="op">+</span></span>
+<span id="cb387-16"><a href="binarymodels.html#cb387-16"></a><span class="st">                         </span><span class="kw">choicevar</span>(price3, <span class="st">&quot;b2&quot;</span>, <span class="st">&quot;3&quot;</span>),</span>
+<span id="cb387-17"><a href="binarymodels.html#cb387-17"></a>                       <span class="dt">baseline=</span><span class="st">&quot;3&quot;</span>, <span class="dt">mcmc.method=</span><span class="st">&quot;IndMH&quot;</span>)</span></code></pre></div>
+<pre><code>## Warning in model.matrix.default(mt, mf, contrasts): non-list contrasts
+## argument ignored</code></pre>
 <pre><code>## Calculating MLEs and large sample var-cov matrix.
 ## This may take a moment...
 ## Inverting Hessian to get large sample var-cov matrix.</code></pre>
 <p>The output from function multinom gives coefficient estimates for each level of the response variable psechoice, except for the first level, which is the benchmark.</p>
 <p>We can calculate the probability that individual <span class="math inline">\(i\)</span> chooses pepsi and sevenup for some given values of the prices that individual <span class="math inline">\(i\)</span>. Coke is not shown as it is the baseline choice.</p>
-<pre class="sourceCode r"><code class="sourceCode r">sclogit &lt;-<span class="st"> </span><span class="kw">summary</span>(cola.clogit)
-tabMCMC &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(sclogit<span class="op">$</span>statistics)[,<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>]
-<span class="kw">row.names</span>(tabMCMC)&lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;b2&quot;</span>,<span class="st">&quot;b11&quot;</span>,<span class="st">&quot;b12&quot;</span>)
-<span class="kw">kable</span>(tabMCMC, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,
-      <span class="dt">caption=</span><span class="st">&quot;Conditional logit estimates for the &#39;cola&#39; problem&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb390-1"><a href="binarymodels.html#cb390-1"></a>sclogit &lt;-<span class="st"> </span><span class="kw">summary</span>(cola.clogit)</span>
+<span id="cb390-2"><a href="binarymodels.html#cb390-2"></a>tabMCMC &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(sclogit<span class="op">$</span>statistics)[,<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>]</span>
+<span id="cb390-3"><a href="binarymodels.html#cb390-3"></a><span class="kw">row.names</span>(tabMCMC)&lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;b2&quot;</span>,<span class="st">&quot;b11&quot;</span>,<span class="st">&quot;b12&quot;</span>)</span>
+<span id="cb390-4"><a href="binarymodels.html#cb390-4"></a><span class="kw">kable</span>(tabMCMC, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,</span>
+<span id="cb390-5"><a href="binarymodels.html#cb390-5"></a>      <span class="dt">caption=</span><span class="st">&quot;Conditional logit estimates for the &#39;cola&#39; problem&quot;</span>)</span></code></pre></div>
 <table>
 <caption><span id="tab:unnamed-chunk-159">Table 2.1: </span>Conditional logit estimates for the ‘cola’ problem</caption>
 <thead>
@@ -1125,24 +1128,24 @@ tabMCMC &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(sclo
 </tbody>
 </table>
 <p>We can also estimate the probabilities of individual <span class="math inline">\(i\)</span> choosing Pepsi or Sevenup for a given price.</p>
-<pre class="sourceCode r"><code class="sourceCode r">pPepsi &lt;-<span class="st"> </span><span class="dv">1</span>
-pSevenup &lt;-<span class="st"> </span><span class="fl">1.25</span>
-pCoke &lt;-<span class="st"> </span><span class="fl">1.10</span>
-b13 &lt;-<span class="st"> </span><span class="dv">0</span>
-b2  &lt;-<span class="st"> </span>tabMCMC<span class="op">$</span>Mean[<span class="dv">1</span>]
-b11 &lt;-<span class="st"> </span>tabMCMC<span class="op">$</span>Mean[<span class="dv">2</span>]
-b12 &lt;-<span class="st"> </span>tabMCMC<span class="op">$</span>Mean[<span class="dv">3</span>]
-
-<span class="co"># The probability that individual i chooses Pepsi:</span>
-PiPepsi &lt;-<span class="st"> </span><span class="kw">exp</span>(b11<span class="op">+</span>b2<span class="op">*</span>pPepsi)<span class="op">/</span>
-<span class="st">          </span>(<span class="kw">exp</span>(b11<span class="op">+</span>b2<span class="op">*</span>pPepsi)<span class="op">+</span><span class="kw">exp</span>(b12<span class="op">+</span>b2<span class="op">*</span>pSevenup)<span class="op">+</span>
-<span class="st">                              </span><span class="kw">exp</span>(b13<span class="op">+</span>b2<span class="op">*</span>pCoke))
-<span class="co"># The probability that individual i chooses Sevenup:</span>
-PiSevenup &lt;-<span class="st"> </span><span class="kw">exp</span>(b12<span class="op">+</span>b2<span class="op">*</span>pSevenup)<span class="op">/</span>
-<span class="st">          </span>(<span class="kw">exp</span>(b11<span class="op">+</span>b2<span class="op">*</span>pPepsi)<span class="op">+</span><span class="kw">exp</span>(b12<span class="op">+</span>b2<span class="op">*</span>pSevenup)<span class="op">+</span>
-<span class="st">                              </span><span class="kw">exp</span>(b13<span class="op">+</span>b2<span class="op">*</span>pCoke))
-<span class="co"># The probability that individual i chooses Coke:</span>
-PiCoke &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">-</span>PiPepsi<span class="op">-</span>PiSevenup</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb391-1"><a href="binarymodels.html#cb391-1"></a>pPepsi &lt;-<span class="st"> </span><span class="dv">1</span></span>
+<span id="cb391-2"><a href="binarymodels.html#cb391-2"></a>pSevenup &lt;-<span class="st"> </span><span class="fl">1.25</span></span>
+<span id="cb391-3"><a href="binarymodels.html#cb391-3"></a>pCoke &lt;-<span class="st"> </span><span class="fl">1.10</span></span>
+<span id="cb391-4"><a href="binarymodels.html#cb391-4"></a>b13 &lt;-<span class="st"> </span><span class="dv">0</span></span>
+<span id="cb391-5"><a href="binarymodels.html#cb391-5"></a>b2  &lt;-<span class="st"> </span>tabMCMC<span class="op">$</span>Mean[<span class="dv">1</span>]</span>
+<span id="cb391-6"><a href="binarymodels.html#cb391-6"></a>b11 &lt;-<span class="st"> </span>tabMCMC<span class="op">$</span>Mean[<span class="dv">2</span>]</span>
+<span id="cb391-7"><a href="binarymodels.html#cb391-7"></a>b12 &lt;-<span class="st"> </span>tabMCMC<span class="op">$</span>Mean[<span class="dv">3</span>]</span>
+<span id="cb391-8"><a href="binarymodels.html#cb391-8"></a></span>
+<span id="cb391-9"><a href="binarymodels.html#cb391-9"></a><span class="co"># The probability that individual i chooses Pepsi:</span></span>
+<span id="cb391-10"><a href="binarymodels.html#cb391-10"></a>PiPepsi &lt;-<span class="st"> </span><span class="kw">exp</span>(b11<span class="op">+</span>b2<span class="op">*</span>pPepsi)<span class="op">/</span></span>
+<span id="cb391-11"><a href="binarymodels.html#cb391-11"></a><span class="st">          </span>(<span class="kw">exp</span>(b11<span class="op">+</span>b2<span class="op">*</span>pPepsi)<span class="op">+</span><span class="kw">exp</span>(b12<span class="op">+</span>b2<span class="op">*</span>pSevenup)<span class="op">+</span></span>
+<span id="cb391-12"><a href="binarymodels.html#cb391-12"></a><span class="st">                              </span><span class="kw">exp</span>(b13<span class="op">+</span>b2<span class="op">*</span>pCoke))</span>
+<span id="cb391-13"><a href="binarymodels.html#cb391-13"></a><span class="co"># The probability that individual i chooses Sevenup:</span></span>
+<span id="cb391-14"><a href="binarymodels.html#cb391-14"></a>PiSevenup &lt;-<span class="st"> </span><span class="kw">exp</span>(b12<span class="op">+</span>b2<span class="op">*</span>pSevenup)<span class="op">/</span></span>
+<span id="cb391-15"><a href="binarymodels.html#cb391-15"></a><span class="st">          </span>(<span class="kw">exp</span>(b11<span class="op">+</span>b2<span class="op">*</span>pPepsi)<span class="op">+</span><span class="kw">exp</span>(b12<span class="op">+</span>b2<span class="op">*</span>pSevenup)<span class="op">+</span></span>
+<span id="cb391-16"><a href="binarymodels.html#cb391-16"></a><span class="st">                              </span><span class="kw">exp</span>(b13<span class="op">+</span>b2<span class="op">*</span>pCoke))</span>
+<span id="cb391-17"><a href="binarymodels.html#cb391-17"></a><span class="co"># The probability that individual i chooses Coke:</span></span>
+<span id="cb391-18"><a href="binarymodels.html#cb391-18"></a>PiCoke &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">-</span>PiPepsi<span class="op">-</span>PiSevenup</span></code></pre></div>
 <p>The calculatred probabilities are:</p>
 <ul>
 <li><span class="math inline">\(p_{i,pepsi}=0.483\)</span></li>
@@ -1155,12 +1158,14 @@ PiCoke &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">-
 <h3><span class="header-section-number">2.2.3</span> Ordered Choice Models</h3>
 <p>The order of choices in these models is meaningful, unlike the multinomial and conditional logit model we have studied so far. The following example explains the choice of higher education, when the choice variable is psechoice and the only regressor is grades; the dataset, <em>nels_small</em> , is already known to us.</p>
 <p>The R package <strong>MCMCpack</strong> is again used here, with its function <code>MCMCoprobit()</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r">nels.oprobit &lt;-<span class="st"> </span><span class="kw">MCMCoprobit</span>(psechoice <span class="op">~</span><span class="st"> </span>grades, 
-                            <span class="dt">data=</span>nels_small, <span class="dt">mcmc=</span><span class="dv">10000</span>)
-sOprobit &lt;-<span class="st"> </span><span class="kw">summary</span>(nels.oprobit)
-tabOprobit &lt;-<span class="st"> </span>sOprobit<span class="op">$</span>statistics[, <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>]
-<span class="kw">kable</span>(tabOprobit, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,
-      <span class="dt">caption=</span><span class="st">&quot;Ordered probit estimates for the &#39;nels&#39; problem&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb392-1"><a href="binarymodels.html#cb392-1"></a>nels.oprobit &lt;-<span class="st"> </span><span class="kw">MCMCoprobit</span>(psechoice <span class="op">~</span><span class="st"> </span>grades, </span>
+<span id="cb392-2"><a href="binarymodels.html#cb392-2"></a>                            <span class="dt">data=</span>nels_small, <span class="dt">mcmc=</span><span class="dv">10000</span>)</span></code></pre></div>
+<pre><code>## Warning in model.matrix.default(mt, mf, contrasts): non-list contrasts
+## argument ignored</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb394-1"><a href="binarymodels.html#cb394-1"></a>sOprobit &lt;-<span class="st"> </span><span class="kw">summary</span>(nels.oprobit)</span>
+<span id="cb394-2"><a href="binarymodels.html#cb394-2"></a>tabOprobit &lt;-<span class="st"> </span>sOprobit<span class="op">$</span>statistics[, <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>]</span>
+<span id="cb394-3"><a href="binarymodels.html#cb394-3"></a><span class="kw">kable</span>(tabOprobit, <span class="dt">digits=</span><span class="dv">4</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>,</span>
+<span id="cb394-4"><a href="binarymodels.html#cb394-4"></a>      <span class="dt">caption=</span><span class="st">&quot;Ordered probit estimates for the &#39;nels&#39; problem&quot;</span>)</span></code></pre></div>
 <table>
 <caption><span id="tab:unnamed-chunk-161">Table 2.2: </span>Ordered probit estimates for the ‘nels’ problem</caption>
 <thead>
@@ -1195,49 +1200,49 @@ tabOprobit &lt;-<span class="st"> </span>sOprobit<span class="op">$</span>statis
 <li><span class="math inline">\(\mu_2\)</span> = gamma2 − (Intercept)</li>
 </ul>
 <p>The probabilities for each choice can be calculated as in the next code fragment:</p>
-<pre class="sourceCode r"><code class="sourceCode r">mu1 &lt;-<span class="st"> </span><span class="op">-</span>tabOprobit[<span class="dv">1</span>]
-b &lt;-<span class="st"> </span>tabOprobit[<span class="dv">2</span>]
-mu2 &lt;-<span class="st"> </span>tabOprobit[<span class="dv">3</span>]<span class="op">-</span>tabOprobit[<span class="dv">1</span>]
-xGrade &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">mean</span>(nels_small<span class="op">$</span>grades), 
-            <span class="kw">quantile</span>(nels_small<span class="op">$</span>grades, <span class="fl">0.05</span>))
-
-<span class="co"># Probabilities:</span>
-prob1 &lt;-<span class="st"> </span><span class="kw">pnorm</span>(mu1<span class="op">-</span>b<span class="op">*</span>xGrade)
-prob2 &lt;-<span class="st"> </span><span class="kw">pnorm</span>(mu2<span class="op">-</span>b<span class="op">*</span>xGrade)<span class="op">-</span><span class="kw">pnorm</span>(mu1<span class="op">-</span>b<span class="op">*</span>xGrade)
-prob3 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">-</span><span class="kw">pnorm</span>(mu2<span class="op">-</span>b<span class="op">*</span>xGrade)
-
-<span class="co"># Marginal effects:</span>
-Dp1DGrades &lt;-<span class="st"> </span><span class="op">-</span><span class="kw">pnorm</span>(mu1<span class="op">-</span>b<span class="op">*</span>xGrade)<span class="op">*</span>b
-Dp2DGrades &lt;-<span class="st"> </span>(<span class="kw">pnorm</span>(mu1<span class="op">-</span>b<span class="op">*</span>xGrade)<span class="op">-</span><span class="kw">pnorm</span>(mu2<span class="op">-</span>b<span class="op">*</span>xGrade))<span class="op">*</span>b
-Dp3DGrades &lt;-<span class="st"> </span><span class="kw">pnorm</span>(mu2<span class="op">-</span>b<span class="op">*</span>xGrade)<span class="op">*</span>b</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb395-1"><a href="binarymodels.html#cb395-1"></a>mu1 &lt;-<span class="st"> </span><span class="op">-</span>tabOprobit[<span class="dv">1</span>]</span>
+<span id="cb395-2"><a href="binarymodels.html#cb395-2"></a>b &lt;-<span class="st"> </span>tabOprobit[<span class="dv">2</span>]</span>
+<span id="cb395-3"><a href="binarymodels.html#cb395-3"></a>mu2 &lt;-<span class="st"> </span>tabOprobit[<span class="dv">3</span>]<span class="op">-</span>tabOprobit[<span class="dv">1</span>]</span>
+<span id="cb395-4"><a href="binarymodels.html#cb395-4"></a>xGrade &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="kw">mean</span>(nels_small<span class="op">$</span>grades), </span>
+<span id="cb395-5"><a href="binarymodels.html#cb395-5"></a>            <span class="kw">quantile</span>(nels_small<span class="op">$</span>grades, <span class="fl">0.05</span>))</span>
+<span id="cb395-6"><a href="binarymodels.html#cb395-6"></a></span>
+<span id="cb395-7"><a href="binarymodels.html#cb395-7"></a><span class="co"># Probabilities:</span></span>
+<span id="cb395-8"><a href="binarymodels.html#cb395-8"></a>prob1 &lt;-<span class="st"> </span><span class="kw">pnorm</span>(mu1<span class="op">-</span>b<span class="op">*</span>xGrade)</span>
+<span id="cb395-9"><a href="binarymodels.html#cb395-9"></a>prob2 &lt;-<span class="st"> </span><span class="kw">pnorm</span>(mu2<span class="op">-</span>b<span class="op">*</span>xGrade)<span class="op">-</span><span class="kw">pnorm</span>(mu1<span class="op">-</span>b<span class="op">*</span>xGrade)</span>
+<span id="cb395-10"><a href="binarymodels.html#cb395-10"></a>prob3 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">-</span><span class="kw">pnorm</span>(mu2<span class="op">-</span>b<span class="op">*</span>xGrade)</span>
+<span id="cb395-11"><a href="binarymodels.html#cb395-11"></a></span>
+<span id="cb395-12"><a href="binarymodels.html#cb395-12"></a><span class="co"># Marginal effects:</span></span>
+<span id="cb395-13"><a href="binarymodels.html#cb395-13"></a>Dp1DGrades &lt;-<span class="st"> </span><span class="op">-</span><span class="kw">pnorm</span>(mu1<span class="op">-</span>b<span class="op">*</span>xGrade)<span class="op">*</span>b</span>
+<span id="cb395-14"><a href="binarymodels.html#cb395-14"></a>Dp2DGrades &lt;-<span class="st"> </span>(<span class="kw">pnorm</span>(mu1<span class="op">-</span>b<span class="op">*</span>xGrade)<span class="op">-</span><span class="kw">pnorm</span>(mu2<span class="op">-</span>b<span class="op">*</span>xGrade))<span class="op">*</span>b</span>
+<span id="cb395-15"><a href="binarymodels.html#cb395-15"></a>Dp3DGrades &lt;-<span class="st"> </span><span class="kw">pnorm</span>(mu2<span class="op">-</span>b<span class="op">*</span>xGrade)<span class="op">*</span>b</span></code></pre></div>
 <p>For instance, the marginal effect of grades on the probability of attending a four-year college for a student with average grade and for a student in the top 5 percent are, respectively, -0.143 and -0.031.</p>
 </div>
 <div id="probit-model" class="section level3">
 <h3><span class="header-section-number">2.2.4</span> Probit model</h3>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))  
-x &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">3</span>,<span class="dv">3</span>, <span class="fl">.2</span>)
-<span class="kw">plot</span>(x, <span class="kw">pnorm</span>(x), <span class="dt">type=</span><span class="st">&quot;l&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;b1+b2x&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;P[y=1]&quot;</span>)
-<span class="kw">plot</span>(x, <span class="kw">dnorm</span>(x), <span class="dt">type=</span><span class="st">&quot;l&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb396-1"><a href="binarymodels.html#cb396-1"></a><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))  </span>
+<span id="cb396-2"><a href="binarymodels.html#cb396-2"></a>x &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">3</span>,<span class="dv">3</span>, <span class="fl">.2</span>)</span>
+<span id="cb396-3"><a href="binarymodels.html#cb396-3"></a><span class="kw">plot</span>(x, <span class="kw">pnorm</span>(x), <span class="dt">type=</span><span class="st">&quot;l&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;b1+b2x&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;P[y=1]&quot;</span>)</span>
+<span id="cb396-4"><a href="binarymodels.html#cb396-4"></a><span class="kw">plot</span>(x, <span class="kw">dnorm</span>(x), <span class="dt">type=</span><span class="st">&quot;l&quot;</span>)</span></code></pre></div>
 <div class="figure" style="text-align: center"><span id="fig:fig21"></span>
 <img src="MEM5220_R_files/figure-html/fig21-1.png" alt="The shape of the probit function is the standard normal distribution" width="80%" />
 <p class="caption">
 Figure 2.1: The shape of the probit function is the standard normal distribution
 </p>
 </div>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">detach</span>(<span class="st">&quot;package:PoEdata&quot;</span>, <span class="dt">unload=</span><span class="ot">TRUE</span>)
-<span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)
-<span class="kw">attach</span>(mroz)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb397-1"><a href="binarymodels.html#cb397-1"></a><span class="kw">detach</span>(<span class="st">&quot;package:PoEdata&quot;</span>, <span class="dt">unload=</span><span class="ot">TRUE</span>)</span>
+<span id="cb397-2"><a href="binarymodels.html#cb397-2"></a><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)</span>
+<span id="cb397-3"><a href="binarymodels.html#cb397-3"></a><span class="kw">attach</span>(mroz)</span></code></pre></div>
 <pre><code>## The following objects are masked from bwght:
 ## 
 ##     faminc, fatheduc, motheduc</code></pre>
 <pre><code>## The following object is masked from gpa1:
 ## 
 ##     age</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Estimate probit model</span>
-probitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,
-               <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>probit),<span class="dt">data=</span>mroz)
-<span class="co"># Summary of results:</span>
-<span class="kw">summary</span>(probitres)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb400-1"><a href="binarymodels.html#cb400-1"></a><span class="co"># Estimate probit model</span></span>
+<span id="cb400-2"><a href="binarymodels.html#cb400-2"></a>probitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,</span>
+<span id="cb400-3"><a href="binarymodels.html#cb400-3"></a>               <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>probit),<span class="dt">data=</span>mroz)</span>
+<span id="cb400-4"><a href="binarymodels.html#cb400-4"></a><span class="co"># Summary of results:</span></span>
+<span id="cb400-5"><a href="binarymodels.html#cb400-5"></a><span class="kw">summary</span>(probitres)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = inlf ~ nwifeinc + educ + exper + I(exper^2) + age + 
@@ -1267,23 +1272,23 @@ probitres&lt;-<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<
 ## AIC: 818.6
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Log likelihood value:</span>
-<span class="kw">logLik</span>(probitres) </code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb402-1"><a href="binarymodels.html#cb402-1"></a><span class="co"># Log likelihood value:</span></span>
+<span id="cb402-2"><a href="binarymodels.html#cb402-2"></a><span class="kw">logLik</span>(probitres) </span></code></pre></div>
 <pre><code>## &#39;log Lik.&#39; -401.3022 (df=8)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># McFadden&#39;s pseudo R2:</span>
-<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>probitres<span class="op">$</span>deviance<span class="op">/</span>probitres<span class="op">$</span>null.deviance</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb404-1"><a href="binarymodels.html#cb404-1"></a><span class="co"># McFadden&#39;s pseudo R2:</span></span>
+<span id="cb404-2"><a href="binarymodels.html#cb404-2"></a><span class="dv">1</span> <span class="op">-</span><span class="st"> </span>probitres<span class="op">$</span>deviance<span class="op">/</span>probitres<span class="op">$</span>null.deviance</span></code></pre></div>
 <pre><code>## [1] 0.2205805</code></pre>
 <p>Take a boostrap sample for the 95% confidence interval for each parameter.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)
-
-boot_probitres &lt;-<span class="st"> </span>mroz <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">bootstrap</span>(<span class="dv">500</span>) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">do</span>(<span class="kw">tidy</span>(<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,
-               <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>probit),.)))
-boot_probitres <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span><span class="kw">group_by</span>(term) <span class="op">%&gt;%</span><span class="st"> </span>
-<span class="st">  </span>dplyr<span class="op">::</span><span class="kw">summarise</span>(<span class="dt">low =</span> <span class="kw">quantile</span>(estimate, <span class="fl">.025</span>), 
-                   <span class="dt">high =</span> <span class="kw">quantile</span>(estimate, <span class="fl">.0975</span>))</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb406-1"><a href="binarymodels.html#cb406-1"></a><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)</span>
+<span id="cb406-2"><a href="binarymodels.html#cb406-2"></a></span>
+<span id="cb406-3"><a href="binarymodels.html#cb406-3"></a>boot_probitres &lt;-<span class="st"> </span>mroz <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb406-4"><a href="binarymodels.html#cb406-4"></a><span class="st">  </span><span class="kw">bootstrap</span>(<span class="dv">500</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb406-5"><a href="binarymodels.html#cb406-5"></a><span class="st">  </span><span class="kw">do</span>(<span class="kw">tidy</span>(<span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6,</span>
+<span id="cb406-6"><a href="binarymodels.html#cb406-6"></a>               <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>probit),.)))</span>
+<span id="cb406-7"><a href="binarymodels.html#cb406-7"></a>boot_probitres <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb406-8"><a href="binarymodels.html#cb406-8"></a><span class="st">  </span><span class="kw">group_by</span>(term) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb406-9"><a href="binarymodels.html#cb406-9"></a><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">summarise</span>(<span class="dt">low =</span> <span class="kw">quantile</span>(estimate, <span class="fl">.025</span>), </span>
+<span id="cb406-10"><a href="binarymodels.html#cb406-10"></a>                   <span class="dt">high =</span> <span class="kw">quantile</span>(estimate, <span class="fl">.0975</span>))</span></code></pre></div>
 <table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 56.6666666666667%; margin-left: 0%; margin-right: auto; ">
 <col><col><col><tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">term</td>
@@ -1336,13 +1341,13 @@ boot_probitres <span class="op">%&gt;%</span><span class="st"> </span>
 <div id="inference" class="section level3">
 <h3><span class="header-section-number">2.2.5</span> Inference</h3>
 <p>We can implement the test for overall significance for the probit model using both manual and automatic calculations.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Test of overall significance:</span>
-<span class="co"># Manual calculation of the LR test statistic:</span>
-probitres<span class="op">$</span>null.deviance <span class="op">-</span><span class="st"> </span>probitres<span class="op">$</span>deviance</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb407-1"><a href="binarymodels.html#cb407-1"></a><span class="co"># Test of overall significance:</span></span>
+<span id="cb407-2"><a href="binarymodels.html#cb407-2"></a><span class="co"># Manual calculation of the LR test statistic:</span></span>
+<span id="cb407-3"><a href="binarymodels.html#cb407-3"></a>probitres<span class="op">$</span>null.deviance <span class="op">-</span><span class="st"> </span>probitres<span class="op">$</span>deviance</span></code></pre></div>
 <pre><code>## [1] 227.142</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Automatic calculations including p-values,...:</span>
-<span class="kw">lrtest</span>(probitres)</code></pre>
-<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 62.2222222222222%; margin-left: 0%; margin-right: auto; ">
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb409-1"><a href="binarymodels.html#cb409-1"></a><span class="co"># Automatic calculations including p-values,...:</span></span>
+<span id="cb409-2"><a href="binarymodels.html#cb409-2"></a><span class="kw">lrtest</span>(probitres)</span></code></pre></div>
+<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 62.2222222222222%; margin-left: 0%; margin-right: auto;  ">
 <col><col><col><col><col><tr>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">#Df</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">LogLik</td>
@@ -1366,11 +1371,11 @@ probitres<span class="op">$</span>null.deviance <span class="op">-</span><span c
 </tr>
 </table>
 
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Test of H0: experience and age are irrelevant</span>
-restr &lt;-<span class="st"> </span><span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span><span class="st"> </span>kidslt6<span class="op">+</span>kidsge6, 
-             <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>logit),<span class="dt">data=</span>mroz)
-<span class="kw">lrtest</span>(restr,probitres)</code></pre>
-<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 62.2222222222222%; margin-left: 0%; margin-right: auto; ">
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb410-1"><a href="binarymodels.html#cb410-1"></a><span class="co"># Test of H0: experience and age are irrelevant</span></span>
+<span id="cb410-2"><a href="binarymodels.html#cb410-2"></a>restr &lt;-<span class="st"> </span><span class="kw">glm</span>(inlf<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span><span class="st"> </span>kidslt6<span class="op">+</span>kidsge6, </span>
+<span id="cb410-3"><a href="binarymodels.html#cb410-3"></a>             <span class="dt">family=</span><span class="kw">binomial</span>(<span class="dt">link=</span>logit),<span class="dt">data=</span>mroz)</span>
+<span id="cb410-4"><a href="binarymodels.html#cb410-4"></a><span class="kw">lrtest</span>(restr,probitres)</span></code></pre></div>
+<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 62.2222222222222%; margin-left: 0%; margin-right: auto;  ">
 <col><col><col><col><col><tr>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">#Df</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">LogLik</td>
@@ -1399,41 +1404,41 @@ restr &lt;-<span class="st"> </span><span class="kw">glm</span>(inlf<span class=
 <h3><span class="header-section-number">2.2.6</span> Predictions</h3>
 <p>The command <code>predict()</code> can calculate predicted values for the estimation sample or arbitrary sets of regressor values.</p>
 <p>We can calculate</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># predictions for two &quot;extreme&quot; women:</span>
-xpred &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">nwifeinc=</span><span class="kw">c</span>(<span class="dv">100</span>,<span class="dv">0</span>),<span class="dt">educ=</span><span class="kw">c</span>(<span class="dv">5</span>,<span class="dv">17</span>),<span class="dt">exper=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">30</span>),
-              <span class="dt">age=</span><span class="kw">c</span>(<span class="dv">20</span>,<span class="dv">52</span>),<span class="dt">kidslt6=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">0</span>),<span class="dt">kidsge6=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>))
-<span class="co"># Predictions from linear probability, probit and logit model:</span>
-<span class="kw">predict</span>(linprob,  xpred,<span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb411-1"><a href="binarymodels.html#cb411-1"></a><span class="co"># predictions for two &quot;extreme&quot; women:</span></span>
+<span id="cb411-2"><a href="binarymodels.html#cb411-2"></a>xpred &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">nwifeinc=</span><span class="kw">c</span>(<span class="dv">100</span>,<span class="dv">0</span>),<span class="dt">educ=</span><span class="kw">c</span>(<span class="dv">5</span>,<span class="dv">17</span>),<span class="dt">exper=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">30</span>),</span>
+<span id="cb411-3"><a href="binarymodels.html#cb411-3"></a>              <span class="dt">age=</span><span class="kw">c</span>(<span class="dv">20</span>,<span class="dv">52</span>),<span class="dt">kidslt6=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">0</span>),<span class="dt">kidsge6=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>))</span>
+<span id="cb411-4"><a href="binarymodels.html#cb411-4"></a><span class="co"># Predictions from linear probability, probit and logit model:</span></span>
+<span id="cb411-5"><a href="binarymodels.html#cb411-5"></a><span class="kw">predict</span>(linprob,  xpred,<span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
 <pre><code>##          1          2 
 ## -0.4104582  1.0428084</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">predict</span>(logitres, xpred,<span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb413-1"><a href="binarymodels.html#cb413-1"></a><span class="kw">predict</span>(logitres, xpred,<span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
 <pre><code>##           1           2 
 ## 0.005218002 0.950049117</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">predict</span>(probitres,xpred,<span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb415-1"><a href="binarymodels.html#cb415-1"></a><span class="kw">predict</span>(probitres,xpred,<span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
 <pre><code>##           1           2 
 ## 0.001065043 0.959869044</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Simulated data</span>
-<span class="kw">set.seed</span>(<span class="dv">12345</span>)
-y &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dv">100</span>, <span class="dv">1</span>, <span class="fl">0.5</span>)
-x &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">100</span>) <span class="op">+</span><span class="st"> </span><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>y
-
-<span class="co"># Estimation </span>
-linpr.res &lt;-<span class="st"> </span><span class="kw">lm</span>(y<span class="op">~</span>x)
-logit.res &lt;-<span class="kw">glm</span>(y <span class="op">~</span>x, <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> logit))
-probit.res &lt;-<span class="kw">glm</span>(y <span class="op">~</span>x, <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> probit))
-
-<span class="co"># Prediction from a regular grid of x values</span>
-xp &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from=</span> <span class="kw">min</span>(x), <span class="dt">to=</span><span class="kw">max</span>(x), <span class="dt">length=</span><span class="dv">50</span>)
-linpr.p &lt;-<span class="st"> </span><span class="kw">predict</span>(linpr.res, <span class="kw">list</span>(<span class="dt">x =</span> xp), <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)
-logit.p &lt;-<span class="st"> </span><span class="kw">predict</span>(logit.res, <span class="kw">list</span>(<span class="dt">x =</span> xp), <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)
-probit.p &lt;-<span class="st"> </span><span class="kw">predict</span>(probit.res, <span class="kw">list</span>(<span class="dt">x =</span> xp), <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(x,y)
-<span class="kw">lines</span>(xp, linpr.p, <span class="dt">lwd=</span><span class="dv">2</span>, <span class="dt">lty =</span> <span class="dv">1</span>)
-<span class="kw">lines</span>(xp, logit.p, <span class="dt">lwd=</span><span class="dv">2</span>, <span class="dt">lty =</span> <span class="dv">2</span>)
-<span class="kw">lines</span>(xp, probit.p, <span class="dt">lwd=</span><span class="dv">1</span>, <span class="dt">lty =</span> <span class="dv">1</span>)
-<span class="kw">legend</span>(<span class="st">&quot;topleft&quot;</span>, 
-       <span class="kw">c</span>(<span class="st">&quot;linear prob.&quot;</span>, <span class="st">&quot;logit&quot;</span>, <span class="st">&quot;probit&quot;</span>), 
-       <span class="dt">lwd =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>))</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb417-1"><a href="binarymodels.html#cb417-1"></a><span class="co"># Simulated data</span></span>
+<span id="cb417-2"><a href="binarymodels.html#cb417-2"></a><span class="kw">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb417-3"><a href="binarymodels.html#cb417-3"></a>y &lt;-<span class="st"> </span><span class="kw">rbinom</span>(<span class="dv">100</span>, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb417-4"><a href="binarymodels.html#cb417-4"></a>x &lt;-<span class="st"> </span><span class="kw">rnorm</span>(<span class="dv">100</span>) <span class="op">+</span><span class="st"> </span><span class="dv">2</span> <span class="op">*</span><span class="st"> </span>y</span>
+<span id="cb417-5"><a href="binarymodels.html#cb417-5"></a></span>
+<span id="cb417-6"><a href="binarymodels.html#cb417-6"></a><span class="co"># Estimation </span></span>
+<span id="cb417-7"><a href="binarymodels.html#cb417-7"></a>linpr.res &lt;-<span class="st"> </span><span class="kw">lm</span>(y<span class="op">~</span>x)</span>
+<span id="cb417-8"><a href="binarymodels.html#cb417-8"></a>logit.res &lt;-<span class="kw">glm</span>(y <span class="op">~</span>x, <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> logit))</span>
+<span id="cb417-9"><a href="binarymodels.html#cb417-9"></a>probit.res &lt;-<span class="kw">glm</span>(y <span class="op">~</span>x, <span class="dt">family =</span> <span class="kw">binomial</span>(<span class="dt">link =</span> probit))</span>
+<span id="cb417-10"><a href="binarymodels.html#cb417-10"></a></span>
+<span id="cb417-11"><a href="binarymodels.html#cb417-11"></a><span class="co"># Prediction from a regular grid of x values</span></span>
+<span id="cb417-12"><a href="binarymodels.html#cb417-12"></a>xp &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dt">from=</span> <span class="kw">min</span>(x), <span class="dt">to=</span><span class="kw">max</span>(x), <span class="dt">length=</span><span class="dv">50</span>)</span>
+<span id="cb417-13"><a href="binarymodels.html#cb417-13"></a>linpr.p &lt;-<span class="st"> </span><span class="kw">predict</span>(linpr.res, <span class="kw">list</span>(<span class="dt">x =</span> xp), <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb417-14"><a href="binarymodels.html#cb417-14"></a>logit.p &lt;-<span class="st"> </span><span class="kw">predict</span>(logit.res, <span class="kw">list</span>(<span class="dt">x =</span> xp), <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</span>
+<span id="cb417-15"><a href="binarymodels.html#cb417-15"></a>probit.p &lt;-<span class="st"> </span><span class="kw">predict</span>(probit.res, <span class="kw">list</span>(<span class="dt">x =</span> xp), <span class="dt">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb418-1"><a href="binarymodels.html#cb418-1"></a><span class="kw">plot</span>(x,y)</span>
+<span id="cb418-2"><a href="binarymodels.html#cb418-2"></a><span class="kw">lines</span>(xp, linpr.p, <span class="dt">lwd=</span><span class="dv">2</span>, <span class="dt">lty =</span> <span class="dv">1</span>)</span>
+<span id="cb418-3"><a href="binarymodels.html#cb418-3"></a><span class="kw">lines</span>(xp, logit.p, <span class="dt">lwd=</span><span class="dv">2</span>, <span class="dt">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb418-4"><a href="binarymodels.html#cb418-4"></a><span class="kw">lines</span>(xp, probit.p, <span class="dt">lwd=</span><span class="dv">1</span>, <span class="dt">lty =</span> <span class="dv">1</span>)</span>
+<span id="cb418-5"><a href="binarymodels.html#cb418-5"></a><span class="kw">legend</span>(<span class="st">&quot;topleft&quot;</span>, </span>
+<span id="cb418-6"><a href="binarymodels.html#cb418-6"></a>       <span class="kw">c</span>(<span class="st">&quot;linear prob.&quot;</span>, <span class="st">&quot;logit&quot;</span>, <span class="st">&quot;probit&quot;</span>), </span>
+<span id="cb418-7"><a href="binarymodels.html#cb418-7"></a>       <span class="dt">lwd =</span> <span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">1</span>), <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">1</span>))</span></code></pre></div>
 <div class="figure" style="text-align: center"><span id="fig:fig22"></span>
 <img src="MEM5220_R_files/figure-html/fig22-1.png" alt="Predictions from binary response models (simulated data)" width="80%" />
 <p class="caption">
@@ -1445,9 +1450,9 @@ Figure 2.2: Predictions from binary response models (simulated data)
 <h3><span class="header-section-number">2.2.7</span> Marginal (partial) effects</h3>
 <p>Several packages provide estimates of marginal effects for different types of models. Among these are <strong>car</strong>, <strong>alr3</strong>, <strong>mfx</strong>, <strong>erer</strong>, among others. Unfortunately, none of these packages implement marginal effects correctly (i.e., correctly account for interrelated variables such as interaction terms (e.g., a:b) or power terms (e.g., I(a^2)) and the packages all implement quite different interfaces for different types of models. The <strong>margins</strong> and <strong>prediction</strong> packages are a combined effort to calculate marginal effects that include complex terms and provide a uniform interface for doing those calculations.</p>
 <p>To know how much a variable influences the labour force participation, one has to use <code>margins()</code> command:</p>
-<pre class="sourceCode r"><code class="sourceCode r">effects_logit_participation &lt;-<span class="st"> </span><span class="kw">margins</span>(logitres) 
-<span class="kw">summary</span>(effects_logit_participation)</code></pre>
-<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto; ">
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb419-1"><a href="binarymodels.html#cb419-1"></a>effects_logit_participation &lt;-<span class="st"> </span><span class="kw">margins</span>(logitres) </span>
+<span id="cb419-2"><a href="binarymodels.html#cb419-2"></a><span class="kw">summary</span>(effects_logit_participation)</span></code></pre></div>
+<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto;  ">
 <col><col><col><col><col><col><col><tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">factor</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">AME</td>
@@ -1513,11 +1518,11 @@ Figure 2.2: Predictions from binary response models (simulated data)
 </tr>
 </table>
 
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(effects_logit_participation)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb420-1"><a href="binarymodels.html#cb420-1"></a><span class="kw">plot</span>(effects_logit_participation)</span></code></pre></div>
 <p><img src="MEM5220_R_files/figure-html/unnamed-chunk-168-1.png" width="672" /></p>
 <p>If one desires subgroup effects, simply pass a subset of data to the data argument:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(<span class="kw">margins</span>(logitres, <span class="dt">data =</span> <span class="kw">subset</span>(mroz, kidslt6 <span class="op">==</span><span class="st"> </span><span class="dv">0</span>))) <span class="co"># no kids &lt; 6 years</span></code></pre>
-<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto; ">
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb421-1"><a href="binarymodels.html#cb421-1"></a><span class="kw">summary</span>(<span class="kw">margins</span>(logitres, <span class="dt">data =</span> <span class="kw">subset</span>(mroz, kidslt6 <span class="op">==</span><span class="st"> </span><span class="dv">0</span>))) <span class="co"># no kids &lt; 6 years</span></span></code></pre></div>
+<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 100%; margin-left: 0%; margin-right: auto;  ">
 <col><col><col><col><col><col><col><tr>
 <td style="vertical-align: top; text-align: left; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">factor</td>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0pt 0.4pt 0pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">AME</td>
@@ -1583,12 +1588,12 @@ Figure 2.2: Predictions from binary response models (simulated data)
 </tr>
 </table>
 
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ggplot</span>(<span class="dt">data =</span> <span class="kw">summary</span>(effects_logit_participation)) <span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(factor, AME)) <span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_errorbar</span>(<span class="kw">aes</span>(<span class="dt">x =</span> factor, <span class="dt">ymin =</span> lower, <span class="dt">ymax =</span> upper)) <span class="op">+</span>
-<span class="st">  </span><span class="kw">geom_hline</span>(<span class="dt">yintercept =</span> <span class="dv">0</span>, <span class="dt">color=</span><span class="st">&quot;lightgrey&quot;</span>) <span class="op">+</span>
-<span class="st">  </span><span class="kw">theme_minimal</span>() <span class="op">+</span>
-<span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">45</span>))</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb422-1"><a href="binarymodels.html#cb422-1"></a><span class="kw">ggplot</span>(<span class="dt">data =</span> <span class="kw">summary</span>(effects_logit_participation)) <span class="op">+</span></span>
+<span id="cb422-2"><a href="binarymodels.html#cb422-2"></a><span class="st">  </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(factor, AME)) <span class="op">+</span></span>
+<span id="cb422-3"><a href="binarymodels.html#cb422-3"></a><span class="st">  </span><span class="kw">geom_errorbar</span>(<span class="kw">aes</span>(<span class="dt">x =</span> factor, <span class="dt">ymin =</span> lower, <span class="dt">ymax =</span> upper)) <span class="op">+</span></span>
+<span id="cb422-4"><a href="binarymodels.html#cb422-4"></a><span class="st">  </span><span class="kw">geom_hline</span>(<span class="dt">yintercept =</span> <span class="dv">0</span>, <span class="dt">color=</span><span class="st">&quot;lightgrey&quot;</span>) <span class="op">+</span></span>
+<span id="cb422-5"><a href="binarymodels.html#cb422-5"></a><span class="st">  </span><span class="kw">theme_minimal</span>() <span class="op">+</span></span>
+<span id="cb422-6"><a href="binarymodels.html#cb422-6"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">angle =</span> <span class="dv">45</span>))</span></code></pre></div>
 <div class="figure" style="text-align: center"><span id="fig:fig23"></span>
 <img src="MEM5220_R_files/figure-html/fig23-1.png" alt="Logit effect plot" width="80%" />
 <p class="caption">
@@ -1596,8 +1601,8 @@ Figure 2.3: Logit effect plot
 </p>
 </div>
 <p>You can also extract the marginal effects of a single variable, with <code>dydx</code>:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(<span class="kw">dydx</span>(mroz, logitres, <span class="st">&quot;educ&quot;</span>))</code></pre>
-<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 20%; margin-left: 0%; margin-right: auto; ">
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb423-1"><a href="binarymodels.html#cb423-1"></a><span class="kw">head</span>(<span class="kw">dydx</span>(mroz, logitres, <span class="st">&quot;educ&quot;</span>))</span></code></pre></div>
+<table class="huxtable" style="border-collapse: collapse; margin-bottom: 2em; margin-top: 2em; width: 20%; margin-left: 0%; margin-right: auto;  ">
 <col><tr>
 <td style="vertical-align: top; text-align: right; white-space: nowrap; border-style: solid solid solid solid; border-width: 0.4pt 0.4pt 0.4pt 0.4pt; padding: 4pt 4pt 4pt 4pt; font-weight: bold;">dydx_educ</td>
 </tr>
@@ -1622,28 +1627,7 @@ Figure 2.3: Logit effect plot
 </table>
 
 <p>The function <code>cplot()</code> provides the commonly needed visual summaries of predictions or average marginal effects conditional on a covariate.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cplot</span>(logitres, <span class="dt">x =</span> <span class="st">&quot;educ&quot;</span>, <span class="dt">se.type =</span> <span class="st">&quot;shade&quot;</span>)</code></pre>
-<pre><code>##    xvals     yvals     upper     lower
-## 1    5.0 0.2549509 0.3787666 0.1311353
-## 2    5.5 0.2765192 0.3988913 0.1541471
-## 3    6.0 0.2991794 0.4190899 0.1792689
-## 4    6.5 0.3228678 0.4392936 0.2064421
-## 5    7.0 0.3475019 0.4594481 0.2355556
-## 6    7.5 0.3729801 0.4795186 0.2664417
-## 7    8.0 0.3991836 0.4994946 0.2988726
-## 8    8.5 0.4259774 0.5193953 0.3325594
-## 9    9.0 0.4532129 0.5392750 0.3671508
-## 10   9.5 0.4807315 0.5592299 0.4022331
-## 11  10.0 0.5083674 0.5794045 0.4373304
-## 12  10.5 0.5359524 0.5999963 0.4719084
-## 13  11.0 0.5633190 0.6212490 0.5053891
-## 14  11.5 0.5903055 0.6434188 0.5371922
-## 15  12.0 0.6167588 0.6666929 0.5668248
-## 16  12.5 0.6425384 0.6910722 0.5940047
-## 17  13.0 0.6675187 0.7162931 0.6187444
-## 18  13.5 0.6915913 0.7418704 0.6413122
-## 19  14.0 0.7146659 0.7672368 0.6620950
-## 20  14.5 0.7366715 0.7918749 0.6814681</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb424-1"><a href="binarymodels.html#cb424-1"></a><span class="kw">cplot</span>(logitres, <span class="dt">x =</span> <span class="st">&quot;educ&quot;</span>, <span class="dt">se.type =</span> <span class="st">&quot;shade&quot;</span>)</span></code></pre></div>
 <div class="figure" style="text-align: center"><span id="fig:fig24"></span>
 <img src="MEM5220_R_files/figure-html/fig24-1.png" alt="Marginal effects for logit model" width="80%" />
 <p class="caption">
@@ -1658,18 +1642,18 @@ Figure 2.4: Marginal effects for logit model
 <p>The Poisson regression model is the most basic and convenient model explicitly model explicitly designed for count data.</p>
 <p>Poisson regression models can be estimated in R via the <code>glm()</code> function with the specification <strong>family= poisson</strong></p>
 <p>Estimating the model with <strong>quasipoisson</strong> is to adjust for potential vioalations of the Poisson distribution.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(crime1, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)
-
-<span class="co"># Estimate linear model</span>
-lm.res      &lt;-<span class="st">  </span><span class="kw">lm</span>(narr86<span class="op">~</span>pcnv<span class="op">+</span>avgsen<span class="op">+</span>tottime<span class="op">+</span>ptime86<span class="op">+</span>qemp86<span class="op">+</span>inc86<span class="op">+</span>
-<span class="st">                     </span>black<span class="op">+</span>hispan<span class="op">+</span>born60, <span class="dt">data=</span>crime1)
-<span class="co"># Estimate Poisson model</span>
-Poisson.res &lt;-<span class="st"> </span><span class="kw">glm</span>(narr86<span class="op">~</span>pcnv<span class="op">+</span>avgsen<span class="op">+</span>tottime<span class="op">+</span>ptime86<span class="op">+</span>qemp86<span class="op">+</span>inc86<span class="op">+</span>
-<span class="st">                     </span>black<span class="op">+</span>hispan<span class="op">+</span>born60, <span class="dt">data=</span>crime1, <span class="dt">family=</span>poisson)
-<span class="co"># Quasi-Poisson model</span>
-QPoisson.res&lt;-<span class="st"> </span><span class="kw">glm</span>(narr86<span class="op">~</span>pcnv<span class="op">+</span>avgsen<span class="op">+</span>tottime<span class="op">+</span>ptime86<span class="op">+</span>qemp86<span class="op">+</span>inc86<span class="op">+</span>
-<span class="st">                     </span>black<span class="op">+</span>hispan<span class="op">+</span>born60, <span class="dt">data=</span>crime1, <span class="dt">family=</span>quasipoisson)</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stargazer</span>(lm.res,Poisson.res,QPoisson.res,<span class="dt">type=</span><span class="st">&quot;text&quot;</span>,<span class="dt">keep.stat=</span><span class="st">&quot;n&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb425-1"><a href="binarymodels.html#cb425-1"></a><span class="kw">data</span>(crime1, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)</span>
+<span id="cb425-2"><a href="binarymodels.html#cb425-2"></a></span>
+<span id="cb425-3"><a href="binarymodels.html#cb425-3"></a><span class="co"># Estimate linear model</span></span>
+<span id="cb425-4"><a href="binarymodels.html#cb425-4"></a>lm.res      &lt;-<span class="st">  </span><span class="kw">lm</span>(narr86<span class="op">~</span>pcnv<span class="op">+</span>avgsen<span class="op">+</span>tottime<span class="op">+</span>ptime86<span class="op">+</span>qemp86<span class="op">+</span>inc86<span class="op">+</span></span>
+<span id="cb425-5"><a href="binarymodels.html#cb425-5"></a><span class="st">                     </span>black<span class="op">+</span>hispan<span class="op">+</span>born60, <span class="dt">data=</span>crime1)</span>
+<span id="cb425-6"><a href="binarymodels.html#cb425-6"></a><span class="co"># Estimate Poisson model</span></span>
+<span id="cb425-7"><a href="binarymodels.html#cb425-7"></a>Poisson.res &lt;-<span class="st"> </span><span class="kw">glm</span>(narr86<span class="op">~</span>pcnv<span class="op">+</span>avgsen<span class="op">+</span>tottime<span class="op">+</span>ptime86<span class="op">+</span>qemp86<span class="op">+</span>inc86<span class="op">+</span></span>
+<span id="cb425-8"><a href="binarymodels.html#cb425-8"></a><span class="st">                     </span>black<span class="op">+</span>hispan<span class="op">+</span>born60, <span class="dt">data=</span>crime1, <span class="dt">family=</span>poisson)</span>
+<span id="cb425-9"><a href="binarymodels.html#cb425-9"></a><span class="co"># Quasi-Poisson model</span></span>
+<span id="cb425-10"><a href="binarymodels.html#cb425-10"></a>QPoisson.res&lt;-<span class="st"> </span><span class="kw">glm</span>(narr86<span class="op">~</span>pcnv<span class="op">+</span>avgsen<span class="op">+</span>tottime<span class="op">+</span>ptime86<span class="op">+</span>qemp86<span class="op">+</span>inc86<span class="op">+</span></span>
+<span id="cb425-11"><a href="binarymodels.html#cb425-11"></a><span class="st">                     </span>black<span class="op">+</span>hispan<span class="op">+</span>born60, <span class="dt">data=</span>crime1, <span class="dt">family=</span>quasipoisson)</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb426-1"><a href="binarymodels.html#cb426-1"></a><span class="kw">stargazer</span>(lm.res,Poisson.res,QPoisson.res,<span class="dt">type=</span><span class="st">&quot;text&quot;</span>,<span class="dt">keep.stat=</span><span class="st">&quot;n&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ## ==================================================
 ##                       Dependent variable:         
@@ -1719,10 +1703,10 @@ QPoisson.res&lt;-<span class="st"> </span><span class="kw">glm</span>(narr86<spa
 <p>Corner solutions describe situations where the variable of interest is continous but restricted in range. Typically, it cannot be negative.</p>
 <p>The package <strong>censReg</strong> offers the command <code>censReg()</code> for estimating a Tobit model.</p>
 <p>We have already estimated labor supply mdoeld for the women in the dataset <em>mroz</em>, ignoring the fact that the hours worked is necessarily non-negative.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Estimate Tobit model using censReg:</span>
-TobitRes &lt;-<span class="st"> </span><span class="kw">censReg</span>(hours<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="st"> </span>
-<span class="st">                      </span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6, <span class="dt">data=</span>mroz )
-<span class="kw">summary</span>(TobitRes)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb428-1"><a href="binarymodels.html#cb428-1"></a><span class="co"># Estimate Tobit model using censReg:</span></span>
+<span id="cb428-2"><a href="binarymodels.html#cb428-2"></a>TobitRes &lt;-<span class="st"> </span><span class="kw">censReg</span>(hours<span class="op">~</span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span><span class="st"> </span></span>
+<span id="cb428-3"><a href="binarymodels.html#cb428-3"></a><span class="st">                      </span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6, <span class="dt">data=</span>mroz )</span>
+<span id="cb428-4"><a href="binarymodels.html#cb428-4"></a><span class="kw">summary</span>(TobitRes)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## censReg(formula = hours ~ nwifeinc + educ + exper + I(exper^2) + 
@@ -1749,17 +1733,17 @@ TobitRes &lt;-<span class="st"> </span><span class="kw">censReg</span>(hours<spa
 ## Newton-Raphson maximisation, 7 iterations
 ## Return code 1: gradient close to zero
 ## Log-likelihood: -3819.095 on 9 Df</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Partial Effects at the average x:</span>
-<span class="kw">margEff</span>(TobitRes)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb430-1"><a href="binarymodels.html#cb430-1"></a><span class="co"># Partial Effects at the average x:</span></span>
+<span id="cb430-2"><a href="binarymodels.html#cb430-2"></a><span class="kw">margEff</span>(TobitRes)</span></code></pre></div>
 <pre><code>##    nwifeinc        educ       exper  I(exper^2)         age     kidslt6 
 ##   -5.326442   48.734094   79.504232   -1.126509  -32.876918 -540.256831 
 ##     kidsge6 
 ##   -9.800526</code></pre>
 <p>Another alternative for estimating Tobit models is the command <strong>survreg</strong> from the package survival. It is less straightforward to use but more flexible.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Estimate Tobit model using survreg:</span>
-res &lt;-<span class="st"> </span><span class="kw">survreg</span>(<span class="kw">Surv</span>(hours, hours<span class="op">&gt;</span><span class="dv">0</span>, <span class="dt">type=</span><span class="st">&quot;left&quot;</span>) <span class="op">~</span><span class="st"> </span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span>
-<span class="st">                 </span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6, <span class="dt">data=</span>mroz, <span class="dt">dist=</span><span class="st">&quot;gaussian&quot;</span>)
-<span class="kw">summary</span>(res)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb432-1"><a href="binarymodels.html#cb432-1"></a><span class="co"># Estimate Tobit model using survreg:</span></span>
+<span id="cb432-2"><a href="binarymodels.html#cb432-2"></a>res &lt;-<span class="st"> </span><span class="kw">survreg</span>(<span class="kw">Surv</span>(hours, hours<span class="op">&gt;</span><span class="dv">0</span>, <span class="dt">type=</span><span class="st">&quot;left&quot;</span>) <span class="op">~</span><span class="st"> </span>nwifeinc<span class="op">+</span>educ<span class="op">+</span>exper<span class="op">+</span></span>
+<span id="cb432-3"><a href="binarymodels.html#cb432-3"></a><span class="st">                 </span><span class="kw">I</span>(exper<span class="op">^</span><span class="dv">2</span>)<span class="op">+</span>age<span class="op">+</span>kidslt6<span class="op">+</span>kidsge6, <span class="dt">data=</span>mroz, <span class="dt">dist=</span><span class="st">&quot;gaussian&quot;</span>)</span>
+<span id="cb432-4"><a href="binarymodels.html#cb432-4"></a><span class="kw">summary</span>(res)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## survreg(formula = Surv(hours, hours &gt; 0, type = &quot;left&quot;) ~ nwifeinc + 
@@ -1789,16 +1773,16 @@ res &lt;-<span class="st"> </span><span class="kw">survreg</span>(<span class="k
 <h2><span class="header-section-number">2.4</span> Censored and Truncated Regression Models</h2>
 <p>Censored regression models are closely related to Tobit models. In the basic Tobit model we observe <span class="math inline">\(y = y^*\)</span> in the “uncensored” cases with <span class="math inline">\(y^* &gt; 0\)</span> and we only know an upper bound for <span class="math inline">\(y^* \le 0\)</span> if we observe $y 0 = $.</p>
 <p>In this example we are are interested in criminal prognosis of individuals released from prison to reoffend.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(recid, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)
-
-<span class="co"># Define Dummy for UNcensored observations</span>
-recid<span class="op">$</span>uncensored &lt;-<span class="st"> </span>recid<span class="op">$</span>cens<span class="op">==</span><span class="dv">0</span>
-<span class="co"># Estimate censored regression model:</span>
-res&lt;-<span class="kw">survreg</span>(<span class="kw">Surv</span>(<span class="kw">log</span>(durat),uncensored, <span class="dt">type=</span><span class="st">&quot;right&quot;</span>) <span class="op">~</span><span class="st"> </span>workprg<span class="op">+</span>priors<span class="op">+</span>
-<span class="st">               </span>tserved<span class="op">+</span>felon<span class="op">+</span>alcohol<span class="op">+</span>drugs<span class="op">+</span>black<span class="op">+</span>married<span class="op">+</span>educ<span class="op">+</span>age, 
-             <span class="dt">data=</span>recid, <span class="dt">dist=</span><span class="st">&quot;gaussian&quot;</span>)
-<span class="co"># Output:</span>
-<span class="kw">summary</span>(res)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb434-1"><a href="binarymodels.html#cb434-1"></a><span class="kw">data</span>(recid, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)</span>
+<span id="cb434-2"><a href="binarymodels.html#cb434-2"></a></span>
+<span id="cb434-3"><a href="binarymodels.html#cb434-3"></a><span class="co"># Define Dummy for UNcensored observations</span></span>
+<span id="cb434-4"><a href="binarymodels.html#cb434-4"></a>recid<span class="op">$</span>uncensored &lt;-<span class="st"> </span>recid<span class="op">$</span>cens<span class="op">==</span><span class="dv">0</span></span>
+<span id="cb434-5"><a href="binarymodels.html#cb434-5"></a><span class="co"># Estimate censored regression model:</span></span>
+<span id="cb434-6"><a href="binarymodels.html#cb434-6"></a>res&lt;-<span class="kw">survreg</span>(<span class="kw">Surv</span>(<span class="kw">log</span>(durat),uncensored, <span class="dt">type=</span><span class="st">&quot;right&quot;</span>) <span class="op">~</span><span class="st"> </span>workprg<span class="op">+</span>priors<span class="op">+</span></span>
+<span id="cb434-7"><a href="binarymodels.html#cb434-7"></a><span class="st">               </span>tserved<span class="op">+</span>felon<span class="op">+</span>alcohol<span class="op">+</span>drugs<span class="op">+</span>black<span class="op">+</span>married<span class="op">+</span>educ<span class="op">+</span>age, </span>
+<span id="cb434-8"><a href="binarymodels.html#cb434-8"></a>             <span class="dt">data=</span>recid, <span class="dt">dist=</span><span class="st">&quot;gaussian&quot;</span>)</span>
+<span id="cb434-9"><a href="binarymodels.html#cb434-9"></a><span class="co"># Output:</span></span>
+<span id="cb434-10"><a href="binarymodels.html#cb434-10"></a><span class="kw">summary</span>(res)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## survreg(formula = Surv(log(durat), uncensored, type = &quot;right&quot;) ~ 
@@ -1829,11 +1813,11 @@ res&lt;-<span class="kw">survreg</span>(<span class="kw">Surv</span>(<span class
 <h3><span class="header-section-number">2.4.1</span> The Heckman, or Sample Selection Model</h3>
 <p>The models are useful when the sample selection is not random, but whehter an individual is in the sample depends on individual characteristics. For example, when studying wage determination for married women, some women are not in the labour force, therefore their wages are zero.</p>
 <p>The Heckit procedure involves two steps, estimating both the selection equation and the equation of interest. Function <code>selection()</code> in the <strong>sampleSelection</strong> package performs both steps; therefore, it needs both equations among its arguments. (The selection equation is, in fact, a probit model.)</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)
-wage.heckit &lt;-<span class="st"> </span><span class="kw">selection</span>(inlf<span class="op">~</span>age<span class="op">+</span>educ<span class="op">+</span><span class="kw">I</span>(kidslt6<span class="op">+</span>kidsge6)<span class="op">+</span>mtr,
-                         <span class="kw">log</span>(wage)<span class="op">~</span>educ<span class="op">+</span>exper, 
-                         <span class="dt">data=</span>mroz, <span class="dt">method=</span><span class="st">&quot;ml&quot;</span>)
-<span class="kw">summary</span>(wage.heckit)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span id="cb436-1"><a href="binarymodels.html#cb436-1"></a><span class="kw">data</span>(<span class="st">&quot;mroz&quot;</span>, <span class="dt">package=</span><span class="st">&#39;wooldridge&#39;</span>)</span>
+<span id="cb436-2"><a href="binarymodels.html#cb436-2"></a>wage.heckit &lt;-<span class="st"> </span><span class="kw">selection</span>(inlf<span class="op">~</span>age<span class="op">+</span>educ<span class="op">+</span><span class="kw">I</span>(kidslt6<span class="op">+</span>kidsge6)<span class="op">+</span>mtr,</span>
+<span id="cb436-3"><a href="binarymodels.html#cb436-3"></a>                         <span class="kw">log</span>(wage)<span class="op">~</span>educ<span class="op">+</span>exper, </span>
+<span id="cb436-4"><a href="binarymodels.html#cb436-4"></a>                         <span class="dt">data=</span>mroz, <span class="dt">method=</span><span class="st">&quot;ml&quot;</span>)</span>
+<span id="cb436-5"><a href="binarymodels.html#cb436-5"></a><span class="kw">summary</span>(wage.heckit)</span></code></pre></div>
 <pre><code>## --------------------------------------------
 ## Tobit 2 model (sample selection model)
 ## Maximum Likelihood estimation
@@ -1867,11 +1851,11 @@ wage.heckit &lt;-<span class="st"> </span><span class="kw">selection</span>(inlf
 </div>
 <h3>References</h3>
 <div id="refs" class="references">
-<div id="ref-dalpiaz2016">
-<p>Dalpiaz, David. 2016. <em>Applied Statistics</em>. <a href="http://www.stat.illinois.edu">http://www.stat.illinois.edu</a>.</p>
-</div>
 <div id="ref-Adkins2014">
 <p>Adkins, Lee. 2014. “Using Gretl for Principles of Econometrics, 4th Edition.” Economics Working Paper Series 1412. Oklahoma State University, Department of Economics and Legal Studies in Business. <a href="https://econpapers.repec.org/paper/oklwpaper/1412.htm">https://econpapers.repec.org/paper/oklwpaper/1412.htm</a>.</p>
+</div>
+<div id="ref-dalpiaz2016">
+<p>Dalpiaz, David. 2016. <em>Applied Statistics</em>. <a href="http://www.stat.illinois.edu">http://www.stat.illinois.edu</a>.</p>
 </div>
 </div>
             </section>
@@ -1900,7 +1884,7 @@ gitbook.start({
 "google": false,
 "linkedin": false,
 "weibo": false,
-"instapper": false,
+"instapaper": false,
 "vk": false,
 "all": ["facebook", "google", "twitter", "linkedin", "weibo", "instapaper"]
 },
@@ -1910,6 +1894,10 @@ gitbook.start({
 "size": 2
 },
 "edit": {
+"link": null,
+"text": null
+},
+"history": {
 "link": null,
 "text": null
 },
