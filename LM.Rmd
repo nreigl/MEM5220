@@ -1,7 +1,7 @@
 ---
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 
@@ -54,7 +54,7 @@ PACKAGES<-c("PoEdata", # R data sets for "Principles of Econometrics" by Hill, G
             "magrittr") #  pipes
 inst<-match(PACKAGES, .packages(all=TRUE))
 need<-which(is.na(inst))
-if (length(need)>0) install.packages(PACKAGES[need], repos = "http://cran.us.r-project.org")
+if (length(need)>0) pak::pkg_install(PACKAGES[need])
 lapply(PACKAGES, require, character.only=T)
 ```
 
@@ -1506,17 +1506,9 @@ beta4 <- lm_hprice2$coefficients[[5]]
 ```
 
 
----
-
-<details><summary>**Overthinking**</summary>
-<p>
-
-
 ### Statistical significance
 
 Selecting your results based on significance means that you're biasing yourself! Especially in small samples/cases of weak power, significant results are heavily overstated.
-
-
 
 
 ```{r}
@@ -1557,30 +1549,37 @@ p1 <- ggplot(res, aes(x = N, y = Difference, color = Significant)) +
 
 
 
-
-```{r}
+```{r, eval=TRUE}
 resbig <- crossing(N = 10000,iter = 1:380) %>%
-  mutate(regs = map(N, reg_return)) %>%
+    mutate(regs = map(N, reg_return)) %>%
   mutate(Difference = map_dbl(regs,"beta"),
          p = map_dbl(regs,"p")) %>%
   mutate(Significant = ifelse(p <= .05,"Sig. at 95%","Insig."))
+```
 
-sigonly <- bind_rows(
-  resbig %>% filter(Significant == "Sig. at 95%") %>% mutate(size = "10,000"),
-  res %>% filter(N <= 100, Significant == "Sig. at 95%") %>% mutate(size = "10-100"),
-  res %>% filter(between(N,750,1000), Significant == "Sig. at 95%") %>% mutate(size = "750-1,000")
+
+```{r, eval=TRUE}
+sigonly <- dplyr::bind_rows(
+  resbig %>% dplyr::filter(Significant == "Sig. at 95%") %>% dplyr::mutate(size = "10,000"),
+  res %>% dplyr::filter(N <= 100, Significant == "Sig. at 95%") %>% dplyr::mutate(size = "10-100"),
+  res %>% dplyr::filter(dplyr::between(N,750,1000), Significant == "Sig. at 95%") %>% dplyr::mutate(size = "750-1,000")
 ) %>%
-  mutate(Sample.Size = factor(size, levels = c("10-100","750-1,000","10,000")))
+  dplyr::mutate(Sample.Size = factor(size, levels = c("10-100","750-1,000","10,000")))
+
+```
+
+
+```{r}
 
 means <-  sigonly %>%
   group_by(Sample.Size) %>%
-  summarize(m = mean(Difference)) %>%
+  dplyr::summarize(m = mean(Difference)) %>%
   pull(m) %>%
   round(digits = 3)
 ```
 
 ```{r}
-p2 <- ggplot(sigonly %>% filter(between(Difference,-.1,.5)), aes(x = Difference, color = Sample.Size)) +
+p2 <- ggplot(sigonly %>% dplyr::filter(between(Difference,-.1,.5)), aes(x = Difference, color = Sample.Size)) +
   stat_density(geom='line',size = 1) +
   theme_light()+
   geom_vline(aes(xintercept = .05),linetype = 'dashed',color = 'black') +
@@ -1594,23 +1593,10 @@ p2 <- ggplot(sigonly %>% filter(between(Difference,-.1,.5)), aes(x = Difference,
            label = paste("Mean",means), x = c(.275,.15,-.02), y = c(7,18,35))
 ```
 
-
-
 ```{r}
-grid <- grid.arrange(p1,p2, ncol = 2)
-ggsave("results_selection.png", plot = grid, width = 12, height = 9, units = "in")
+p2
 ```
 
-
-
----
-
-</p>
-</details>
-
-
-
-**Overthinking**
 
 #### Interaction terms
 
@@ -1755,9 +1741,9 @@ married<- df_lm2_wage1 %>%
 A:
 
 1. Reference group: *single* and *male*
-2. Cp. married males make `r percent(marriedmale)` (` percent(marriedmale)`) more than single males.
-3. Cp. a single female makes `r percent(singlefemale)` (`percent(singlefemale)`) less than the reference group.
-3. Married females make `r percent(abs(marriedfemale) - abs(married))` (`percent(abs(marriedfemale) - abs(married))`) less than single females.
+2. Cp. married males make `r scales::percent(marriedmale)` (` scales::percent(marriedmale)`) more than single males.
+3. Cp. a single female makes `r scales::percent(singlefemale)` (`scales::percent(singlefemale)`) less than the reference group.
+3. Married females make `r scales::percent(abs(marriedfemale) - abs(married))` (`scales::percent(abs(marriedfemale) - abs(married))`) less than single females.
 4. There seems to be a marriage premium for men but for women the marriage premium is negative.
 
 ---
