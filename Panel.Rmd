@@ -1,0 +1,811 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Panel Data Models {#panel}
+
+To load the dataset and necessary functions: 
+
+```{r, echo=TRUE, message=FALSE, results='hide'}
+# This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
+# devtools::install_github("ccolonescu/PoEdata")
+PACKAGES<-c(
+  "tidyverse",  # for data manipulation and ggplots
+  "knitr", # knit functions
+  # "kableExtra", # extended knit functions for objects exported from other packages
+  "huxtable", #  Regression tables, broom compatible
+  "stargazer", # Regression tables
+  "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
+  "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+  "wooldridge",  # Wooldrige Datasets
+  "car", 
+  "plm", # Panel data models
+  "lmtest", # Testing linear regression models
+  "lfe", # extended Panel data models
+  "lme4", # Linear mixed-effects models
+  "pmdplyr", # Panel maneuvers in dplyr
+  "magrittr") #  pipes
+inst<-match(PACKAGES, .packages(all=TRUE))
+need<-which(is.na(inst))
+if (length(need)>0) install.packages(PACKAGES[need])
+lapply(PACKAGES, require, character.only=T)
+```
+
+## Pooled cross-sections
+
+Pooled cross sections consist of random samples from the same population at different points in time. 
+
+The data set `cps78_85` includes two pooled cross-sections for the year 1978 and 1985. The dummy variable **y85** is equal to one for observations in 1985 and 0 for observations in 1978. 
+
+We estimate a model for
+
+
+$$
+\log(w) = \beta_0 + \delta_{0}y85 + \beta_1 educ + \delta_{1} (y85 \times educ) +  \beta_{2} exper + \beta_3 exper^2 + \beta_{3} \frac{exper^2}{100} + \beta_{4} union + \beta_{5}female + \delta_{2} (y85 \times female) + \epsilon
+$$
+
+
+```{r, message=FALSE}
+data("cps78_85", package="wooldridge")
+attach(cps78_85)
+head(cps78_85)
+```
+
+
+
+```{r}
+cps_ols <- lm(lwage ~ y85*(educ + female) + exper + I((exper^2)/100) + union, data = cps78_85)
+summary(cps_ols)
+```
+
+
+```{r}
+stargazer(cps_ols, type = "text")
+```
+
+
+
+Return to education
+```{r}
+df_cps_ols <- tidy(cps_ols)
+# Singe male
+delta1 <- df_cps_ols %>%
+  dplyr::filter(term == "y85") %>% 
+  dplyr::select(estimate) %>% 
+  pull() # pull out the single coefficient value of the dataframe
+```
+
+
+
+Gender wage gap
+```{r}
+df_cps_ols <- tidy(cps_ols)
+# Singe male
+beta5 <- df_cps_ols %>%
+  dplyr::filter(term == "female") %>% 
+  dplyr::select(estimate) %>% 
+  pull() # pull out the single coefficient value of the dataframe
+```
+
+Change in gender wage gap
+
+```{r}
+delta5 <- df_cps_ols %>%
+  dplyr::filter(term == "y85:female") %>% 
+  dplyr::select(estimate) %>% 
+  pull() # pull out the single coefficient value of the dataframe
+```
+
+Gender wage gap in 1985
+
+```{r}
+beta5+delta5
+```
+
+
+
+
+### Difference-in-Differences
+
+Difference-in-Differences (Diff-in-Diff, or DiD) is an important application of pooled cross-section for identifying causal effects. In the broadest sense, DiD estimators estimate the effect of a policy intervention by comparing the change over time of an outcome of interest between an affected and and unaffected group of observations. In a regression framework, we regress the outcome of interest on a dummy variable for the affected ("treatment") group, a dummy indicating observations after the treatment and an interaction term between both. The coefficient of this interaction term can then be a good estimator of the effect of interest, controlling for initial differences between groups and contemporaneous changes over time. 
+
+
+Effect of a Garbage Incinerator's Location on Housing Prices
+
+We are interested in whether and how much the construction of a new garbage incinerator affected the value of nearby houses. 
+
+```{r}
+
+data("kielmc", package="wooldridge")
+attach(kielmc)
+head(kielmc)
+```
+
+Separate regressions for 1978 and 1981
+
+```{r}
+kielmc1978 <- lm(rprice ~ nearinc, data = kielmc, subset = (year == 1978))
+coef(kielmc1978)
+```
+
+
+```{r}
+kielmc1981 <- lm(rprice ~ nearinc, data = kielmc, subset = (year == 1981))
+coef(kielmc1981)
+```
+
+Joint regression including interaction terms
+
+```{r}
+coeftest(lm(rprice~nearinc*y81, data = kielmc))
+```
+
+One-tailed t-test
+
+
+```{r}
+kielmcDiD <- lm(rprice~nearinc*y81, data = kielmc)
+sukielmcDid <- summary(kielmcDiD)
+pt(coef(sukielmcDid)[,3], kielmcDiD$df, lower = T) #  for H1: beta <0 
+```
+
+A logarithmic specification is more plausible since it implies a constant percentage effect on the house values. We can also add additional covariates to control for incidental changes in the composition of the houses traded.
+
+
+```{r}
+kielmcDiD1 <- lm(log(rprice)~nearinc*y81, data = kielmc)
+kielmcDiD2 <- lm(log(rprice)~nearinc*y81 + age + I(age^2) + log(intst) + log(land) + log(area) +rooms + baths, data = kielmc)
+```
+
+
+
+```{r}
+huxreg(kielmcDiD1, kielmcDiD2)
+```
+
+
+## Organizing Panel Data
+
+For the calculations used by panel data methods, we have to make sure that the data is systemically organized. Usually panel data comes in a _long_ structure where each row corresponds to one combination of $i$ and $t$. We have to introduce an index variable to define which observations belong together. In addition to the index variable for the cross-sectional unit, an index variable for the time dimension $t$ can also be specified. 
+
+
+
+The **plm** and the **felm** package are the widely used panel data packages in R. For certain panel data model classes (multilevel and hierarchical models) the **lme4** package is most powerful^[The package `lme4` is widely used for political science panel data models but also for computational biologists applications. Another package doing panel data "from the political scientist's viewpoint" is `panelr`. The `brms` package allows fitting certain panel data models using a Bayesian approach.].  One of the many packages that help you analyze panel data using `dplyr` style of manipulating the data is the package **pmdplyr**. 
+
+Certain packages use a specific panel data type class (pdata.frame) such as the plm package whereas others work with the standard data.frame type, as long as unique panel ids (indexes) are provided.  
+
+### Organizing Panel Data with the plm package
+
+For unbalanced panels I can specify a panel data frame with `pdata.frame`
+
+
+```{r, eval= F}
+mypdf <- pdata.frame(mydf, index = c("ivar", "tvar"))
+```
+
+
+and for balanced panels I can simply
+
+```{r, eval= F}
+mypdf <- pdata.frame(mydf, index = n)
+```
+
+
+
+
+```{r}
+data("crime2", package = "wooldridge")
+attach(crime2)
+head(crime2, 5)
+```
+
+Wooldrige remarks that the study observations result in a balanced panel of 46 cities, properly sorted. 
+
+```{r}
+crime2.p <- pdata.frame(crime2, index = 46)
+```
+
+```{r}
+crime2.p[1:6,c("id","time","year","pop","crimes","crmrte","unem")]
+```
+
+
+
+### Organizing Panel Data with the **pmdply** package
+
+```{r}
+data("Scorecard")
+```
+
+Scorecard observations are uniquely identified by college ID *united* and year *year*. 
+
+
+```{r}
+Scorecard <- as_pibble(Scorecard, .i = unitid, .t = year)
+```
+
+Convert the pibble type to pdata.frame type
+
+```{r}
+Scorecard.pdata <- panel_convert(Scorecard, "pdata.frame")
+```
+
+### Panel specific computations
+
+The the **plm** and the **pmdply** can be used to perform panel specific computations. We focus on the methods provided by the **plm** package. 
+
+
+
+| Code           | Description                                       | Formula                      |
+|----------------|---------------------------------------------------|------------------------------|
+| l = lag(x)     | Lag                                               | $l_{it} = x_{it}-1$        |
+| d = diff(x)    | Difference $\Delta x_{it}$                        | $d_{it} = x_{it} - x_{it-1}$ |
+| b = between(x) | Between transformation $\bar{x_{i}}$ (length $n$) | $b_i = \frac{1}{T_i}\sum^{T_i}_{t=1}x_{it}$                                                                |
+| B = Between(x) | Between transformation $\bar{x_{i}}$ (length $N$) | $B_{it} = b_i$               |
+| w = within(x)  | Within transformation (demeaning) $\ddot{x}_{it}$ |$w_{it} = x_{it} - B_{it}$    |
+
+
+
+```{r}
+data("crime4")
+```
+
+```{r}
+crime4.p <- pdata.frame(crime4, index=c("county","year") )
+
+crime4.p$cr.l <- lag(crime4.p$crmrte)
+crime4.p$cr.d <- diff(crime4.p$crmrte)
+crime4.p$cr.b <- between(crime4.p$crmrte)
+crime4.p$cr.B <- Between(crime4.p$crmrte)
+crime4.p$cr.W <- Within(crime4.p$crmrte)
+```
+
+```{r}
+crime4.p[1:8,c("county","year","crmrte","cr.l","cr.d","cr.b","cr.B","cr.W")]
+```
+
+## First Differenced Model
+
+The first difference estimator can be calculated simply applying OLS to the differenced values. The observations for the first year with missing observation are automatically dropped from the estimation sample. 
+
+
+```{r}
+data(crime2, package='wooldridge')
+
+crime2.p <- pdata.frame(crime2, index=46 )
+```
+
+```{r}
+# manually calculate first differences:
+crime2.p$dcrmrte <- diff(crime2.p$crmrte)
+crime2.p$dunem   <- diff(crime2.p$unem)
+
+# Display selected variables for observations 1-6:
+crime2.p[1:6,c("id","time","year","crmrte","dcrmrte","unem","dunem")]
+```
+
+
+```{r}
+# Estimate FD model with lm on differenced data:
+coeftest( lm(dcrmrte~dunem, data=crime2.p))
+
+# Estimate FD model with plm on original data:
+coeftest( plm(crmrte~unem, data=crime2.p, model="fd") )
+
+```
+
+Another example
+
+```{r}
+data(crime4, package='wooldridge')
+
+crime4.p <- pdata.frame(crime4, index=c("county","year") )
+pdim(crime4.p)
+
+```
+
+```{r}
+# manually calculate first differences of crime rate:
+crime4.p$dcrmrte <- diff(crime4.p$crmrte)
+
+# Display selected variables for observations 1-9:
+crime4.p[1:9, c("county","year","crmrte","dcrmrte")]
+```
+
+```{r}
+# Estimate FD model:
+coeftest( plm(log(crmrte)~d83+d84+d85+d86+d87+lprbarr+lprbconv+ 
+                  lprbpris+lavgsen+lpolpc,data=crime4.p, model="fd") )
+```
+
+## Fixed Effects Estimation
+
+
+Instead of first differencing, we get rid of the unobserved individual effect $a_i$ using the within transformation. Using the `model = "within` argument from the `plm` function, we obtain degrees of freedom, which are adjusted for the demeaning which also corrects the variance-covariance matrix and standard errors. 
+
+
+```{r}
+data(wagepan, package='wooldridge')
+
+# Generate pdata.frame:
+wagepan.p <- pdata.frame(wagepan, index=c("nr","year") )
+
+pdim(wagepan.p)
+```
+
+```{r}
+# Estimate FE model
+summary( plm(lwage~married+union+factor(year)*educ, 
+                                        data=wagepan.p, model="within"))
+```
+
+
+
+## Random Effects Estimation
+
+The random effects (RE) model assumes that the unobserved effects of $a_i$ are independent of (or at least uncorrelated) with the regressors $x_{itj}$ for all $t$ and $j=1,\dots,k$. Therefore, our main motivation for using FD or FE disappears as OLS can consistently estimate the models parameters. 
+However, like in the situation with heteroskedasticity and autocorrelation, we can obtain more efficient estimates if we take into account the structure of the variances and covariances of the error term. 
+
+
+To estimate a RE model using `plm`, the argument option is set to `model = "random"`. 
+
+```{r}
+data(wagepan, package='wooldridge')
+
+# Generate pdata.frame:
+wagepan.p <- pdata.frame(wagepan, index=c("nr","year") )
+
+pdim(wagepan.p)
+```
+
+Check for each individual if its associated time periods are consecutive (no "gaps" in time dimension per individual). 
+
+```{r}
+all(is.pconsecutive(wagepan.p))
+```
+
+
+Check variation of variables within individuals
+
+```{r}
+pvar(wagepan.p)
+```
+
+
+```{r}
+wagepan.p$yr<-factor(wagepan.p$year)
+
+reg.po<- (plm(lwage~educ+black+hisp+exper+I(exper^2)+married+union+yr, 
+                                      data=wagepan.p, model="pooling") ) # OLS
+reg.re <- (plm(lwage~educ+black+hisp+exper+I(exper^2)+married+union+yr, 
+                                      data=wagepan.p, model="random") )
+reg.fe <- (plm(lwage~                      I(exper^2)+married+union+yr, 
+                                      data=wagepan.p, model="within") )
+```
+
+
+
+```{r}
+# Pretty table of selected results (not reporting year dummies)
+stargazer(reg.po,reg.re,reg.fe, type="text", 
+          column.labels=c("Pooling","RE","FE"),keep.stat=c("n","rsq"),
+          keep=c("ed","bl","hi","exp","mar","un"))
+```
+
+
+
+For the _random_ effects model, the summary method gives information about the variance of the error. 
+
+```{r}
+summary(reg.re)
+```
+
+Fixed effects might be extracted easily using `fixef`.  By setting the type argument, the fixed effects may be returned in levels ("level"), as deviations from the first value of the index ("dfirst"), or as deviations from the overall mean ("dmean"). If the argument vcov was specified, the standard errors (stored as attribute "se" in the return value) are the respective robust standard errors.
+
+```{r}
+fixef_reg.fe <-plm::fixef(reg.fe)
+head(summary(fixef_reg.fe))
+```
+
+The summary methods prints the effects (in deviations from the overall intercept), their standard errors and the test of equality to the overall intercept. 
+
+In case of a two-ways effect model, an additional argument `effect` is required to extract fixed effects.
+
+```{r}
+reg.fe2w <- (plm(lwage~I(exper^2)+married+union+yr, 
+                                      data=wagepan.p, model="within") )
+```
+
+```{r}
+summary(reg.fe2w)
+```
+
+
+```{r}
+fixef_reg.fe2w <- plm::fixef(reg.fe2w)
+head(summary(fixef_reg.fe2w, effect = "time"))
+```
+
+
+#### Hausman test
+
+```{r}
+# Test whether the fixed effects are significant. H0: FE are irrelevant
+pFtest(reg.fe, reg.po)
+```
+
+
+
+```{r}
+# Lagrange Multiplier Test - (Breusch-Pagan) for balanced panels
+# Tests whether pooled OLS (H0) or Random effects should be used
+plmtest(reg.po, effect="individual", type="bp")
+plmtest(reg.po, effect="time", type="bp")
+```
+
+
+The RE estimator needs stronger assumptions to be consistent than the FE estimator. On the other hand, it is more efficient if in these assumptions hold and we can include time constant regressors. A widely used test of this additional assumption is the Hausman test. 
+
+
+```{r}
+phtest(reg.fe, reg.re)
+```
+
+Breusch-Godfrey/Wooldridge test for serial correlation in panel models
+```{r}
+reg.fe <- plm(lwage~                      I(exper^2)+married+union+yr, 
+                                      data=wagepan.p, model="within")
+```
+
+
+
+
+```{r}
+# H0: No seriel correlation
+pbgtest(reg.fe)
+```
+
+```{r}
+# Add year dummies using the "twoways" argument in plm function and see if it improves the outcome
+reg.fe2w <- (plm(lwage~I(exper^2)+married+union+yr, 
+                                      data=wagepan.p, model="within", effect="twoways") )
+```
+
+
+```{r}
+pbgtest(reg.fe2w)
+```
+
+
+```{r}
+data("Grunfeld", package = "plm")
+g.reg.fe <- plm(inv ~ value + capital, data = Grunfeld, model = "within")
+g.reg.fe2w <- plm(inv ~ value + capital, data = Grunfeld, model = "within", effect = "twoways") # two-way fixed effects homogeneous model
+pbgtest(g.reg.fe)
+pbgtest(g.reg.fe2w)
+```
+
+```{r}
+g.reg.re <- plm(inv ~ value + capital, data = Grunfeld, model = "random")
+g.reg.re2w <- plm(inv ~ value + capital, data = Grunfeld, model = "random", effect = "twoways")
+pbgtest(g.reg.re)
+pbgtest(g.reg.re2w)
+```
+
+Pesaran CD test for cross-sectional dependence in panels
+
+```{r}
+# H0: No cross-sectional dependence
+pcdtest(g.reg.fe)  # Oneway (individual) effect Within Model
+pcdtest(g.reg.fe2w) # test on two-way fixed effects homogeneous model
+```
+
+
+ Wooldridge test for serial correlation (only in fixed-effects panel models)
+
+```{r}
+# H0: No serial correlation
+pwartest(g.reg.fe)
+pwartest(g.reg.fe2w)
+```
+
+Under the null of no serial correlation in the errors, the residuals of a FE model must be negatively serially correlated, with $cor(\hat{u}_{it}, \hat{u}_{is})=-1/(T-1)$ for each $t,s$. Therefore, you might want to adjust (clustered) heterogeneity in the residuals. 
+
+
+## General Feasible Generalized Least Squares (FGLS) Models
+
+The function `pggls` estimates general FGLS models with either fixed or "random" effects^[The "random" effect is better termed "general FGSLS" models, as in fact it does not have a proper random effects structure.].
+
+```{r}
+data("Produc", package = "plm")
+```
+
+
+```{r}
+reg.fgls <- pggls(log(gsp) ~ log(pcap) + log(pc) + log(emp) + unemp, data = Produc, model = "pooling") # Note: pooling stands for "random" fgls
+summary(reg.fgls)
+```
+
+Whereas the general FGLS estimator is based in the first step on an OLS model, the fixed effects _pggls_ is based on the estimation of a within model in the first step; the rest is the same. 
+
+
+```{r, eval=F}
+reg.fgls.fe<- pggls(log(gsp) ~ log(pcap) + log(pc) + log(emp) + unemp, data = Produc, model = "within")
+summary(reg.fgls.fe)
+```
+
+## Dummy Variable Regression and Correlated Random Effects
+
+We can get the FE parameter estimates in two other ways than the within transformation. The dummy variable equation uses OLS on the original variables instead of the transformed ones. But it adds $n-1$ dummy variables (or $n$ dummies and removes the constant), one for each cross-sectional unit $i = 1, \dots, n$. The simplest (although not the most computationally efficient) way to implement this in R is to use the cross-sectional index as another factor variable. The third way is the correlated random effects (CRE) approach. Instead of assuming that the individual affects $a_i$ are independent on the regressors $x_{itj}$, it is assumed that they only depend on the averages over time $\bar{x}_{ij} = \frac{1}{T_{i}} \sum^{2}_{i=1}T_{i}$. 
+
+```{r}
+data(wagepan, package='wooldridge')
+
+# Generate pdata.frame:
+wagepan.p <- pdata.frame(wagepan, index=c("nr","year") )
+```
+
+```{r}
+# Estimate FE parameter in 3 different ways:
+wagepan.p$yr<-factor(wagepan.p$year)
+reg.fe <-(plm(lwage~married+union+yr*educ,data=wagepan.p, model="within"))
+reg.dum<-( lm(lwage~married+union+yr*educ+factor(nr), data=wagepan.p))
+reg.re <-(plm(lwage~married+union+yr*educ,data=wagepan.p, model="random"))
+reg.cre<-(plm(lwage~married+union+yr*educ+Between(married)+Between(union)
+                                         ,data=wagepan.p, model="random"))
+```
+
+
+```{r}
+stargazer(reg.fe,reg.dum,reg.cre,reg.re,type="text",model.names=FALSE,
+          keep=c("married","union",":educ"),keep.stat=c("n","rsq"),
+          column.labels=c("Within","Dummies","CRE","RE"))
+```
+
+
+Given that we estimated the CRE model, it is easy to the null hypothesis that the RE estimator is consistent. 
+
+```{r}
+# RE test as an F test on the "Between" coefficients 
+linearHypothesis(reg.cre, matchCoefs(reg.cre,"Between"))
+```
+
+Another advantage of the CRE approach is that we can add time-constant regressors to the model. Since we cannot control for average values of $\bar{x}_{ij}$ for these variables, they have to be uncorrelated with $a_i$ for consistent estimation of _their_ coefficients. For the other coefficients of the time-varying variables, we still don't need these additional RE assumptions. 
+
+```{r}
+data(wagepan, package='wooldridge')
+
+# Generate pdata.frame:
+wagepan.p <- pdata.frame(wagepan, index=c("nr","year") )
+```
+
+```{r}
+# Estimate CRE parameters
+wagepan.p$yr<-factor(wagepan.p$year)
+summary(plm(lwage~married+union+educ+black+hisp+Between(married)+
+                         Between(union), data=wagepan.p, model="random"))
+```
+
+## Robust (Clustered) Standard Errors
+
+Under the RE assumptions, OLS is inefficient but consistent. Instead of using RE, we could use OLS but would have to adjust the standard errors for the fact the composite error term $v_{it} = \alpha_{i}+ u_{it}$ is correlated over time because of the constant individual effect $\alpha_{i}$. In fact, the variance-covariance matrix could be more complex than the RE assumptions with i.i.d. $u_{it}$ implies. These errors terms could be serially correlated and/ or heteroscedastic. This would invalidate the standard errors not only of OLS but also of FD, FE, RE and CRE. 
+
+Especially in large cross-sectional data, formulas exist for the variance-covariance matrix for panel data that are robust with respect to heteroskedasticity and _arbitrary_ correlations of the error term within a cross-sectional unit (or "cluster"). 
+
+Different versions of clustered variance-covariance matrix can be computed with the command `vcovHC` from the `plm` package^[Note that `vcovHC` from the `plm` package is different from the `vcovHC` function of the `sandwich` package.].
+
+The next chunk estimates a familiar FD regression but also reports the regression table with clustered standard errors and respective $t$ statistics in addition to the non-adjusted standard errors. 
+
+```{r}
+data(crime4, package='wooldridge')
+
+# Generate pdata.frame:
+crime4.p <- pdata.frame(crime4, index=c("county","year") )
+```
+
+```{r}
+# Estimate FD model:
+reg <- ( plm(log(crmrte)~d83+d84+d85+d86+d87+lprbarr+lprbconv+ 
+                   lprbpris+lavgsen+lpolpc,data=crime4.p, model="fd") )
+```
+
+
+```{r}
+# Regression table with standard SE
+coeftest(reg)
+```
+
+```{r}
+# Regression table with "clustered" SE (default type HC0):
+coeftest(reg, vcovHC)
+```
+
+```{r}
+# Regression table with "clustered" SE (small-sample correction)
+# This is the default version used by Stata and reported by Wooldridge:
+coeftest(reg, vcovHC(reg, type="sss"))
+```
+
+## Example using lfe and plm approach 
+
+We will be using the _fatalities_ dataset from the `AER` package to estimate the relationship between drunk driving laws and traffic deaths. 
+
+```{r}
+data("Fatalities")
+```
+
+```{r}
+fatdata <- Fatalities %>%
+  mutate(fatal_rate = fatal / pop * 10000) 
+```
+
+Year-fixed effects by state: 
+
+```{r}
+ggplot(fatdata, aes(x = year, y = fatal_rate)) + 
+  geom_boxplot()+
+  stat_summary(fun.y=mean, geom="line", aes(group=1))  + 
+  stat_summary(fun.y=mean, geom="point") +
+  facet_wrap(~state)
+```
+
+
+```{r}
+fatdata88 <- Fatalities %>%
+  mutate(fatal_rate = fatal / pop * 10000) %>% 
+  dplyr::filter(year == "1988")
+```
+
+```{r}
+plot(x = fatdata88$beertax, 
+     y = fatdata88$fatal_rate, 
+     xlab = "Beer tax (in 1988 dollars)",
+     ylab = "Fatality rate (fatalities per 10000)",
+     main = "Traffic Fatality Rates and Beer Taxes in 1988",
+     pch = 20, 
+     col = "steelblue")
+```
+
+
+
+
+```{r}
+# OLS 
+result_ols <- felm( fatal_rate ~ beertax  | 0 | 0 | 0, data = fatdata )
+summary(result_ols, robust = TRUE)
+```
+
+```{r}
+# State FE
+result_stateFE <- felm( fatal_rate ~ beertax  | state | 0 | state, data = fatdata )
+summary(result_stateFE, robust = TRUE)
+```
+
+This corresponds to the plm model formulas. Note the coefficients for $\beta_1$ are identical but the plm standard errors have not been "made" robust. 
+
+```{r}
+result_stateFE_plm <- plm(fatal_rate ~ beertax, index =c("state"), model = "within", data = fatdata)
+summary(result_stateFE_plm)
+```
+
+
+
+```{r}
+# State and Year FE
+result_bothFE <- felm( fatal_rate ~ beertax  | state + year | 0 | state, data = fatdata )
+summary(result_bothFE, robust = TRUE)
+```
+
+```{r}
+result_stateFE_plm2 <- plm(fatal_rate ~ beertax, index =c("year", "state"), model = "within", effect = "twoways", data = fatdata) #  Note the twoways flag!
+summary(result_stateFE_plm2)
+```
+
+```{r}
+stargazer::stargazer(result_ols, result_stateFE, result_bothFE, type = "text")
+```
+
+What if we do not use the cluster-robust standard error?
+  
+```{r}
+# State FE w.o. CRS
+result_wo_CRS <- felm( fatal_rate ~ beertax  | state | 0 | 0, data = fatdata )
+
+# State FE w. CRS
+result_w_CRS <- felm( fatal_rate ~ beertax  | state | 0 | state, data = fatdata )
+```
+
+
+```{r}
+# Report heteroskedasticity robust standard error and cluster-robust standard errors
+stargazer::stargazer(result_wo_CRS, result_w_CRS,  type = "text", se = list(summary(result_wo_CRS)$rse, NULL))
+```
+
+
+If we just want to control for fix effect and only care about coefficients of interests, either felm and plm is a good choice. But if we want to know the effect of some specific groups, lm is preferred.
+
+### Panel Data with Instrumental Variables
+
+Consider a model estimating the demand (measured in number of packs) for cigarettes
+
+$$
+log(Q_{it} = \beta_0 + \beta_1log(P_{it})+\beta_2log(income_{it})+ e_{it})
+$$
+  
+  As an IV for the price we use
+
+- $SalesTax_{it}$: the proportion of taxes on cigarettes arising from the general sales tax. 
+  - Relevant as it is included in the after-tax price
+  - Exogenous(independent) since the sales tax does not influence demand directly, but indirectly through the price.
+- $CigTax_{it}$: CigTaxit
+
+```{r}
+data("CigarettesSW")
+Cigdata <- CigarettesSW %>% 
+  mutate( rincome = (income / population) / cpi) %>% 
+  mutate( rprice  = price / cpi ) %>% 
+  mutate( salestax = (taxs - tax) / cpi ) %>% 
+  mutate( cigtax = tax/cpi ) 
+```
+
+```{r}
+# OLS
+result_1 <- felm( log(packs) ~ log(rprice) + log(rincome)  | 0 | 0 | state, data = Cigdata )
+```
+
+```{r}
+# State FE
+result_2 <- felm( log(packs) ~ log(rprice) + log(rincome)  | state | 0 | state, data = Cigdata )
+```
+
+```{r}
+# IV without FE
+result_3 <- felm( log(packs) ~ log(rincome)  | 0 | (log(rprice) ~  salestax + cigtax) | state, data = Cigdata )
+```
+
+```{r}
+# IV with FE 
+result_4 <- felm( log(packs) ~ log(rincome)  | state | (log(rprice) ~  salestax + cigtax) | state, data = Cigdata )
+```
+
+```{r}
+stargazer::stargazer(result_1, result_2, result_3, result_4, type = "text")
+```
+
+
+
+## Dynamic Panel Data Models
+
+In the context of panel data, we usually must deal with unobserved heterogeneity by applying the within (demeaning) transformation, as in one-way fixed effects models, or by taking first differences if the second dimension of the panel is a proper time series.
+
+The ability of first differencing to remove unobserved heterogeneity also underlies the family of estimators that have been developed for dynamic panel data (DPD) models. These models contain one or more lagged dependent variables, allowing for the modeling of a partial adjustment mechanism.
+
+Dynamic panel data models are estimated using the GMM estimator suggested by  @Arellano1991, utilizing lagged endogenous regressors after a first-differences transformation. 
+
+We illustrate the use of the dynamic panel data method by trying to estimate determinants of employment in the UK based on the original example of @Arellano1991
+
+ - Unbalanced panel: 7–9 annual observations (1976–1984) for 140 UK firms
+ - 4 variables: employment (emp), average annual wage per employee (wage), book value of gross fixed assets (capital), index of value-added output at constant factor cost (output)
+
+```{r}
+data("EmplUK", package = "plm")
+```
+
+
+Arellano-Bond estimator is provided by `pgmm()`. Dynamic formula derived from static formula via list of lags
+
+
+```{r}
+empl_ab<- pgmm(log(emp) ~ lag(log(emp), 1:2) + lag(log(wage), 0:1)
+           + log(capital) + lag(log(output), 0:1) | lag(log(emp), 2:99),
+            data = EmplUK, effect = "twoways", model = "twosteps")
+summary(empl_ab, robust = FALSE)
+```
+
+ - $p=2$ lagged endogenous terms
+ - log(wage) and log(output) occur up to lag 1
+ - log(capital) contemporaneous term only 
+ - time- and firm-specific effects, instruments are lagged terms of the dependent variable (all lags beyond lag 1 are to be used)
+
+

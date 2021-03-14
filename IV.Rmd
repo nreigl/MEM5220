@@ -13,13 +13,301 @@ PACKAGES<-c(
             # "kableExtra", # extended knit functions for objects exported from other packages
             "huxtable", #  Regression tables, broom compatible
             "stargazer", # Regression tables
+            "lfe", # Panel IV
+            "gmm", # GMM method
             "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
             "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
             "wooldridge",  # Wooldrige Datasets
+            "broom", 
             "magrittr") #  pipes
 inst<-match(PACKAGES, .packages(all=TRUE))
 need<-which(is.na(inst))
-if (length(need)>0) pak::pkg_install(PACKAGES[need])
+if (length(need)>0) install.packages(PACKAGES[need])
+# if (length(need)>0) pak::pkg_install(PACKAGES[need])
 lapply(PACKAGES, require, character.only=T)
 ```
+
+
+## Introduction: Endogeneity Problem and its Solution
+
+- When $Cov(x_k, \epsilon)=0$ does not hold, we have **endogeneity problem**
+    - We call such $x_k$ an **endogenous variable**.
+- In this chapter, I introduce an **instrumental variable** estimation method, a solution to this issue.
+
+## Examples of Endogeneity Problem 
+
+- Source of endogeneity problems. 
+    1. Omitted variable bias
+    2. Measurement error
+    3. Simultaneity
+
+For instance, quantity and price is determined by the intersection of supply and demand. Although we observe the correlation between price and quantity, we have no information about the elasticities associated with supply or demand curves.  
+
+## Idea of IV Regression
+
+- Let's start with a simple case. 
+
+$$
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i, 
+$$
+
+and $Cov(x_i, \epsilon_i) \neq 0$. 
+- Now, we consider another variable $z_i$, which we call **instrumental variable (IV)**. 
+- Instrumental variable $z_i$ should satisfies the following two conditions:
+    1. **Independence**: $Cov(z_i, \epsilon_i) = 0$. No correlation between IV and error.
+    2. **Relevance**: $Cov(z_i, x_i) \neq 0$. There should be correlation between IV and endogenous variable $x_i$.
+- Idea: Use the variation of $x_i$ **induced by instrument $z_i$** to estimate the direct (causal) effect of $x_i$ on $y_i$, that is $\beta_1$!.
+
+- More on this: 
+    1. Intuitively, the OLS estimator captures the correlation between $x$ and $y$. 
+    2. If there is no correlation between $x$ and $\epsilon$, it captures the causal effect $\beta_1$. 
+    3. If not, the OLS estimator captures both direct and indirect effect, the latter of which is bias.
+    4. Now, let's capture the variation of $x$ due to instrument $z$, 
+        - Such a variation should exist under **relevance** assumption.
+        - Such a variation should not be correlated with the error under **independence assumption**
+    5. By looking at the correlation between such variation and $y$, you can get the causal effect $\beta_1$.
+
+
+```{r fig.align='center', echo=FALSE, include= identical(knitr:::pandoc_to(), "html") ,  fig.cap="Idea IV. Source: Lecture notes by Yuta Toyama",  fig.link='https://github.com/yutatoyama/AppliedEconometrics/blob/master/fig_IV_idea.png'}
+knitr::include_graphics('images/fig_IV_idea.png', dpi = NA)
+```
+
+
+
+Load and become familiar with data. 
+
+```{r data, message=FALSE}
+data("mroz", package="wooldridge")
+attach(mroz)
+head(mroz)
+```
+
+
+
+- Consider the wage regression 
+
+$$
+\log(w_i) = \beta_0 + \beta_1 educ_i + \beta_2 exper_i + \beta_3 exper_i^2 + \epsilon_i
+$$
+
+```{r, message=FALSE}
+# Restrict to non-missing wage observations
+mroz1 <- subset(mroz, !is.na(wage))
+# Run the OLS lnwage regression
+wage.ols <- lm(log(wage)~educ+exper+I(exper^2), data=mroz1)
+```
+
+
+```{r, message=FALSE}
+# gather robust standard errors in a list
+rob_se <- list(sqrt(diag(vcovHC(wage.ols, type = "HC1"))),
+               sqrt(diag(vcovHC(wage.ols, type = "HC1"))))
+```
+
+```{r}
+stargazer(wage.ols,se = rob_se, type="text" )
+```
+
+
+However let us assume that
+
+-  $exper_{i}$ is exogenous but $educ_{i}$ is endogenous.
+- An instrument for $educ_{i}$, we use the years of schooling for his or her father and mother, which we call $fatheduc_{i}$ and $motheduc_{i}$. 
+
+
+### Discussion on IV
+
+- Labor economists have used family background variables as IVs for education. 
+- Relevance: OK from the first stage regression. 
+- Independence: A bit suspicious. Parents' education would be correlated with child's ability through quality of nurturing at an early age. 
+- Still, we can see that these IVs can mitigate (though may not eliminate completely) the omitted variable bias. 
+- Discussion on the validity of instruments is crucial in empirical research. 
+
+
+
+## Two stage least squares (2SLS)
+
+Two stage least squares is a general approach for IV estimation when we have one or more endogenous regressors and at least as many instrumental variables. First estimate the reduced, first-stage regression. Predict education regressing it on instruments. Then run the second-stage using the fitted value instead of the endogenous initial value of education. Compare the OLS estimation results with 2SLS. Note that the standard errors for the second step are incorrect since estimating the seconds step with OLS does not take into account that prediction on endogenous education variable contain prediction errors.
+
+
+```{r, message=FALSE}
+# 1st stage: reduced form
+str(mroz1)
+educ.ols <- lm(educ~exper+I(exper^2)+motheduc+fatheduc, data=mroz1)
+educHat <- fitted(educ.ols) #
+summary(educ.ols)
+# check instrument relevance for first stage
+linearHypothesis(educ.ols, "fatheduc = 0", vcvcov = vcovHAC, type = "HC1")
+linearHypothesis(educ.ols, c("fatheduc = 0", "motheduc = 0"), vcvcov = vcovHAC, type = "HC1")
+```
+
+
+```{r, message=FALSE}
+# 2nd stage: 
+wage.2sls <- lm(log(wage)~educHat+exper+I(exper^2), data=mroz1) # note: educHat is fitted values of educ from the first stage
+stargazer(wage.ols, wage.2sls, type="text", title="Regression output table")
+```
+
+
+
+## Instrumental variables 
+
+
+Use IV-regression procedure instead for having consistent estimate values and correct standard errors. The key point from the below code chunk is that the first-stage regression is going to be specified after the | and will include all exogenous variables^[Note that we didn’t specify the endogenous variable (i.e. “educ”) directly. Rather, we told R which are the exogenous variables. It then figured out which were the endogenous variables that needed to be instrumented and ran the necessary first-stage regression(s) in the background.].
+
+```{r, message=FALSE}
+# Use the ivreg function to produce GIVE with correct standard errors
+wage.give <- ivreg(log(wage)~educ+exper+I(exper^2)| ## The main regression. "educ" is endogenous
+                    exper+I(exper^2)+motheduc+fatheduc, data=mroz1) ## List all exogenous variables, including "exper" and I(exper^2)
+
+
+# Alternative syntax: 
+wage.give2 <- 
+  ivreg(
+    log(wage) ~ educ + exper+I(exper^2) | 
+      . -(educ) + motheduc+fatheduc, ## Alternative way of specifying the first-stage.
+    data = mroz1
+  )
+
+stargazer(wage.ols, wage.2sls, wage.give, type="text", title="Regression output table")
+```
+
+Our second IV option comes from the estimatr package that we saw earlier. This will default to using HC2 robust standard errors although, as before, we could specify other options if we so wished (including clustering).
+
+```{r}
+# library(estimatr) ## Already loaded
+
+## Run the IV regression with robust SEs
+wage.give_robust <- 
+  estimatr::iv_robust( ## We only need to change the function call. Everything else stays the same.
+    log(wage) ~educ+exper+I(exper^2)| 
+                    exper+I(exper^2)+motheduc+fatheduc, data=mroz1)
+
+summary(wage.give_robust, diagnostics = TRUE)
+```
+
+As a third option we can use the `lfe:felm()` function. It has a slightly different (more Stata like) syntax  but works also very well for [panel data](#panel) models. 
+
+
+```{r}
+wage.give_felm <- 
+  felm(
+    log(wage) ~ exper+I(exper^2) |
+      0 | ## No FEs
+      (educ ~ motheduc+fatheduc), ## First-stage. Note the surrounding parentheses
+    data = mroz1
+  )
+summary(wage.give_felm)
+
+```
+
+
+```{r}
+huxtable::huxreg(wage.give, wage.give_robust, wage.give_felm)
+```
+
+
+Test for weak instruments, perform Hausman test for endogeneity with null hypothesis of no endogeneity. The Sargan instrument validity test helps to check on the accuracy of instruments.
+
+```{r, message=FALSE}
+ivtest.ols <- lm(educ~exper+I(exper^2)+motheduc+fatheduc, 
+              data=mroz1)
+stargazer(ivtest.ols, type="text", title="Instruments")
+
+# Test rejects that parents education coefficients are zero
+linearHypothesis(ivtest.ols, c("motheduc=0", "fatheduc=0"))
+```
+
+
+```{r, message=FALSE}
+# Test does not reject the zero effect of experience on education
+linearHypothesis(ivtest.ols, c("exper=0","I(exper^2)=0"))
+
+```
+
+
+```{r, message=FALSE}
+# Diagnostics tests for IV:
+  # Weak instruments test: H0 All instruments are weak
+  # Hausman test for endogeneity, where the null hypothesis is  no endogeneity
+  # Sargan instrument validity test: H0 instruments are valid
+summary(wage.give, diagnostics=TRUE)
+```
+
+
+
+###  Overidentifying Restrictions Test
+
+
+If there is correlation between an instrument and the error term, IV regression is not consistent. The overidentifying restrictions test (also called the $J$-test) is an approach to test the hypothesis that additional instruments are exogenous. For the $J$-test to be applicable there need to be more instruments than endogenous regressors.
+
+
+```{r}
+# IV regression
+wage.give <- ivreg(log(wage)~educ+exper+I(exper^2)|
+                    exper+I(exper^2)+motheduc+fatheduc, data=mroz1)
+
+# Auxiliary regression
+res.aux <-  lm(residuals(wage.give) ~ exper+I(exper^2)+motheduc+fatheduc
+                       , data=mroz1) 
+
+
+wage.ORTest <- linearHypothesis(res.aux, c("motheduc=0","fatheduc=0", "exper=0", "I(exper^2)=0"), test = "Chisq")
+# wage.ORTest <- linearHypothesis(res.aux, c("fatheduc=0"))
+wage.ORTest
+```
+
+```{r}
+# Calculations for test
+( r2 <- summary(res.aux)$r.squared )
+( n <- nobs(res.aux))
+( teststat <- n*r2 )
+( pval <- 1-pchisq(teststat,1) )
+
+# Compute correct p-value for the J-statistic
+pchisq(wage.ORTest[2,5], df = 1, lower.tail = FALSE)
+```
+
+
+## GMM IV
+
+In any 2SLS/IV setting, you need to mind the requirements for valid instruments - *exogeneity* and *relevance*.
+GMM improves on 2SLS if homoskedasticity assumption is not met. 
+
+```{r, message=FALSE}
+reg_gmm <- gmm(log(wage)~educ+exper+I(exper^2), ~exper+I(exper^2)+motheduc+fatheduc, data=mroz1)
+summary(reg_gmm)
+
+```
+
+```{r, message=FALSE}
+plot(reg_gmm, which = 3)
+```
+
+```{r, message=FALSE}
+stargazer(wage.ols, wage.2sls, wage.give,reg_gmm, type="text", title="Regression output table")
+```
+
+
+```{r, message=FALSE}
+gmm_2sls <- tsls(log(wage)~educ+exper+I(exper^2), ~exper+I(exper^2)+motheduc+fatheduc, data=mroz1) # Note the tsls command of the gmm package 
+summary(gmm_2sls)
+
+```
+
+
+Use the package **huxtable** to produce a nice regression table 
+
+```{r}
+# install.packages("huxtable") #  install package if necessary
+library(huxtable)
+regressiontable <-huxreg(wage.ols, wage.2sls, wage.give,reg_gmm, gmm_2sls)
+caption(regressiontable) <- "Regression output table"
+regressiontable
+```
+
+
+
+
+
 

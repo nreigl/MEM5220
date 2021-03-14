@@ -7,6 +7,7 @@ rmd_files: [
   "LM.Rmd",
   "GLM.Rmd",
   "IV.RMD",
+  "panel.RMD",
   
   "references.Rmd"
 ]

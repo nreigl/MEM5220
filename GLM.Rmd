@@ -32,8 +32,9 @@ PACKAGES<-c(
             "censReg", # Censored Regression models
             "magrittr") #  pipes
 inst<-match(PACKAGES, .packages(all=TRUE))
-need<-which(is.na(inst))
-if (length(need)>0) pak::pkg_install(PACKAGES[need])
+need<-which(is.na(inst)) 
+if (length(need)>0) install.packages(PACKAGES[need])
+# if (length(need)>0) pak::pkg_install(PACKAGES[need])
 lapply(PACKAGES, require, character.only=T)
 ```
 

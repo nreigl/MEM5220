@@ -54,7 +54,8 @@ PACKAGES<-c("PoEdata", # R data sets for "Principles of Econometrics" by Hill, G
             "magrittr") #  pipes
 inst<-match(PACKAGES, .packages(all=TRUE))
 need<-which(is.na(inst))
-if (length(need)>0) pak::pkg_install(PACKAGES[need])
+# if (length(need)>0) pak::pkg_install(PACKAGES[need])
+if (length(need)>0) install.packages(PACKAGES[need])
 lapply(PACKAGES, require, character.only=T)
 ```
 
@@ -2390,11 +2391,11 @@ R packages provide multiple imputation algorithms. Without going into detail how
 data <- airquality
 data[4:10,3] <- rep(NA,7)
 data[1:5,4] <- NA
-tempData <- mice(data,m=5,maxit=50,meth='pmm',seed=500)
+# tempData <- mice(data,m=5,maxit=50,meth='pmm',seed=500)
 ```
 
 ```{r}
-summary(tempData)
+# summary(tempData)
 ```
 
 
