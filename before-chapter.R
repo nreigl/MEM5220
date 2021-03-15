@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
   comment = NA,
   dev = "png",
   dpi = 150,
-  echo = FALSE,
+  echo = TRUE,
   fig.align = "center",
   fig.width = 6,
   fig.asp = 0.618,  # 1 / phi

@@ -12,8 +12,10 @@ output:
       toc:
         collapse: subsection
         scroll_highlight: yes
+        before: null
+        after: null
       fontsettings:
-        theme: lumen
+        theme: white
         family: serif
         size: 2
     split_by: section+number
@@ -99,7 +101,15 @@ For a brief rundown of the version history, we have:
 
 ### Version 3.1.0. {-}
 
-I released the 3.1.0 version of this teaching material in February 17, 2021. 
+I released the 3.1.0 version of this teaching material in March 15, 2021. 
+
+ - Cleanup of certain outdated functions (dplyr::arrange)
+ - Remove `renv`
+ - Add quantile regression subsection to LM.Rmd
+
+Know bugs: 
+
+ - Line 2213 in LM.Rmd: `waldtest` fails to compile in the bookdown version but works in the script version
 
 
 ## Software information and conventions {-}
