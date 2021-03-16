@@ -29,7 +29,8 @@ To load the dataset and necessary functions:
 # This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
 if (!requireNamespace("devtools", quietly = TRUE))
      install.packages("devtools")
-PACKAGES<-c("wooldridge",  # Wooldrige Datasets
+PACKAGES<-c("pacman", 
+  "wooldridge",  # Wooldrige Datasets
             "tidyverse",  # for data manipulation and ggplots
             "tibble",
             "MCMCpack", # Markov Chain Monte Carlo Methods
@@ -62,9 +63,9 @@ PACKAGES<-c("wooldridge",  # Wooldrige Datasets
             "magrittr") #  pipes
 inst<-match(PACKAGES, .packages(all=TRUE))
 need<-which(is.na(inst))
-# if (length(need)>0) pak::pkg_install(PACKAGES[need])
-if (length(need)>0) install.packages(PACKAGES[need])
+if (length(need)>0) install.packages(PACKAGES[need], repos = c(CRAN="https://cran.rstudio.com"))
 lapply(PACKAGES, require, character.only=T)
+library(future.apply)
 ```
 
 
@@ -146,9 +147,12 @@ summary(ceosal1)
 
 
 ```{r}
-skim(ceosal1)
+# kable(skim(ceosal1)) #  for bookdown
 ```
 
+```{r, eval=FALSE, echo=FALSE}
+skim(ceosal1)# for script
+```
 
 
 
@@ -2077,7 +2081,6 @@ Spotting heteroskedasticity in real world data
 
 ```{r}
 data("CPSSWEducation")
-skim(CPSSWEducation)
 ```
 
 
@@ -2096,7 +2099,7 @@ abline(labor_model,
 
 Another useful method to visualize possible heteroskedasticity is to plot the residuals against the regressors suspected of creating heteroskedasticity, or, more generally, against the fitted values of the regression.
 
-```{r fig19, fig.cap='Residual plots in the ‘food’ model ', out.width='80%', fig.asp=.75, fig.align='center'}
+```{r fig19, fig.cap='Residual plots in the ‘labor’ model ', out.width='80%', fig.asp=.75, fig.align='center'}
 res <- residuals(labor_model)
 yhat <- fitted(labor_model)
 plot(CPSSWEducation$education,res, xlab="education", ylab="residuals")
@@ -2380,7 +2383,7 @@ s2 <- 1
 # Sample size
 n <- 30
 # Number of iterations
-n_iter <- 50000
+n_iter <- 1000
 # Set seed
 set.seed(1234)
 # The simulation
@@ -2410,13 +2413,15 @@ sim_df <- parallel::mclapply(X = 1:n_iter, FUN = function(i, size) {
   )
   # Return the data
   return(iter_df)
-}, mc.cores = 3,  size = n) %>% bind_rows()
+}, 
+ mc.cores = 3,  # not possbile on windows but on a Unix based system you can try to use more cores
+size = n) %>% bind_rows()
 # Change names
 names(sim_df) <- c("coef", "se", "model", "iter")
 ```
 
 
-```{r, sim plot efficiency, echo = T, fig.height = 6.25}
+```{r, sim plot efficiency, echo = T, out.width='80%', fig.asp=.75, fig.align='center'}
 ggplot(data = sim_df %>% dplyr::filter(model != "OLS Hom."), aes(x = coef, color = model, fill = model)) +
 geom_vline(xintercept = 10, linetype = "dashed") +
 geom_density(alpha = 0.1) +
@@ -2439,7 +2444,7 @@ theme(
 ```
 
 
-```{r, sim plot t stat, echo = T, fig.height = 6.25}
+```{r, sim plot t stat, echo = T, out.width='80%', fig.asp=.75, fig.align='center'}
 ggplot(data = sim_df, aes(x = (coef-10)/se, color = model, fill = model)) +
 geom_vline(xintercept = qt(c(0.025, 0.975), df = 28), linetype = "dashed") +
 geom_density(alpha = 0.1) +

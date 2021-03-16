@@ -25,7 +25,6 @@ classoption: oneside, openany
 link-citations: yes
 bibliography:
 - MEM5220.bib
-- packages.bib
 citation_package: biblatex
 biblatexoptions: [backend=bibtex]
 subparagraph: yes

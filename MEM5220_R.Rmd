@@ -25,7 +25,6 @@ classoption: oneside, openany
 link-citations: yes
 bibliography:
 - MEM5220.bib
-- packages.bib
 citation_package: biblatex
 biblatexoptions: [backend=bibtex]
 subparagraph: yes
@@ -38,21 +37,167 @@ header-includes:
   \usepackage[T1]{fontenc}
 github-repo: nreigl/MEM5220
 ---
+```{r include=FALSE, cache=FALSE}
+# LIBRARY CONFIGURATION
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  comment = NA,
+  dev = "png",
+  dpi = 150,
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = 0.618,  # 1 / phi
+  fig.show = "hold",
+  include = TRUE,
+  message = FALSE,
+  out.width = "70%",
+  tidy = FALSE,
+  warning = FALSE
+)
+
+
+# UTILITY FUNCTIONS
+
+printf <- function(pattern, ...) {
+  cat(sprintf(pattern, ...))
+}
+
+print_file <- function(file) {
+  cat(paste(readLines(file), "\n", sep=""), sep="")
+}
+
+# GENERAL R CONFIGURATION
+
+# options(digits = 2)
+options(htmltools.dir.version = FALSE)
+
+
+# set.seed(1123)
+```
+
+
 
 # Introduction {-}
 
-Placeholder
 
+```{r, child="_setup.Rmd"}
+```
+
+
+
+```{r fig.align='center', echo=FALSE, include= identical(knitr:::pandoc_to(), "html") ,  fig.cap="Normal and simulated Gaussian densities on a regression line",  fig.link='https://stackoverflow.com/questions/31794876/ggplot2-how-to-curve-small-gaussian-densities-on-a-regression-line'}
+knitr::include_graphics('images/lregression.jpeg', dpi = NA)
+```
+
+
+This handout is designed for the use with MEM5220 - Applied Econometrics at [Tallinn University of Technology, Department of Economics and Finance](https://taltech.ee/en/department-economics-and-finance).   
 
 ## Prerequisites {-}
+
+A basic knowledge of the R [@team2013r] programming language  is required. 
+
+
+In order to reproduce the examples in this script you need the statistical software package R. Additionally I recommend using the [RStudio](https://www.rstudio.com) integrated developer environment (IDE) which will improve your R working experience.
+
 ### Installation of R and RStudio  {-}
+
+Go to the following webpages and download the software adequate for Your operating system:
+
+1. [The Statistical Software Package R:](http://cran.r-project.org)
+2. The GUI [RStudio:](https://www.rstudio.com)
+
+
+Install R first and then proceed with RStudio. Afterwards start RStudio. For accessing packages and datasets from [github](https://github.com/) we need to install the **devtools** package. On Windows, download and install [Rtools](https://cran.r-project.org/bin/windows/Rtools/), and devtools takes care of the rest. On Mac, install the Xcode command line tools. On Linux, install the R development package, usually called r-devel or r-base-dev. 
+
+
 ## Resources {-}
+
+
+Our primary resource is @heiss2016using ^[Heiss (2016) builds on the popular Introductory Econometrics by Wooldridge (2016) and demonstrates how to replicate the applications discussed therein using R.]. The book is available as free [online](http://www.urfie.net/read.html) version. For theoretical concepts I refer to @wooldridge2015introductory^[[Introductory Econometrics: A Modern Approach](https://books.google.ee/books/about/Introductory_Econometrics_A_Modern_Appro.html?id=wUF4BwAAQBAJ&source=kp_cover&redir_esc=y).].  
+For the timeseries part of the course a good reference material is  [Introductory Econometircs for Finance](https://www.cambridge.org/pt/academic/subjects/economics/finance/introductory-econometrics-finance-3rd-edition?format=PB&isbn=9781107661455). 
+
+
+
 ### Attribution {-}
+
+This lecture material would not possible without many other open-source econometrics teaching materials and of course the R package developers. In addition to the main resources, examples and code of this workbook have been drawn from a number of free econometrics eBooks, blogs, R-vignette help pages and other researchers teaching materials. 
+
+Chapter 1.1.2 Simulating SLR is based on @heiss2016using but adds parts of @dalpiaz2016 and @colonescu2018 teaching materials. Chapter 1.2.2 includes additional material from @Hanck2018.  Chapter 1.4 Heteroskedasticity has been amended with material from @Rodrigues2018 blog. The time series part is closely related to the teaching material of Andres Vörk. The finite distributed lags model is adapted from Constantin Colonescu. 
+
+
+- [Using R for Introduction to Econometrics](https://emwikts1970.github.io/URFITE-Bookdown/), @Hanck2018
+- [Applied Statistics with R](https://daviddalpiaz.github.io/appliedstats/), @dalpiaz2016
+- [Principles of Econometrics with R](https://bookdown.org/ccolonescu/RPoE4/), @colonescu2018
+- [Introduction to Econometrics with R](https://scpoecon.github.io/ScPoEconometrics/), @oswald2018introduction
+- [Broadening Your Statistical Horizons](https://bookdown.org/roback/bookdown-bysh/)
+
 ## Updates {-}
+
+For a brief rundown of the version history, we have:
+
 ### Version 3.1.0. {-}
+
+I released the 3.1.0 version of this teaching material in March 15, 2021. 
+
+ - Cleanup of certain outdated functions (dplyr::arrange)
+ - Remove `renv`
+ - Add quantile regression subsection to LM.Rmd
+ - Add heteroskedasdicity simulations 
+
+Known bugs: 
+
+ - Line 2267 in LM.Rmd: `waldtest` fails to compile in the bookdown version but works in the script version
+
+
 ## Software information and conventions {-}
+
+
+The R session information when compiling this book is shown below:
+
+```{r, echo = F, message = F, warning = F, results = "hide"}
+pacman::p_unload(pacman::p_loaded(), character.only = TRUE)
+```
+
+
+I do not add prompts (`>` and `+`) to R source code in this book, and I comment out the text output with two hashes `##` by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out).
+
+* R code blocks and their output appear in a gray background. E.g., 
+
+```{r}
+2 + 2 == 5
+```
+
+* Functions and inline code are in a typewriter font and followed by parentheses, all atop a gray background (e.g., `brm()`).
+
+* When I want to make explicit the package a given function comes from, I insert the double-colon operator `::` between the package name and the function (e.g., `tidybayes::mode_hdi()`).
+
+Package names are in bold text (e.g., **rmarkdown**). Content with **Note**, **Your turn** and **Overthinking** is surrounded by two horizontal lines. **Overthinking** sections serve as additional information for the interested reader but will not be covered in detail in class. 
+
+
+
 ## Contribute {-}
+
+You can contribute to this teaching material. Please fill an issue, improve the material or checkout alternative versions of this project. 
+
+
+The source code of the project is available on GitHub at [https://github.com/nreigl/MEM5220](https://github.com/nreigl/MEM5220).
+
+
+
+ And if you're unacquainted with GitHub, check out my short [Git for Economists](https://github.com/nreigl/git-for-economists) presentation or take a look at [-@bryanHappyGitGitHub2020] [*Happy Git and GitHub for the useR*](https://happygitwithr.com/). 
+
 ## Acknowledgements {-}
+
+I thank Kadri Männasoo and Juan Carlos Cuestas for their useful comments.
+
+
+
 
 <!--chapter:end:index.Rmd-->
 
@@ -130,7 +275,8 @@ To load the dataset and necessary functions:
 # This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
 if (!requireNamespace("devtools", quietly = TRUE))
      install.packages("devtools")
-PACKAGES<-c("wooldridge",  # Wooldrige Datasets
+PACKAGES<-c("pacman", 
+  "wooldridge",  # Wooldrige Datasets
             "tidyverse",  # for data manipulation and ggplots
             "tibble",
             "MCMCpack", # Markov Chain Monte Carlo Methods
@@ -163,9 +309,9 @@ PACKAGES<-c("wooldridge",  # Wooldrige Datasets
             "magrittr") #  pipes
 inst<-match(PACKAGES, .packages(all=TRUE))
 need<-which(is.na(inst))
-# if (length(need)>0) pak::pkg_install(PACKAGES[need])
-if (length(need)>0) install.packages(PACKAGES[need])
+if (length(need)>0) install.packages(PACKAGES[need], repos = c(CRAN="https://cran.rstudio.com"))
 lapply(PACKAGES, require, character.only=T)
+library(future.apply)
 ```
 
 
@@ -247,9 +393,12 @@ summary(ceosal1)
 
 
 ```{r}
-skim(ceosal1)
+# kable(skim(ceosal1)) #  for bookdown
 ```
 
+```{r, eval=FALSE, echo=FALSE}
+skim(ceosal1)# for script
+```
 
 
 
@@ -2178,7 +2327,6 @@ Spotting heteroskedasticity in real world data
 
 ```{r}
 data("CPSSWEducation")
-skim(CPSSWEducation)
 ```
 
 
@@ -2197,7 +2345,7 @@ abline(labor_model,
 
 Another useful method to visualize possible heteroskedasticity is to plot the residuals against the regressors suspected of creating heteroskedasticity, or, more generally, against the fitted values of the regression.
 
-```{r fig19, fig.cap='Residual plots in the ‘food’ model ', out.width='80%', fig.asp=.75, fig.align='center'}
+```{r fig19, fig.cap='Residual plots in the ‘labor’ model ', out.width='80%', fig.asp=.75, fig.align='center'}
 res <- residuals(labor_model)
 yhat <- fitted(labor_model)
 plot(CPSSWEducation$education,res, xlab="education", ylab="residuals")
@@ -2481,7 +2629,7 @@ s2 <- 1
 # Sample size
 n <- 30
 # Number of iterations
-n_iter <- 50000
+n_iter <- 1000
 # Set seed
 set.seed(1234)
 # The simulation
@@ -2511,13 +2659,15 @@ sim_df <- parallel::mclapply(X = 1:n_iter, FUN = function(i, size) {
   )
   # Return the data
   return(iter_df)
-}, mc.cores = 3,  size = n) %>% bind_rows()
+}, 
+ mc.cores = 3,  # not possbile on windows but on a Unix based system you can try to use more cores
+size = n) %>% bind_rows()
 # Change names
 names(sim_df) <- c("coef", "se", "model", "iter")
 ```
 
 
-```{r, sim plot efficiency, echo = T, fig.height = 6.25}
+```{r, sim plot efficiency, echo = T, out.width='80%', fig.asp=.75, fig.align='center'}
 ggplot(data = sim_df %>% dplyr::filter(model != "OLS Hom."), aes(x = coef, color = model, fill = model)) +
 geom_vline(xintercept = 10, linetype = "dashed") +
 geom_density(alpha = 0.1) +
@@ -2540,7 +2690,7 @@ theme(
 ```
 
 
-```{r, sim plot t stat, echo = T, fig.height = 6.25}
+```{r, sim plot t stat, echo = T, out.width='80%', fig.asp=.75, fig.align='center'}
 ggplot(data = sim_df, aes(x = (coef-10)/se, color = model, fill = model)) +
 geom_vline(xintercept = qt(c(0.025, 0.975), df = 28), linetype = "dashed") +
 geom_density(alpha = 0.1) +
