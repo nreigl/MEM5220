@@ -1,3 +1,61 @@
+--- 
+title: "MEM52220 - Applied Econometrics"
+author: "Nicolas Reigl"
+subtitle: "Spring semester 2021"
+description: "This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology"
+cover-image: "images/TalTech_Gradient_print.jpg"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: 
+  bookdown::gitbook:
+    config:
+      toc:
+        collapse: subsection
+        scroll_highlight: yes
+        before: null
+        after: null
+      fontsettings:
+        theme: white
+        family: serif
+        size: 2
+    split_by: section+number
+    highlight: tango
+documentclass: book
+classoption: oneside, openany
+link-citations: yes
+bibliography:
+- MEM5220.bib
+- packages.bib
+citation_package: biblatex
+biblatexoptions: [backend=bibtex]
+subparagraph: yes
+geometry:
+  margin = 0.5in
+urlcolor: blue
+highlight: tango
+header-includes:
+  \usepackage{underscore}
+  \usepackage[T1]{fontenc}
+github-repo: nreigl/MEM5220
+---
+
+# Introduction {-}
+
+Placeholder
+
+
+## Prerequisites {-}
+### Installation of R and RStudio  {-}
+## Resources {-}
+### Attribution {-}
+## Updates {-}
+### Version 3.1.0. {-}
+## Software information and conventions {-}
+## Contribute {-}
+## Acknowledgements {-}
+
+<!--chapter:end:index.Rmd-->
+
 ---
 output:
   pdf_document: default
@@ -5,6 +63,49 @@ output:
 editor_options: 
   chunk_output_type: console
 ---
+```{r include=FALSE, cache=FALSE}
+# LIBRARY CONFIGURATION
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  comment = NA,
+  dev = "png",
+  dpi = 150,
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = 0.618,  # 1 / phi
+  fig.show = "hold",
+  include = TRUE,
+  message = FALSE,
+  out.width = "70%",
+  tidy = FALSE,
+  warning = FALSE
+)
+
+
+# UTILITY FUNCTIONS
+
+printf <- function(pattern, ...) {
+  cat(sprintf(pattern, ...))
+}
+
+print_file <- function(file) {
+  cat(paste(readLines(file), "\n", sep=""), sep="")
+}
+
+# GENERAL R CONFIGURATION
+
+# options(digits = 2)
+options(htmltools.dir.version = FALSE)
+
+
+# set.seed(1123)
+```
 
 
 ```{r setup, include=FALSE}
@@ -2744,4 +2845,56 @@ anova(fit_quantiles, test = "Wald", joint=TRUE)
 ```{r, warning=FALSE}
 anova(fit_quantiles, test = "Wald", joint=FALSE)
 ```
+
+
+<!--chapter:end:LM.Rmd-->
+
+```{r include=FALSE, cache=FALSE}
+# LIBRARY CONFIGURATION
+
+library(dplyr)
+library(ggplot2)
+library(knitr)
+knitr::opts_chunk$set(
+  cache = TRUE,
+  collapse = TRUE,
+  comment = NA,
+  dev = "png",
+  dpi = 150,
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6,
+  fig.asp = 0.618,  # 1 / phi
+  fig.show = "hold",
+  include = TRUE,
+  message = FALSE,
+  out.width = "70%",
+  tidy = FALSE,
+  warning = FALSE
+)
+
+
+# UTILITY FUNCTIONS
+
+printf <- function(pattern, ...) {
+  cat(sprintf(pattern, ...))
+}
+
+print_file <- function(file) {
+  cat(paste(readLines(file), "\n", sep=""), sep="")
+}
+
+# GENERAL R CONFIGURATION
+
+# options(digits = 2)
+options(htmltools.dir.version = FALSE)
+
+
+# set.seed(1123)
+```
+`r if (knitr::is_html_output()) '
+# References {-}
+'`
+
+<!--chapter:end:references.Rmd-->
 
