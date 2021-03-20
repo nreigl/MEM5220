@@ -1,4 +1,4 @@
---- 
+---
 title: "MEM52220 - Applied Econometrics"
 author: "Nicolas Reigl"
 subtitle: "Spring semester 2021"
@@ -6,7 +6,7 @@ description: "This manual constitutues the classroom material of the applied eco
 cover-image: "images/TalTech_Gradient_print.jpg"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
-output: 
+output:
   bookdown::gitbook:
     config:
       toc:
@@ -53,11 +53,11 @@ knitr::include_graphics('images/lregression.jpeg', dpi = NA)
 ```
 
 
-This handout is designed for the use with MEM5220 - Applied Econometrics at [Tallinn University of Technology, Department of Economics and Finance](https://taltech.ee/en/department-economics-and-finance).   
+This handout is designed for the use with MEM5220 - Applied Econometrics at [Tallinn University of Technology, Department of Economics and Finance](https://taltech.ee/en/department-economics-and-finance).
 
 ## Prerequisites {-}
 
-A basic knowledge of the R [@team2013r] programming language  is required. 
+A basic knowledge of the R [@team2013r] programming language  is required.
 
 
 In order to reproduce the examples in this script you need the statistical software package R. Additionally I recommend using the [RStudio](https://www.rstudio.com) integrated developer environment (IDE) which will improve your R working experience.
@@ -70,22 +70,22 @@ Go to the following webpages and download the software adequate for Your operati
 2. The GUI [RStudio:](https://www.rstudio.com)
 
 
-Install R first and then proceed with RStudio. Afterwards start RStudio. For accessing packages and datasets from [github](https://github.com/) we need to install the **devtools** package. On Windows, download and install [Rtools](https://cran.r-project.org/bin/windows/Rtools/), and devtools takes care of the rest. On Mac, install the Xcode command line tools. On Linux, install the R development package, usually called r-devel or r-base-dev. 
+Install R first and then proceed with RStudio. Afterwards start RStudio. For accessing packages and datasets from [github](https://github.com/) we need to install the **devtools** package. On Windows, download and install [Rtools](https://cran.r-project.org/bin/windows/Rtools/), and devtools takes care of the rest. On Mac, install the Xcode command line tools. On Linux, install the R development package, usually called r-devel or r-base-dev.
 
 
 ## Resources {-}
 
 
-Our primary resource is @heiss2016using ^[Heiss (2016) builds on the popular Introductory Econometrics by Wooldridge (2016) and demonstrates how to replicate the applications discussed therein using R.]. The book is available as free [online](http://www.urfie.net/read.html) version. For theoretical concepts I refer to @wooldridge2015introductory^[[Introductory Econometrics: A Modern Approach](https://books.google.ee/books/about/Introductory_Econometrics_A_Modern_Appro.html?id=wUF4BwAAQBAJ&source=kp_cover&redir_esc=y).].  
-For the timeseries part of the course a good reference material is  [Introductory Econometircs for Finance](https://www.cambridge.org/pt/academic/subjects/economics/finance/introductory-econometrics-finance-3rd-edition?format=PB&isbn=9781107661455). 
+Our primary resource is @heiss2016using ^[Heiss (2016) builds on the popular Introductory Econometrics by Wooldridge (2016) and demonstrates how to replicate the applications discussed therein using R.]. The book is available as free [online](http://www.urfie.net/read.html) version. For theoretical concepts I refer to @wooldridge2015introductory^[[Introductory Econometrics: A Modern Approach](https://books.google.ee/books/about/Introductory_Econometrics_A_Modern_Appro.html?id=wUF4BwAAQBAJ&source=kp_cover&redir_esc=y).].
+For the timeseries part of the course a good reference material is  [Introductory Econometircs for Finance](https://www.cambridge.org/pt/academic/subjects/economics/finance/introductory-econometrics-finance-3rd-edition?format=PB&isbn=9781107661455).
 
 
 
 ### Attribution {-}
 
-This lecture material would not possible without many other open-source econometrics teaching materials and of course the R package developers. In addition to the main resources, examples and code of this workbook have been drawn from a number of free econometrics eBooks, blogs, R-vignette help pages and other researchers teaching materials. 
+This lecture material would not possible without many other open-source econometrics teaching materials and of course the R package developers. In addition to the main resources, examples and code of this workbook have been drawn from a number of free econometrics eBooks, blogs, R-vignette help pages and other researchers teaching materials.
 
-Chapter 1.1.2 Simulating SLR is based on @heiss2016using but adds parts of @dalpiaz2016 and @colonescu2018 teaching materials. Chapter 1.2.2 includes additional material from @Hanck2018.  Chapter 1.4 Heteroskedasticity has been amended with material from @Rodrigues2018 blog. The time series part is closely related to the teaching material of Andres Vörk. The finite distributed lags model is adapted from Constantin Colonescu. 
+Chapter 1.1.2 Simulating SLR is based on @heiss2016using but adds parts of @dalpiaz2016 and @colonescu2018 teaching materials. Chapter 1.2.2 includes additional material from @Hanck2018.  Chapter 1.4 Heteroskedasticity has been amended with material from @Rodrigues2018 blog. The time series part is closely related to the teaching material of Andres Vörk. The finite distributed lags model is adapted from Constantin Colonescu.
 
 
 - [Using R for Introduction to Econometrics](https://emwikts1970.github.io/URFITE-Bookdown/), @Hanck2018
@@ -100,14 +100,14 @@ For a brief rundown of the version history, we have:
 
 ### Version 3.1.0. {-}
 
-I released the 3.1.0 version of this teaching material in March 15, 2021. 
+I released the 3.1.0 version of this teaching material in March 15, 2021.
 
  - Cleanup of certain outdated functions (dplyr::arrange)
  - Remove `renv`
  - Add quantile regression subsection to LM.Rmd
- - Add heteroskedasdicity simulations 
+ - Add heteroskedasdicity simulations
 
-Known bugs: 
+Known bugs:
 
  - Line 2267 in LM.Rmd: `waldtest` fails to compile in the bookdown version but works in the script version
 
@@ -124,7 +124,7 @@ pacman::p_unload(pacman::p_loaded(), character.only = TRUE)
 
 I do not add prompts (`>` and `+`) to R source code in this book, and I comment out the text output with two hashes `##` by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out).
 
-* R code blocks and their output appear in a gray background. E.g., 
+* R code blocks and their output appear in a gray background. E.g.,
 
 ```{r}
 2 + 2 == 5
@@ -134,20 +134,20 @@ I do not add prompts (`>` and `+`) to R source code in this book, and I comment 
 
 * When I want to make explicit the package a given function comes from, I insert the double-colon operator `::` between the package name and the function (e.g., `tidybayes::mode_hdi()`).
 
-Package names are in bold text (e.g., **rmarkdown**). Content with **Note**, **Your turn** and **Overthinking** is surrounded by two horizontal lines. **Overthinking** sections serve as additional information for the interested reader but will not be covered in detail in class. 
+Package names are in bold text (e.g., **rmarkdown**). Content with **Note**, **Your turn** and **Overthinking** is surrounded by two horizontal lines. **Overthinking** sections serve as additional information for the interested reader but will not be covered in detail in class.
 
 
 
 ## Contribute {-}
 
-You can contribute to this teaching material. Please fill an issue, improve the material or checkout alternative versions of this project. 
+You can contribute to this teaching material. Please fill an issue, improve the material or checkout alternative versions of this project.
 
 
 The source code of the project is available on GitHub at [https://github.com/nreigl/MEM5220](https://github.com/nreigl/MEM5220).
 
 
 
- And if you're unacquainted with GitHub, check out my short [Git for Economists](https://github.com/nreigl/git-for-economists) presentation or take a look at [-@bryanHappyGitGitHub2020] [*Happy Git and GitHub for the useR*](https://happygitwithr.com/). 
+ And if you're unacquainted with GitHub, check out my short [Git for Economists](https://github.com/nreigl/git-for-economists) presentation or take a look at [-@bryanHappyGitGitHub2020] [*Happy Git and GitHub for the useR*](https://happygitwithr.com/).
 
 ## Acknowledgements {-}
 

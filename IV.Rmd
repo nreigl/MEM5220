@@ -12,8 +12,13 @@ PACKAGES<-c(
             "knitr", # knit functions
             # "kableExtra", # extended knit functions for objects exported from other packages
             "huxtable", #  Regression tables, broom compatible
+            "modelsummary", #
+            #  Regression tables, broom compatible
             "stargazer", # Regression tables
             "lfe", # Panel IV
+            "fabricatr", 
+            "estimatr", # 
+            "skimr", 
             "gmm", # GMM method
             "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
             "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
@@ -117,7 +122,7 @@ However let us assume that
 
 ### Discussion on IV
 
-- Labor economists have used family background variables as IVs for education. 
+- Labour economists have used family background variables as IVs for education. 
 - Relevance: OK from the first stage regression. 
 - Independence: A bit suspicious. Parents' education would be correlated with child's ability through quality of nurturing at an early age. 
 - Still, we can see that these IVs can mitigate (though may not eliminate completely) the omitted variable bias. 
@@ -153,7 +158,7 @@ stargazer(wage.ols, wage.2sls, type="text", title="Regression output table")
 ## Instrumental variables 
 
 
-Use IV-regression procedure instead for having consistent estimate values and correct standard errors. The key point from the below code chunk is that the first-stage regression is going to be specified after the | and will include all exogenous variables^[Note that we didn’t specify the endogenous variable (i.e. “educ”) directly. Rather, we told R which are the exogenous variables. It then figured out which were the endogenous variables that needed to be instrumented and ran the necessary first-stage regression(s) in the background.].
+Use IV-regression procedure instead for having consistent estimate values and correct standard errors. The key point from the below code chunk is that the first-stage regression is going to be specified after the | and will include all exogenous variables^[Note that we did not specify the endogenous variable (i.e. “educ”) directly. Rather, we told R which are the exogenous variables. It then figured out which were the endogenous variables that needed to be instrumented and ran the necessary first-stage regression(s) in the background.].
 
 ```{r, message=FALSE}
 # Use the ivreg function to produce GIVE with correct standard errors
@@ -268,6 +273,84 @@ wage.ORTest
 pchisq(wage.ORTest[2,5], df = 1, lower.tail = FALSE)
 ```
 
+### Multiple instruments 
+
+In principle, one is not restricted to use only one instrument. Adding a second instrument improves your explanatory power in the first stage. Recall that an IV changes what you are estimating. With an instrumental variable you get a local average treatment effect. The local average treatment effect refers to the treatment effect for the subset of the sample that takes the treatment if and only if they were assigned to the treatment. So the stronger the the individual is effected by the instrument, the stronger the treatment effect is weighted. 
+
+With two instruments ones get the weighted average of local average treatment effect of the first instrument and the local average treatment effect from the second instrument. 
+
+As it is not trivial to find one good instrument not to speak of two instruments, we will use simulated data. 
+
+```{r}
+# fabricatr package to simulate some data
+set.seed(123)
+dat <- fabricate(
+  N = 100, 
+  Y =  rpois(N, lambda = 4), # Poisson distribution
+  Z1 = rbinom(N, 1, prob = 0.4),
+  Z2 = rbinom(N, 1, prob = 0.4),
+  X1 = Z1 * rbinom(N, 1, prob = 0.8)  + Z2 * rbinom(N, 1, prob = 0.8),
+  X2 = rnorm(N)
+)
+
+```
+
+```{r}
+skim(dat)
+```
+
+```{r}
+datOLS <- lm(Y ~ X1 + X2, data = dat)
+# start with 2STL 
+fsOLS <- lm(X1 ~ Z1 + X2, data = dat) # try with first instrument
+X1HAT <- fitted(fsOLS) # 
+dat2sls <- lm(Y ~ X1HAT+ X2, data = dat)
+```
+
+Use the estimatr package
+
+```{r}
+iv <- estimatr::iv_robust(Y ~ X1 + X2 | Z1 + X2, data = dat)
+```
+
+
+```{r}
+iv2 <- estimatr::iv_robust(Y ~ X1 + X2 | Z1 + Z2 + X2, data = dat)
+```
+
+
+```{r}
+modelsummary::modelsummary(list("OLS" = datOLS, "2SLS" = dat2sls, "IV1" = iv,"IV2" = iv2))
+```
+
+
+Diagnostics 
+
+1. F-statistic for all the instruments in the first stage
+
+That is a common way of looking for weak instruments. 
+
+```{r}
+iv2diag <- iv2$diagnostic_first_stage_fstatistic
+scales::number(iv2$diagnostic_first_stage_fstatistic, accuracy = .01)
+```
+
+We observe a very low p-value and a F-statistic of around `r scales::number(iv2diag[[1]])`. We can reject the Null Hypothesis of joint weak instruments. 
+
+2. Overidentification test for multiple instruments 
+
+If we have multiple instruments and we assume that **at least one of them** is correct we can check the other one against. So if the two different instruments give two very different results either one of them might be 
+
+A. Endogenous and by that should not be an instrument 
+B. Or potentially they are picking two different local instruments 
+
+Note that we are looking for differences in the second-stage coefficients. It is okay if the effects in the first stage are different. 
+
+```{r}
+iv2$diagnostic_overid_test
+```
+We can't reject that that the two different effects are the same no matter which instruments we use. That tells us that if least one of our instruments is valid, we can also assume that the second one is valid. If we would fail that hypothesis test we have to assume that at least one of our instrument is endogenous, without knowing which one. 
+
 
 ## GMM IV
 
@@ -305,6 +388,11 @@ regressiontable <-huxreg(wage.ols, wage.2sls, wage.give,reg_gmm, gmm_2sls)
 caption(regressiontable) <- "Regression output table"
 regressiontable
 ```
+
+## Panel IV
+
+One of the specificities of panel data models is that the error term is modelled as having two components, and individual and an idiosyncratic term. Therefore, the correlation between covariates and instrumental variables, on the other hand, and the errors of the model, on the other hand, must be analysed separately for each component of the error. 
+
 
 
 

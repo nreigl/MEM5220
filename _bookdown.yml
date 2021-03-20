@@ -5,7 +5,7 @@ rmd_files: [
   "index.Rmd",
   
   "LM.Rmd",
-  
+  "IV.Rmd", 
   "references.Rmd"
 ]
 
