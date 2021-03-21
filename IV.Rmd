@@ -16,6 +16,8 @@ PACKAGES<-c(
             #  Regression tables, broom compatible
             "stargazer", # Regression tables
             "lfe", # Panel IV
+            "fixest", # another Panel IV package 
+            "pder", # Panel data sets 
             "fabricatr", 
             "estimatr", # 
             "skimr", 
@@ -310,12 +312,12 @@ dat2sls <- lm(Y ~ X1HAT+ X2, data = dat)
 Use the estimatr package
 
 ```{r}
-iv <- estimatr::iv_robust(Y ~ X1 + X2 | Z1 + X2, data = dat)
+iv <- estimatr::iv_robust(Y ~ X1 + X2 | Z1 + X2, data = dat,  diagnostics = TRUE)
 ```
 
 
 ```{r}
-iv2 <- estimatr::iv_robust(Y ~ X1 + X2 | Z1 + Z2 + X2, data = dat)
+iv2 <- estimatr::iv_robust(Y ~ X1 + X2 | Z1 + Z2 + X2, data = dat, diagnostics = TRUE)
 ```
 
 
@@ -332,10 +334,10 @@ That is a common way of looking for weak instruments.
 
 ```{r}
 iv2diag <- iv2$diagnostic_first_stage_fstatistic
-scales::number(iv2$diagnostic_first_stage_fstatistic, accuracy = .01)
+iv2diag
 ```
 
-We observe a very low p-value and a F-statistic of around `r scales::number(iv2diag[[1]])`. We can reject the Null Hypothesis of joint weak instruments. 
+We observe a very low p-value and a F-statistic of around `r iv2diag[[1]]`. We can reject the Null Hypothesis of joint weak instruments. 
 
 2. Overidentification test for multiple instruments 
 
@@ -347,7 +349,8 @@ B. Or potentially they are picking two different local instruments
 Note that we are looking for differences in the second-stage coefficients. It is okay if the effects in the first stage are different. 
 
 ```{r}
-iv2$diagnostic_overid_test
+iv2over<- iv2$diagnostic_overid_test
+iv2over
 ```
 We can't reject that that the two different effects are the same no matter which instruments we use. That tells us that if least one of our instruments is valid, we can also assume that the second one is valid. If we would fail that hypothesis test we have to assume that at least one of our instrument is endogenous, without knowing which one. 
 
@@ -394,8 +397,88 @@ regressiontable
 One of the specificities of panel data models is that the error term is modelled as having two components, and individual and an idiosyncratic term. Therefore, the correlation between covariates and instrumental variables, on the other hand, and the errors of the model, on the other hand, must be analysed separately for each component of the error. 
 
 
+@cohen2003 studies study the influence of using seat belts on the number of deaths on American roads. The use panel data from 50 American states for the period 1983-1997. The treatment they are interested in is the *usage* of seatbelts and its effect on death on the roads. 
+
+Two main questions are analysed: 
+
+1. Behavioural compensation theory (@peltzman1975) postulates, among other things, that the use of seat belts makes the driver more confident and leads him to adopt a less prudent driving behaviour. Is is possible that the usage of seatbelts has no significant effect on traffic death or even a positive effect?
+
+2. Endogeneity problem with the seatbelt usage. When driving conditions get worse due to bad weather, keeping other things constant, more traffic fatalities will be recorded. However, evidence shows that when weather conditions worsen, more people will use a seatbelt. 
+
+```{r}
+data("SeatBelt", package="pder")
+```
+
+We construct a new variable, occfact, that captures the number of vehicle occupants kille on the road. 
+
+```{r}
+SeatBelt$occfat <- with(SeatBelt, log(farsocc / (vmtrural + vmturban)))
+SeatBelt1 <- SeatBelt
+```
+
+```{r}
+seatbeltOLS <- feols(occfat ~ log(usage) + log(percapin) + log(unemp) + log(meanage) + log(precentb) + log(precenth) + log(densrur) + log(densurb) + log(viopcap) + log(proppcap) + log(vmtrural) +  log(vmturban) + log(fueltax) + lim65 + lim70p + mlda21 + bac08, cluster = "year", se = "cluster",  data = SeatBelt1)
+```
+
+```{r}
+seatbeltFE1 <- feols(occfat ~ log(usage) + log(percapin) + log(unemp) + log(meanage) + log(precentb) + log(precenth) + log(densrur) + log(densurb) + log(viopcap) + log(proppcap) + log(vmtrural) +  log(vmturban) + log(fueltax) + lim65 + lim70p + mlda21 + bac08 | year,  data = SeatBelt1)
+```
+
+```{r}
+seatbeltFE2 <- feols(occfat ~ log(usage) + log(percapin) + log(unemp) + log(meanage) + log(precentb) + log(precenth) + log(densrur) + log(densurb) + log(viopcap) + log(proppcap) + log(vmtrural) +  log(vmturban) + log(fueltax) + lim65 + lim70p + mlda21 + bac08 | year + state,  data = SeatBelt1)
+```
 
 
+
+```{r}
+seatbeltivfe <-
+  feols(
+    occfat ~ log(percapin) + log(unemp) + log(meanage) + log(precentb) + log(precenth) + log(densrur) + log(densurb) + log(viopcap) + log(proppcap) + log(vmtrural) +  log(vmturban) + log(fueltax) + lim65 + lim70p + mlda21 + bac08 | 
+      year + state | # FE
+      log(usage) ~  ds + dp + dsp , # IV reg
+    data = SeatBelt1
+  )
+```
+Access the first stage of IV FE regression 
+
+```{r}
+summary(seatbeltivfe, stage = 1)
+```
+
+
+
+```{r}
+modelsummary(list('OLS' = seatbeltOLS, 'FE1' = seatbeltFE1, 'FE2' = seatbeltFE2, 'IV' = seatbeltivfe), stars = TRUE)
+```
+
+
+
+
+Alternative you can use the plm package. 
+
+```{r}
+data("SeatBelt", package = "pder")
+SeatBelt$occfat <- with(SeatBelt, log(farsocc / (vmtrural + vmturban)))
+fe1 <- plm::plm(occfat ~ log(usage) + log(percapin) + log(unemp) + log(meanage) + 
+           log(precentb) + log(precenth)+ log(densrur) + 
+           log(densurb) + log(viopcap) + log(proppcap) +
+           log(vmtrural) + log(vmturban) + log(fueltax) +
+           lim65 + lim70p + mlda21 + bac08, SeatBelt, 
+           effect = "time")
+fe2 <- update(ols, effect = "twoways")
+ivfe <- update(fe2, . ~ . |  . - log(usage) + ds + dp +dsp)
+```
+
+```{r}
+rbind(ols = coef(summary(ols))[1,],
+      fe2 = coef(summary(fe2))[1, ],
+      w2sls = coef(summary(ivfe))[1, ])
+```
+```{r}
+SeatBelt$noccfat <- with(SeatBelt, log(farsnocc / (vmtrural + vmturban)))
+nivfe <- update(ivfe, noccfat ~ . | .)
+coef(summary(nivfe))[1, ]
+```
 
 
 
