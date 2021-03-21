@@ -11,8 +11,7 @@ PACKAGES<-c(
             "tidyverse",  # for data manipulation and ggplots
             "knitr", # knit functions
             # "kableExtra", # extended knit functions for objects exported from other packages
-            "huxtable", #  Regression tables, broom compatible
-            "modelsummary", #
+            "modelsummary", # Regression tables, broom compatible
             #  Regression tables, broom compatible
             "stargazer", # Regression tables
             "lfe", # Panel IV
@@ -129,9 +128,6 @@ However let us assume that
 - Independence: A bit suspicious. Parents' education would be correlated with child's ability through quality of nurturing at an early age. 
 - Still, we can see that these IVs can mitigate (though may not eliminate completely) the omitted variable bias. 
 - Discussion on the validity of instruments is crucial in empirical research. 
-
-
-
 ## Two stage least squares (2SLS)
 
 Two stage least squares is a general approach for IV estimation when we have one or more endogenous regressors and at least as many instrumental variables. First estimate the reduced, first-stage regression. Predict education regressing it on instruments. Then run the second-stage using the fitted value instead of the endogenous initial value of education. Compare the OLS estimation results with 2SLS. Note that the standard errors for the second step are incorrect since estimating the seconds step with OLS does not take into account that prediction on endogenous education variable contain prediction errors.
@@ -156,6 +152,77 @@ stargazer(wage.ols, wage.2sls, type="text", title="Regression output table")
 ```
 
 
+As a third option we can use the `lfe:felm()` function. It has a slightly different (more Stata like) syntax  but works also very well for [panel data](#panel) models. 
+  
+  
+```{r}
+  wage.give_felm <- 
+    felm(
+      log(wage) ~ exper+I(exper^2) |
+        0 | ## No FEs
+        (educ ~ motheduc+fatheduc), ## First-stage. Note the surrounding parentheses
+      data = mroz1
+    )
+  summary(wage.give_felm)
+```
+  
+```{r}
+modelsummary::modelsummary(list("IV" = wage.give, "IV robust" = wage.give_robust, "IV felm" = wage.give_felm))
+```
+
+
+Test for weak instruments, perform Hausman test for endogeneity with null hypothesis of no endogeneity. The Sargan instrument validity test helps to check on the accuracy of instruments.
+
+```{r, message=FALSE}
+ivtest.ols <- lm(educ~exper+I(exper^2)+motheduc+fatheduc, 
+                 data=mroz1)
+stargazer(ivtest.ols, type="text", title="Instruments")
+
+```
+
+```{r}
+# Test rejects that parents education coefficients are zero
+linearHypothesis(ivtest.ols, c("motheduc=0", "fatheduc=0"))
+```
+
+
+```{r, message=FALSE}
+# Test does not reject the zero effect of experience on education
+linearHypothesis(ivtest.ols, c("exper=0","I(exper^2)=0"))
+```
+
+
+```{r, message=FALSE}
+# Diagnostics tests for IV:
+# Weak instruments test: H0 All instruments are weak
+# Hausman test for endogeneity, where the null hypothesis is  no endogeneity
+# Sargan instrument validity test: H0 instruments are valid
+summary(wage.give, diagnostics=TRUE)
+```
+
+
+
+###  Overidentifying Restrictions Test
+
+
+If there is correlation between an instrument and the error term, IV regression is not consistent. The overidentifying restrictions test (also called the $J$-test) is an approach to test the hypothesis that additional instruments are exogenous. For the $J$-test to be applicable there need to be more instruments than endogenous regressors.
+
+
+```{r}
+# IV regression
+wage.give <- ivreg(log(wage)~educ+exper+I(exper^2)|
+                     exper+I(exper^2)+motheduc+fatheduc, data=mroz1)
+
+# Auxiliary regression
+res.aux <-  lm(residuals(wage.give) ~ exper+I(exper^2)+motheduc+fatheduc
+               , data=mroz1) 
+
+
+wage.ORTest <- linearHypothesis(res.aux, c("motheduc=0","fatheduc=0", "exper=0", "I(exper^2)=0"), test = "Chisq")
+# wage.ORTest <- linearHypothesis(res.aux, c("fatheduc=0"))
+wage.ORTest
+```
+
 
 ## Instrumental variables 
 
@@ -165,7 +232,7 @@ Use IV-regression procedure instead for having consistent estimate values and co
 ```{r, message=FALSE}
 # Use the ivreg function to produce GIVE with correct standard errors
 wage.give <- ivreg(log(wage)~educ+exper+I(exper^2)| ## The main regression. "educ" is endogenous
-                    exper+I(exper^2)+motheduc+fatheduc, data=mroz1) ## List all exogenous variables, including "exper" and I(exper^2)
+                     exper+I(exper^2)+motheduc+fatheduc, data=mroz1) ## List all exogenous variables, including "exper" and I(exper^2)
 
 
 # Alternative syntax: 
@@ -188,170 +255,103 @@ Our second IV option comes from the estimatr package that we saw earlier. This w
 wage.give_robust <- 
   estimatr::iv_robust( ## We only need to change the function call. Everything else stays the same.
     log(wage) ~educ+exper+I(exper^2)| 
-                    exper+I(exper^2)+motheduc+fatheduc, data=mroz1)
+      exper+I(exper^2)+motheduc+fatheduc, data=mroz1)
 
 summary(wage.give_robust, diagnostics = TRUE)
 ```
 
-As a third option we can use the `lfe:felm()` function. It has a slightly different (more Stata like) syntax  but works also very well for [panel data](#panel) models. 
+
 
 
 ```{r}
-wage.give_felm <- 
-  felm(
-    log(wage) ~ exper+I(exper^2) |
-      0 | ## No FEs
-      (educ ~ motheduc+fatheduc), ## First-stage. Note the surrounding parentheses
-    data = mroz1
-  )
-summary(wage.give_felm)
-
+  # Calculations for test
+  ( r2 <- summary(res.aux)$r.squared )
+  ( n <- nobs(res.aux))
+  ( teststat <- n*r2 )
+  ( pval <- 1-pchisq(teststat,1) )
+  
+  # Compute correct p-value for the J-statistic
+  pchisq(wage.ORTest[2,5], df = 1, lower.tail = FALSE)
 ```
-
-
-```{r}
-huxtable::huxreg(wage.give, wage.give_robust, wage.give_felm)
-```
-
-
-Test for weak instruments, perform Hausman test for endogeneity with null hypothesis of no endogeneity. The Sargan instrument validity test helps to check on the accuracy of instruments.
-
-```{r, message=FALSE}
-ivtest.ols <- lm(educ~exper+I(exper^2)+motheduc+fatheduc, 
-              data=mroz1)
-stargazer(ivtest.ols, type="text", title="Instruments")
-
-# Test rejects that parents education coefficients are zero
-linearHypothesis(ivtest.ols, c("motheduc=0", "fatheduc=0"))
-```
-
-
-```{r, message=FALSE}
-# Test does not reject the zero effect of experience on education
-linearHypothesis(ivtest.ols, c("exper=0","I(exper^2)=0"))
-
-```
-
-
-```{r, message=FALSE}
-# Diagnostics tests for IV:
-  # Weak instruments test: H0 All instruments are weak
-  # Hausman test for endogeneity, where the null hypothesis is  no endogeneity
-  # Sargan instrument validity test: H0 instruments are valid
-summary(wage.give, diagnostics=TRUE)
-```
-
-
-
-###  Overidentifying Restrictions Test
-
-
-If there is correlation between an instrument and the error term, IV regression is not consistent. The overidentifying restrictions test (also called the $J$-test) is an approach to test the hypothesis that additional instruments are exogenous. For the $J$-test to be applicable there need to be more instruments than endogenous regressors.
-
-
-```{r}
-# IV regression
-wage.give <- ivreg(log(wage)~educ+exper+I(exper^2)|
-                    exper+I(exper^2)+motheduc+fatheduc, data=mroz1)
-
-# Auxiliary regression
-res.aux <-  lm(residuals(wage.give) ~ exper+I(exper^2)+motheduc+fatheduc
-                       , data=mroz1) 
-
-
-wage.ORTest <- linearHypothesis(res.aux, c("motheduc=0","fatheduc=0", "exper=0", "I(exper^2)=0"), test = "Chisq")
-# wage.ORTest <- linearHypothesis(res.aux, c("fatheduc=0"))
-wage.ORTest
-```
-
-```{r}
-# Calculations for test
-( r2 <- summary(res.aux)$r.squared )
-( n <- nobs(res.aux))
-( teststat <- n*r2 )
-( pval <- 1-pchisq(teststat,1) )
-
-# Compute correct p-value for the J-statistic
-pchisq(wage.ORTest[2,5], df = 1, lower.tail = FALSE)
-```
-
-### Multiple instruments 
-
+  
+ ### Multiple instruments 
+  
 In principle, one is not restricted to use only one instrument. Adding a second instrument improves your explanatory power in the first stage. Recall that an IV changes what you are estimating. With an instrumental variable you get a local average treatment effect. The local average treatment effect refers to the treatment effect for the subset of the sample that takes the treatment if and only if they were assigned to the treatment. So the stronger the the individual is effected by the instrument, the stronger the treatment effect is weighted. 
-
+  
 With two instruments ones get the weighted average of local average treatment effect of the first instrument and the local average treatment effect from the second instrument. 
-
+  
 As it is not trivial to find one good instrument not to speak of two instruments, we will use simulated data. 
-
+  
 ```{r}
-# fabricatr package to simulate some data
-set.seed(123)
-dat <- fabricate(
-  N = 100, 
-  Y =  rpois(N, lambda = 4), # Poisson distribution
-  Z1 = rbinom(N, 1, prob = 0.4),
-  Z2 = rbinom(N, 1, prob = 0.4),
-  X1 = Z1 * rbinom(N, 1, prob = 0.8)  + Z2 * rbinom(N, 1, prob = 0.8),
-  X2 = rnorm(N)
-)
-
+  # fabricatr package to simulate some data
+  set.seed(123)
+  dat <- fabricate(
+    N = 100, 
+    Y =  rpois(N, lambda = 4), # Poisson distribution
+    Z1 = rbinom(N, 1, prob = 0.4),
+    Z2 = rbinom(N, 1, prob = 0.4),
+    X1 = Z1 * rbinom(N, 1, prob = 0.8)  + Z2 * rbinom(N, 1, prob = 0.8),
+    X2 = rnorm(N)
+  )
+  
 ```
-
+  
 ```{r}
-skim(dat)
+ skim(dat)
 ```
-
+  
 ```{r}
-datOLS <- lm(Y ~ X1 + X2, data = dat)
-# start with 2STL 
-fsOLS <- lm(X1 ~ Z1 + X2, data = dat) # try with first instrument
-X1HAT <- fitted(fsOLS) # 
-dat2sls <- lm(Y ~ X1HAT+ X2, data = dat)
+  datOLS <- lm(Y ~ X1 + X2, data = dat)
+  # start with 2STL 
+  fsOLS <- lm(X1 ~ Z1 + X2, data = dat) # try with first instrument
+  X1HAT <- fitted(fsOLS) # 
+  dat2sls <- lm(Y ~ X1HAT+ X2, data = dat)
 ```
-
-Use the estimatr package
-
+  
+  Use the estimatr package
+  
 ```{r}
-iv <- estimatr::iv_robust(Y ~ X1 + X2 | Z1 + X2, data = dat,  diagnostics = TRUE)
+  iv <- estimatr::iv_robust(Y ~ X1 + X2 | Z1 + X2, data = dat,  diagnostics = TRUE)
 ```
-
-
+  
+  
 ```{r}
-iv2 <- estimatr::iv_robust(Y ~ X1 + X2 | Z1 + Z2 + X2, data = dat, diagnostics = TRUE)
+  iv2 <- estimatr::iv_robust(Y ~ X1 + X2 | Z1 + Z2 + X2, data = dat, diagnostics = TRUE)
 ```
-
-
+  
+  
 ```{r}
-modelsummary::modelsummary(list("OLS" = datOLS, "2SLS" = dat2sls, "IV1" = iv,"IV2" = iv2))
+  modelsummary::modelsummary(list("OLS" = datOLS, "2SLS" = dat2sls, "IV1" = iv,"IV2" = iv2))
 ```
-
-
-Diagnostics 
-
-1. F-statistic for all the instruments in the first stage
-
-That is a common way of looking for weak instruments. 
-
+  
+  
+  Diagnostics 
+  
+  1. F-statistic for all the instruments in the first stage
+  
+  That is a common way of looking for weak instruments. 
+  
 ```{r}
-iv2diag <- iv2$diagnostic_first_stage_fstatistic
-iv2diag
+  iv2diag <- iv2$diagnostic_first_stage_fstatistic
+  iv2diag
 ```
-
-We observe a very low p-value and a F-statistic of around `r iv2diag[[1]]`. We can reject the Null Hypothesis of joint weak instruments. 
-
+  
+  We observe a very low p-value and a F-statistic of around `r iv2diag[[1]]`. We can reject the Null Hypothesis of joint weak instruments. 
+  
 2. Overidentification test for multiple instruments 
-
-If we have multiple instruments and we assume that **at least one of them** is correct we can check the other one against. So if the two different instruments give two very different results either one of them might be 
-
-A. Endogenous and by that should not be an instrument 
-B. Or potentially they are picking two different local instruments 
-
-Note that we are looking for differences in the second-stage coefficients. It is okay if the effects in the first stage are different. 
-
+  
+  If we have multiple instruments and we assume that **at least one of them** is correct we can check the other one against. So if the two different instruments give two very different results either one of them might be 
+  
+  A. Endogenous and by that should not be an instrument 
+  B. Or potentially they are picking two different local instruments 
+  
+  Note that we are looking for differences in the second-stage coefficients. It is okay if the effects in the first stage are different. 
+  
 ```{r}
-iv2over<- iv2$diagnostic_overid_test
-iv2over
+  iv2over<- iv2$diagnostic_overid_test
+  iv2over
 ```
+  
 We can't reject that that the two different effects are the same no matter which instruments we use. That tells us that if least one of our instruments is valid, we can also assume that the second one is valid. If we would fail that hypothesis test we have to assume that at least one of our instrument is endogenous, without knowing which one. 
 
 
@@ -363,7 +363,6 @@ GMM improves on 2SLS if homoskedasticity assumption is not met.
 ```{r, message=FALSE}
 reg_gmm <- gmm(log(wage)~educ+exper+I(exper^2), ~exper+I(exper^2)+motheduc+fatheduc, data=mroz1)
 summary(reg_gmm)
-
 ```
 
 ```{r, message=FALSE}
@@ -378,18 +377,11 @@ stargazer(wage.ols, wage.2sls, wage.give,reg_gmm, type="text", title="Regression
 ```{r, message=FALSE}
 gmm_2sls <- tsls(log(wage)~educ+exper+I(exper^2), ~exper+I(exper^2)+motheduc+fatheduc, data=mroz1) # Note the tsls command of the gmm package 
 summary(gmm_2sls)
-
 ```
 
 
-Use the package **huxtable** to produce a nice regression table 
-
 ```{r}
-# install.packages("huxtable") #  install package if necessary
-library(huxtable)
-regressiontable <-huxreg(wage.ols, wage.2sls, wage.give,reg_gmm, gmm_2sls)
-caption(regressiontable) <- "Regression output table"
-regressiontable
+modelsummary::modelsummary(list("OLS" = wage.ols, "2sls" = wage.2sls, "IV" = wage.give, "GMM"= reg_gmm, "GMM 2SLS"= gmm_2sls))
 ```
 
 ## Panel IV
@@ -451,34 +443,32 @@ summary(seatbeltivfe, stage = 1)
 modelsummary(list('OLS' = seatbeltOLS, 'FE1' = seatbeltFE1, 'FE2' = seatbeltFE2, 'IV' = seatbeltivfe), stars = TRUE)
 ```
 
+The results confirm that the endogeneity problem is important. The estimate for *usage* in the OLS models shows a positive and signficant coefficient. It becomes negative for the fixed effects model that controls for time and county fixed effects. This indicates that *usage* is strongly correlated with the **individual** county effects. The fixed effects model that instruments usage with a dummy equal to 1 for the periods in which the state had a secondary-enforcement mandatory seat belt law, or a primary-enforcement law that preceded by a secondary-enforcement law (no seat belt law is the base category) (ds),   a dummy variable equal to 1 for the periods in which the state had a primary-enforcement mandatory seat belt law that was not preceded by a secondary-enforcement law (no seat belt is the base category) (dp) + a dummy variable equal to 1 for the periods in which the state had a primary-enforcement mandatory seat belt law that was preceded by a secondary enforcement law (no seat belt law is the base category (dsp), shows an increase in the negative and statistically significant coefficient, indicating that the idiosyncratic error is also correlated with usage. 
 
-
-
-Alternative you can use the plm package. 
-
-```{r}
-data("SeatBelt", package = "pder")
-SeatBelt$occfat <- with(SeatBelt, log(farsocc / (vmtrural + vmturban)))
-fe1 <- plm::plm(occfat ~ log(usage) + log(percapin) + log(unemp) + log(meanage) + 
-           log(precentb) + log(precenth)+ log(densrur) + 
-           log(densurb) + log(viopcap) + log(proppcap) +
-           log(vmtrural) + log(vmturban) + log(fueltax) +
-           lim65 + lim70p + mlda21 + bac08, SeatBelt, 
-           effect = "time")
-fe2 <- update(ols, effect = "twoways")
-ivfe <- update(fe2, . ~ . |  . - log(usage) + ds + dp +dsp)
-```
+In order to test the behaviour compensation theory, the authors estimate the same models, this time using the number of non-occupants killed (*noccfat*) as response. 
 
 ```{r}
-rbind(ols = coef(summary(ols))[1,],
-      fe2 = coef(summary(fe2))[1, ],
-      w2sls = coef(summary(ivfe))[1, ])
+SeatBelt1$noccfat <- with(SeatBelt1, log(farsnocc)/ vmtrural + vmturban)
 ```
+
+
 ```{r}
-SeatBelt$noccfat <- with(SeatBelt, log(farsnocc / (vmtrural + vmturban)))
-nivfe <- update(ivfe, noccfat ~ . | .)
-coef(summary(nivfe))[1, ]
+seatbeltivfe <-
+  feols(
+    noccfat ~ log(percapin) + log(unemp) + log(meanage) + log(precentb) + log(precenth) + log(densrur) + log(densurb) + log(viopcap) + log(proppcap) + log(vmtrural) +  log(vmturban) + log(fueltax) + lim65 + lim70p + mlda21 + bac08 | 
+      year + state | # FE
+      log(usage) ~  ds + dp + dsp , # IV reg
+    data = SeatBelt1
+  )
 ```
+
+
+```{r}
+modelsummary(list('IV' = seatbeltivfe), stars = TRUE)
+```
+
+
+The results indicate that seat belt use has no influence on out-of-vehicle mortality, which is in contradiction of the behaviour compensation theory. 
 
 
 
