@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.11.25)  21 MAR 2021 21:31
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.11.25)  23 MAR 2021 14:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -646,7 +646,7 @@ LaTeX Info: Redefining \cite on input line 694.
 LaTeX Warning: Label `' multiply defined.
 
 
-LaTeX Warning: Label `tab:unnamed-chunk-186' multiply defined.
+LaTeX Warning: Label `tab:unnamed-chunk-194' multiply defined.
 
 )
 \openout1 = `MEM5220_R.aux'.
@@ -1165,29 +1165,56 @@ t line 5410.
 Chapter 2.
 [73
 
-] [74] [75] [76]
-Underfull \vbox (badness 7649) detected at line 6390
- []
-
-[77] [78] [79] [80] [81] [82] [83]
-<MEM5220_R_files/figure-latex/unnamed-chunk-207-1.png, id=792, 827.09pt x 468.7
-5125pt>
-File: MEM5220_R_files/figure-latex/unnamed-chunk-207-1.png Graphic file (type p
-ng)
-<use MEM5220_R_files/figure-latex/unnamed-chunk-207-1.png>
-Package pdftex.def Info: MEM5220_R_files/figure-latex/unnamed-chunk-207-1.png  
-used on input line 7001.
-(pdftex.def)             Requested size: 379.41852pt x 215.03452pt.
-
-Underfull \vbox (badness 3514) detected at line 7040
- []
-
-[84 <./MEM5220_R_files/figure-latex/unnamed-chunk-207-1.png>] [85] [86] (./MEM5
-220_R.bbl [87] [88] [89])
+]
+<MEM5220_R_files/figure-latex//hist_3cb03100639c.pdf, id=718, 48.18pt x 12.045p
+t>
+File: MEM5220_R_files/figure-latex//hist_3cb03100639c.pdf Graphic file (type pd
+f)
+<use MEM5220_R_files/figure-latex//hist_3cb03100639c.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3cb03100639c.pdf  u
+sed on input line 5869.
+(pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
+<MEM5220_R_files/figure-latex//hist_3cb042c92d86.pdf, id=719, 48.18pt x 12.045p
+t>
+File: MEM5220_R_files/figure-latex//hist_3cb042c92d86.pdf Graphic file (type pd
+f)
+<use MEM5220_R_files/figure-latex//hist_3cb042c92d86.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3cb042c92d86.pdf  u
+sed on input line 5870.
+(pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
+<MEM5220_R_files/figure-latex//hist_3cb06a8123ef.pdf, id=720, 48.18pt x 12.045p
+t>
+File: MEM5220_R_files/figure-latex//hist_3cb06a8123ef.pdf Graphic file (type pd
+f)
+<use MEM5220_R_files/figure-latex//hist_3cb06a8123ef.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3cb06a8123ef.pdf  u
+sed on input line 5871.
+(pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
+<MEM5220_R_files/figure-latex//hist_3cb0d835f70.pdf, id=721, 48.18pt x 12.045pt
+>
+File: MEM5220_R_files/figure-latex//hist_3cb0d835f70.pdf Graphic file (type pdf
+)
+<use MEM5220_R_files/figure-latex//hist_3cb0d835f70.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3cb0d835f70.pdf  us
+ed on input line 5872.
+(pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
+<MEM5220_R_files/figure-latex//hist_3cb045b3423a.pdf, id=722, 48.18pt x 12.045p
+t>
+File: MEM5220_R_files/figure-latex//hist_3cb045b3423a.pdf Graphic file (type pd
+f)
+<use MEM5220_R_files/figure-latex//hist_3cb045b3423a.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3cb045b3423a.pdf  u
+sed on input line 5873.
+(pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
+[74 <./MEM5220_R_files/figure-latex//hist_3cb03100639c.pdf> <./MEM5220_R_files/
+figure-latex//hist_3cb042c92d86.pdf> <./MEM5220_R_files/figure-latex//hist_3cb0
+6a8123ef.pdf> <./MEM5220_R_files/figure-latex//hist_3cb0d835f70.pdf> <./MEM5220
+_R_files/figure-latex//hist_3cb045b3423a.pdf>] [75] [76] [77] [78] [79] [80] [8
+1] [82] [83] [84] [85] [86] (./MEM5220_R.bbl [87] [88] [89] [90])
 
 Package natbib Warning: There were undefined citations.
 
-[90
+[91
 
 ] (./MEM5220_R.aux)
 
@@ -1195,10 +1222,10 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 21192 strings out of 479485
- 361531 string characters out of 5871977
- 740755 words of memory out of 5000000
- 37252 multiletter control sequences out of 15000+600000
+ 21220 strings out of 479485
+ 362825 string characters out of 5871977
+ 737678 words of memory out of 5000000
+ 37271 multiletter control sequences out of 15000+600000
  658337 words of font info for 178 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  79i,13n,85p,1241b,866s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1230,10 +1257,10 @@ texmf-dist/fonts/type1/public/lm/lmtko10.pfb></usr/local/texlive/2020/texmf-dis
 t/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2020/texmf-dist/fonts/ty
 pe1/public/lm/lmtt8.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/
 lm/lmtti10.pfb>
-Output written on MEM5220_R.pdf (91 pages, 2343539 bytes).
+Output written on MEM5220_R.pdf (92 pages, 2217836 bytes).
 PDF statistics:
- 1076 PDF objects out of 1200 (max. 8388607)
- 891 compressed objects within 9 object streams
- 353 named destinations out of 1000 (max. 500000)
- 22891 words of extra memory for PDF output out of 24883 (max. 10000000)
+ 1103 PDF objects out of 1200 (max. 8388607)
+ 908 compressed objects within 10 object streams
+ 357 named destinations out of 1000 (max. 500000)
+ 22911 words of extra memory for PDF output out of 24883 (max. 10000000)
 
