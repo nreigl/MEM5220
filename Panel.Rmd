@@ -21,10 +21,13 @@ PACKAGES<-c(
   "wooldridge",  # Wooldrige Datasets
   "car", 
   "plm", # Panel data models
+  "pder", # Panel data datasets
+  "fixest", # Panel data models
   "lmtest", # Testing linear regression models
   "lfe", # extended Panel data models
   "lme4", # Linear mixed-effects models
   "pmdplyr", # Panel maneuvers in dplyr
+  "collapse", # Advanced and Fast Data Transformation in R suitable for panel data structure
   "magrittr") #  pipes
 inst<-match(PACKAGES, .packages(all=TRUE))
 need<-which(is.na(inst))
@@ -106,79 +109,20 @@ beta5+delta5
 
 
 
-### Difference-in-Differences
-
-Difference-in-Differences (Diff-in-Diff, or DiD) is an important application of pooled cross-section for identifying causal effects. In the broadest sense, DiD estimators estimate the effect of a policy intervention by comparing the change over time of an outcome of interest between an affected and and unaffected group of observations. In a regression framework, we regress the outcome of interest on a dummy variable for the affected ("treatment") group, a dummy indicating observations after the treatment and an interaction term between both. The coefficient of this interaction term can then be a good estimator of the effect of interest, controlling for initial differences between groups and contemporaneous changes over time. 
-
-
-Effect of a Garbage Incinerator's Location on Housing Prices
-
-We are interested in whether and how much the construction of a new garbage incinerator affected the value of nearby houses. 
-
-```{r}
-
-data("kielmc", package="wooldridge")
-attach(kielmc)
-head(kielmc)
-```
-
-Separate regressions for 1978 and 1981
-
-```{r}
-kielmc1978 <- lm(rprice ~ nearinc, data = kielmc, subset = (year == 1978))
-coef(kielmc1978)
-```
-
-
-```{r}
-kielmc1981 <- lm(rprice ~ nearinc, data = kielmc, subset = (year == 1981))
-coef(kielmc1981)
-```
-
-Joint regression including interaction terms
-
-```{r}
-coeftest(lm(rprice~nearinc*y81, data = kielmc))
-```
-
-One-tailed t-test
-
-
-```{r}
-kielmcDiD <- lm(rprice~nearinc*y81, data = kielmc)
-sukielmcDid <- summary(kielmcDiD)
-pt(coef(sukielmcDid)[,3], kielmcDiD$df, lower = T) #  for H1: beta <0 
-```
-
-A logarithmic specification is more plausible since it implies a constant percentage effect on the house values. We can also add additional covariates to control for incidental changes in the composition of the houses traded.
-
-
-```{r}
-kielmcDiD1 <- lm(log(rprice)~nearinc*y81, data = kielmc)
-kielmcDiD2 <- lm(log(rprice)~nearinc*y81 + age + I(age^2) + log(intst) + log(land) + log(area) +rooms + baths, data = kielmc)
-```
-
-
-
-```{r}
-huxreg(kielmcDiD1, kielmcDiD2)
-```
-
-
 ## Organizing Panel Data
 
 For the calculations used by panel data methods, we have to make sure that the data is systemically organized. Usually panel data comes in a _long_ structure where each row corresponds to one combination of $i$ and $t$. We have to introduce an index variable to define which observations belong together. In addition to the index variable for the cross-sectional unit, an index variable for the time dimension $t$ can also be specified. 
 
 
 
-The **plm** and the **felm** package are the widely used panel data packages in R. For certain panel data model classes (multilevel and hierarchical models) the **lme4** package is most powerful^[The package `lme4` is widely used for political science panel data models but also for computational biologists applications. Another package doing panel data "from the political scientist's viewpoint" is `panelr`. The `brms` package allows fitting certain panel data models using a Bayesian approach.].  One of the many packages that help you analyze panel data using `dplyr` style of manipulating the data is the package **pmdplyr**. 
+The **plm** and the **felm** package are the widely used panel data packages in R. For certain panel data model classes (multilevel and hierarchical models) the **lme4** package is most powerful. The currently fasted panel data routines in R are implemented **fixest** ^[The package `lme4` is widely used for political science panel data models but also for computational biologists applications. Another good package doing panel data analysis is `panelr`. The `brms` package allows fitting certain panel data models using a Bayesian approach.].  One of the many packages that help you analyze panel data using `dplyr` style of manipulating the data is the package **pmdplyr**. 
 
 Certain packages use a specific panel data type class (pdata.frame) such as the plm package whereas others work with the standard data.frame type, as long as unique panel ids (indexes) are provided.  
+
 
 ### Organizing Panel Data with the plm package
 
 For unbalanced panels I can specify a panel data frame with `pdata.frame`
-
 
 ```{r, eval= F}
 mypdf <- pdata.frame(mydf, index = c("ivar", "tvar"))
@@ -190,8 +134,6 @@ and for balanced panels I can simply
 ```{r, eval= F}
 mypdf <- pdata.frame(mydf, index = n)
 ```
-
-
 
 
 ```{r}
@@ -339,6 +281,9 @@ pdim(wagepan.p)
 summary( plm(lwage~married+union+factor(year)*educ, 
                                         data=wagepan.p, model="within"))
 ```
+
+
+
 
 
 
@@ -513,6 +458,8 @@ pwartest(g.reg.fe2w)
 Under the null of no serial correlation in the errors, the residuals of a FE model must be negatively serially correlated, with $cor(\hat{u}_{it}, \hat{u}_{is})=-1/(T-1)$ for each $t,s$. Therefore, you might want to adjust (clustered) heterogeneity in the residuals. 
 
 
+
+
 ## General Feasible Generalized Least Squares (FGLS) Models
 
 The function `pggls` estimates general FGLS models with either fixed or "random" effects^[The "random" effect is better termed "general FGSLS" models, as in fact it does not have a proper random effects structure.].
@@ -593,7 +540,7 @@ Under the RE assumptions, OLS is inefficient but consistent. Instead of using RE
 
 Especially in large cross-sectional data, formulas exist for the variance-covariance matrix for panel data that are robust with respect to heteroskedasticity and _arbitrary_ correlations of the error term within a cross-sectional unit (or "cluster"). 
 
-Different versions of clustered variance-covariance matrix can be computed with the command `vcovHC` from the `plm` package^[Note that `vcovHC` from the `plm` package is different from the `vcovHC` function of the `sandwich` package.].
+Different versions of clustered variance-covariance matrix can be computed with the command `vcovHC` from the `plm` package^[Note that `vcovHC` from the `plm` package is different from the `vcovHC` function of the `sandwich` package.]. The `fixest` package also handles multiway clustered errors. 
 
 The next chunk estimates a familiar FD regression but also reports the regression table with clustered standard errors and respective $t$ statistics in addition to the non-adjusted standard errors. 
 
@@ -627,103 +574,6 @@ coeftest(reg, vcovHC)
 coeftest(reg, vcovHC(reg, type="sss"))
 ```
 
-## Example using lfe and plm approach 
-
-We will be using the _fatalities_ dataset from the `AER` package to estimate the relationship between drunk driving laws and traffic deaths. 
-
-```{r}
-data("Fatalities")
-```
-
-```{r}
-fatdata <- Fatalities %>%
-  mutate(fatal_rate = fatal / pop * 10000) 
-```
-
-Year-fixed effects by state: 
-
-```{r}
-ggplot(fatdata, aes(x = year, y = fatal_rate)) + 
-  geom_boxplot()+
-  stat_summary(fun.y=mean, geom="line", aes(group=1))  + 
-  stat_summary(fun.y=mean, geom="point") +
-  facet_wrap(~state)
-```
-
-
-```{r}
-fatdata88 <- Fatalities %>%
-  mutate(fatal_rate = fatal / pop * 10000) %>% 
-  dplyr::filter(year == "1988")
-```
-
-```{r}
-plot(x = fatdata88$beertax, 
-     y = fatdata88$fatal_rate, 
-     xlab = "Beer tax (in 1988 dollars)",
-     ylab = "Fatality rate (fatalities per 10000)",
-     main = "Traffic Fatality Rates and Beer Taxes in 1988",
-     pch = 20, 
-     col = "steelblue")
-```
-
-
-
-
-```{r}
-# OLS 
-result_ols <- felm( fatal_rate ~ beertax  | 0 | 0 | 0, data = fatdata )
-summary(result_ols, robust = TRUE)
-```
-
-```{r}
-# State FE
-result_stateFE <- felm( fatal_rate ~ beertax  | state | 0 | state, data = fatdata )
-summary(result_stateFE, robust = TRUE)
-```
-
-This corresponds to the plm model formulas. Note the coefficients for $\beta_1$ are identical but the plm standard errors have not been "made" robust. 
-
-```{r}
-result_stateFE_plm <- plm(fatal_rate ~ beertax, index =c("state"), model = "within", data = fatdata)
-summary(result_stateFE_plm)
-```
-
-
-
-```{r}
-# State and Year FE
-result_bothFE <- felm( fatal_rate ~ beertax  | state + year | 0 | state, data = fatdata )
-summary(result_bothFE, robust = TRUE)
-```
-
-```{r}
-result_stateFE_plm2 <- plm(fatal_rate ~ beertax, index =c("year", "state"), model = "within", effect = "twoways", data = fatdata) #  Note the twoways flag!
-summary(result_stateFE_plm2)
-```
-
-```{r}
-stargazer::stargazer(result_ols, result_stateFE, result_bothFE, type = "text")
-```
-
-What if we do not use the cluster-robust standard error?
-  
-```{r}
-# State FE w.o. CRS
-result_wo_CRS <- felm( fatal_rate ~ beertax  | state | 0 | 0, data = fatdata )
-
-# State FE w. CRS
-result_w_CRS <- felm( fatal_rate ~ beertax  | state | 0 | state, data = fatdata )
-```
-
-
-```{r}
-# Report heteroskedasticity robust standard error and cluster-robust standard errors
-stargazer::stargazer(result_wo_CRS, result_w_CRS,  type = "text", se = list(summary(result_wo_CRS)$rse, NULL))
-```
-
-
-If we just want to control for fix effect and only care about coefficients of interests, either felm and plm is a good choice. But if we want to know the effect of some specific groups, lm is preferred.
 
 ### Panel Data with Instrumental Variables
 
@@ -772,6 +622,9 @@ result_4 <- felm( log(packs) ~ log(rincome)  | state | (log(rprice) ~  salestax 
 ```{r}
 stargazer::stargazer(result_1, result_2, result_3, result_4, type = "text")
 ```
+
+## Unbalanced panels 
+
 
 
 
