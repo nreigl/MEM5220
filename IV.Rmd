@@ -91,7 +91,7 @@ As it is not trivial to find one good instrument not to speak of two instruments
   # fabricatr package to simulate some data
   set.seed(123)
   dat <- fabricate(
-    N = 100,
+    N = 10000,
     Y =  rpois(N, lambda = 4), # Poisson distribution
     Z1 = rbinom(N, 1, prob = 0.4),
     Z2 = rbinom(N, 1, prob = 0.4),
@@ -106,7 +106,8 @@ datasummary_skim(dat)
 ```
 
 ```{r}
-  datOLS <- lm(Y ~ X1 + X2, data = dat)
+  
+datOLS <- lm(Y ~ X1 + X2, data = dat)
   # start with 2STL
   fsOLS <- lm(X1 ~ Z1 + X2, data = dat) # try with first instrument
   X1HAT <- fitted(fsOLS) #
