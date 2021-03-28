@@ -1,0 +1,86 @@
+---
+  output:
+  pdf_document: default
+html_document: default
+---
+  # Panel Data Models {#panel}
+  
+  To load the dataset and necessary functions: 
+  
+```{r, echo=TRUE, message=FALSE, results='hide'}
+# This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
+# devtools::install_github("ccolonescu/PoEdata")
+PACKAGES<-c(
+  "tidyverse",  # for data manipulation and ggplots
+  "knitr", # knit functions
+  # "kableExtra", # extended knit functions for objects exported from other packages
+  "huxtable", #  Regression tables, broom compatible
+  "stargazer", # Regression tables
+  "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
+  "wooldridge",  # Wooldrige Datasets
+  "car", 
+  "magrittr") #  pipes
+inst<-match(PACKAGES, .packages(all=TRUE))
+need<-which(is.na(inst))
+if (length(need)>0) install.packages(PACKAGES[need])
+lapply(PACKAGES, require, character.only=T)
+```
+
+
+## Difference-in-Differences
+
+Difference-in-Differences (Diff-in-Diff, or DiD) is an important application of pooled cross-section for identifying causal effects. In the broadest sense, DiD estimators estimate the effect of a policy intervention by comparing the change over time of an outcome of interest between an affected and and unaffected group of observations. In a regression framework, we regress the outcome of interest on a dummy variable for the affected ("treatment") group, a dummy indicating observations after the treatment and an interaction term between both. The coefficient of this interaction term can then be a good estimator of the effect of interest, controlling for initial differences between groups and contemporaneous changes over time. 
+
+
+Effect of a Garbage Incinerator's Location on Housing Prices
+
+We are interested in whether and how much the construction of a new garbage incinerator affected the value of nearby houses. 
+
+```{r}
+
+data("kielmc", package="wooldridge")
+attach(kielmc)
+head(kielmc)
+```
+
+Separate regressions for 1978 and 1981
+
+```{r}
+kielmc1978 <- lm(rprice ~ nearinc, data = kielmc, subset = (year == 1978))
+coef(kielmc1978)
+```
+
+
+```{r}
+kielmc1981 <- lm(rprice ~ nearinc, data = kielmc, subset = (year == 1981))
+coef(kielmc1981)
+```
+
+Joint regression including interaction terms
+
+```{r}
+coeftest(lm(rprice~nearinc*y81, data = kielmc))
+```
+
+One-tailed t-test
+
+
+```{r}
+kielmcDiD <- lm(rprice~nearinc*y81, data = kielmc)
+sukielmcDid <- summary(kielmcDiD)
+pt(coef(sukielmcDid)[,3], kielmcDiD$df, lower = T) #  for H1: beta <0 
+```
+
+A logarithmic specification is more plausible since it implies a constant percentage effect on the house values. We can also add additional covariates to control for incidental changes in the composition of the houses traded.
+
+
+```{r}
+kielmcDiD1 <- lm(log(rprice)~nearinc*y81, data = kielmc)
+kielmcDiD2 <- lm(log(rprice)~nearinc*y81 + age + I(age^2) + log(intst) + log(land) + log(area) +rooms + baths, data = kielmc)
+```
+
+
+
+```{r}
+huxreg(kielmcDiD1, kielmcDiD2)
+```
