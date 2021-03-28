@@ -3,9 +3,9 @@ before_chapter_script: "before-chapter.R"
 delete_merged_file: TRUE
 rmd_files: [
   "index.Rmd",
-  
   "LM.Rmd",
-  "IV.Rmd", 
+  "IV.Rmd",
+  "Panel.Rmd",
   "references.Rmd"
 ]
 

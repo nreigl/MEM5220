@@ -2,7 +2,12 @@
 output:
   pdf_document: default
   html_document: default
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: 72
 ---
+
 # Panel Data Models {#panel}
 
 To load the dataset and necessary functions: 
@@ -15,6 +20,7 @@ PACKAGES<-c(
   "knitr", # knit functions
   # "kableExtra", # extended knit functions for objects exported from other packages
   "huxtable", #  Regression tables, broom compatible
+  "modelsummary", 
   "stargazer", # Regression tables
   "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
   "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
@@ -122,18 +128,7 @@ Certain packages use a specific panel data type class (pdata.frame) such as the 
 
 ### Organizing Panel Data with the plm package
 
-For unbalanced panels I can specify a panel data frame with `pdata.frame`
-
-```{r, eval= F}
-mypdf <- pdata.frame(mydf, index = c("ivar", "tvar"))
-```
-
-
-and for balanced panels I can simply
-
-```{r, eval= F}
-mypdf <- pdata.frame(mydf, index = n)
-```
+For unbalanced panels I can specify a panel data frame with `pdata.frame(mydf, index = c("ivar", "tvar"))` and for balanced panels one can simply define the index `pdata.frame(mydf, index = n)`. 
 
 
 ```{r}
@@ -624,6 +619,122 @@ stargazer::stargazer(result_1, result_2, result_3, result_4, type = "text")
 ```
 
 ## Unbalanced panels 
+
+For unbalanced panels, the number of observations for each individual is now individual specific ($T_{n}$). Compared to the balanced panel case, three complications appear: 
+
+1. The covariance matrix of the errors cannot be written anymore as a linear combination of idempotent and mutually orthogonal matrices. 
+2. For models with just one fixed effect, the *within* transformation still consists of removing the individual mean from the variable. On the contrary, for models with multiple fixed effects, the *within* transformation is not obtained by performing the difference with the individual and time means (or means of another FE), as in the balanced panel case, but requires more tedious matrix algebra. 
+3. To estimate the components of the variance, the quadratic forms of the residuals is calculated as in the balanced panel case, but there is no obvious choice of the denominator. 
+The *Tilerseries* dataset contains data on the weekly production of cement floor tiles for 25 small-scale tileries in 1982-1983. The data are observed for 66 weeks in total and aggregated on periods of three weeks. 
+
+```{r}
+data("Tileries", package = "pder")
+head(Tileries, 3)
+pdim(Tileries)
+```
+The number of observations for each firm ranges from 12 to 22.  
+
+We estimate a Cobb-Douglas production function where the production is measured as output and the quantity of inputs is measured as labour and machines. 
+
+```{r}
+Tileries <- pdata.frame(Tileries)
+plm.within <- plm(log(output) ~ log(labor) + log(machine), Tileries)
+y <- log(Tileries$output)
+x1 <- log(Tileries$labor)
+x2 <- log(Tileries$machine)
+lm.within <- lm(I(y - Between(y)) ~ I(x1 - Between(x1)) + I(x2 - Between(x2)) - 1)
+lm.lsdv <- lm(log(output) ~ log(labor) + log(machine) + factor(id), Tileries)
+```
+
+First, use a a linear model with OLS on the *within* transformation. 
+
+
+Estimate a one-way random effects model
+
+```{r}
+tile.r <- plm(log(output) ~ log(labor) + log(machine), Tileries, model = "random")
+```
+
+```{r}
+summary(tile.r)
+```
+
+
+The transformation parameter $\tau$ in the RE model is individual specific. More precisely, it depends on the number of available observations for every individual. This parameter ranges from around 0.489 to 0.598. 
+
+
+```{r}
+modelsummary(list("OLS within" = lm.within,"OLS Dummy" = lm.lsdv, "RE" = tile.r))
+```
+
+Estimate a two-way fixed effects model 
+
+```{r}
+plm.within <- plm(log(output) ~ log(labor) + log(machine),
+                  Tileries, effect = "twoways")
+```
+
+We can show that for the unbalanced panel, we can not manually obtain the same coefficients for a linear models estimated with OLS, where the individual and time means have been removed. 
+
+```{r}
+lm.lsdv <- lm(log(output) ~ log(labor) + log(machine) +
+                  factor(id) + factor(week), Tileries)
+y <- log(Tileries$output)
+x1 <- log(Tileries$labor)
+x2 <- log(Tileries$machine)
+y <- y - Between(y, "individual") - Between(y, "time") + mean(y)
+x1 <- x1 - Between(x1, "individual") - Between(x1, "time") + mean(x1)
+x2 <- x2 - Between(x2, "individual") - Between(x2, "time") + mean(x2)
+lm.within <- lm(y ~ x1 + x2 - 1)
+```
+
+
+```{r}
+modelsummary(list("OLS within" = lm.within,"OLS Dummy" = lm.lsdv, "Toway FE" = plm.within))
+```
+
+Note that we obtain the same coefficients for the LSDV and FE model but not for the individual and time mean corrected OLS model. 
+
+Finally we estimate a two-way RE model with different estimators. 
+
+```{r}
+wh <- plm(log(output) ~ log(labor) + log(machine), Tileries,
+          model = "random", random.method = "walhus",
+          effect = "twoways")
+am <- update(wh, random.method = "amemiya")
+sa <- update(wh, random.method = "swar")
+
+```
+
+```{r}
+ercomp(sa)
+```
+
+The shares of the individual in the total error variance are between 0.4934 and 0.6019 and for the and the time effects between 0.1961 and 0.370 when the Swamy-Arora estimator is used. 
+
+
+```{r}
+re.models <- list(walhus = wh, amemiya = am, swar = sa)
+```
+
+Coefficients across different RE using the three methods of estimation.
+
+```{r}
+sapply(re.models, coef)
+```
+
+The differences in the estimated coefficients are as expected not vary large. 
+
+Extract the total error variance from the three methods of estimation.
+
+```{r}
+sapply(re.models, function(x) sqrt(ercomp(x)$sigma2))
+```
+
+
+## Maximum Liklihood Estimator 
+
+
 
 
 
