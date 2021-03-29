@@ -18,6 +18,7 @@ To load the dataset and necessary functions:
 PACKAGES<-c(
   "tidyverse",  # for data manipulation and ggplots
   "knitr", # knit functions
+  "stringr", 
   # "kableExtra", # extended knit functions for objects exported from other packages
   "huxtable", #  Regression tables, broom compatible
   "modelsummary", 
@@ -743,33 +744,195 @@ sapply(re.models, function(x) sqrt(ercomp(x)$sigma2))
 
 In the context of panel data, we usually must deal with unobserved heterogeneity by applying the within (demeaning) transformation, as in one-way fixed effects models, or by taking first differences if the second dimension of the panel is a proper time series.
 
-The ability of first differencing to remove unobserved heterogeneity also underlies the family of estimators that have been developed for dynamic panel data (DPD) models. These models contain one or more lagged dependent variables, allowing for the modeling of a partial adjustment mechanism.
+The ability of first differencing to remove unobserved heterogeneity also underlies the family of estimators that have been developed for dynamic panel data (DPD) models. These models contain one or more lagged dependent variables, allowing for the modelling of a partial adjustment mechanism.
+
+The econometric community distinguishes roughly between two types of dynamic panel data models: 
+
+ - **Micro-panels** where $N>>T$
+ - **Macro-panels** where $N \leq T$
+
+### Micro panel 
 
 Dynamic panel data models are estimated using the GMM estimator suggested by  @Arellano1991, utilizing lagged endogenous regressors after a first-differences transformation. 
 
-We illustrate the use of the dynamic panel data method by trying to estimate determinants of employment in the UK based on the original example of @Arellano1991
-
- - Unbalanced panel: 7–9 annual observations (1976–1984) for 140 UK firms
- - 4 variables: employment (emp), average annual wage per employee (wage), book value of gross fixed assets (capital), index of value-added output at constant factor cost (output)
+Through the whole chapter we will use a dataset capturing the relationship between Democracy and Income from a study by Acemoglu, Johnson, Robinson, and Yared (2008). The data is spread across two different datasets, containing first observations for 211 countries for a period of 1950 to 2000 and data from 1850 to 2000 for 25 countries. 
 
 ```{r}
-data("EmplUK", package = "plm")
+data("DemocracyIncome", package = "pder")
+data("DemocracyIncome25", package = "pder")
+```
+
+The provided dataset shows the 5 year average for a given observation. I extract the first 4 characters from the year column to obtain the year starting point for a given observation.
+
+```{r}
+dat1 <- DemocracyIncome %>%
+  mutate(year = stringr::str_extract(year, "^.{4}")
+)
+  
+```
+
+Plot some of the data
+
+```{r}
+set.seed(1)
+di2000 <- subset(dat1, year == 2000,
+                 select = c("democracy", "income", "country"))
+di2000 <- na.omit(di2000)
+di2000$country <- as.character(di2000$country)
+di2000$country[- c(2,5, 23, 16, 17, 22, 71,  125, 37, 43, 44, 79, 98, 105, 50, 120,  81, 129, 57, 58,99)] <- NA
 ```
 
 
-Arellano-Bond estimator is provided by `pgmm()`. Dynamic formula derived from static formula via list of lags
-
-
 ```{r}
-empl_ab<- pgmm(log(emp) ~ lag(log(emp), 1:2) + lag(log(wage), 0:1)
-           + log(capital) + lag(log(output), 0:1) | lag(log(emp), 2:99),
-            data = EmplUK, effect = "twoways", model = "twosteps")
-summary(empl_ab, robust = FALSE)
+ggplot(di2000, aes(income, democracy, label = country)) + 
+    geom_point(size = 0.4) + 
+    geom_text(aes(y= democracy + sample(0.03 * c(-1, 1), 
+                                        nrow(di2000), replace = TRUE)),
+                  size = 2) +
+    theme(legend.text = element_text(size = 6), 
+          legend.title= element_text(size = 8),
+          axis.title = element_text(size = 8),
+          axis.text = element_text(size = 6))
+
 ```
 
- - $p=2$ lagged endogenous terms
- - log(wage) and log(output) occur up to lag 1
- - log(capital) contemporaneous term only 
- - time- and firm-specific effects, instruments are lagged terms of the dependent variable (all lags beyond lag 1 are to be used)
+```{r}
+pdim(DemocracyIncome)
+head(DemocracyIncome, 4)
+```
+
+Estimate an OLS model with *within* time fixed effects. 
+
+```{r}
+mco <- plm(democracy ~ lag(democracy) + lag(income), 
+           DemocracyIncome, index = c("country", "year"), 
+           model = "within", effect = "time",
+           subset = sample == 1)
+```
+
+```{r}
+coef(summary(mco))
+```
+
+The coefficients for democracy show a high persistence. Lagged income also shows a high significantly positive influence on the democracy index.  However, we know the OLS estimator suffers from a positive bias. 
+
+Next estimate a two-way fixed effects model. 
+
+```{r}
+within <- update(mco, effect = "twoways")
+coef(summary(within))
+```
+
+With respect to the OLS model, the autoregressive coefficient is smaller. After introducing country fixed effects, the coefficient of income is close to 0 and not significant anymore. 
+
+Now we estimate the model with the Anderson and Hsiao (1982) estimator. For that one must specify that both the regressand and regressors are differenced and that the lagged endogenous variable in differences is instrumented wit the endogenous in levels lagged two periods. Acemoglu et al. (2008) use the second lag of per capita income as a second instrument. 
+
+```{r}
+ahsiao <- plm(diff(democracy) ~ lag(diff(democracy)) + 
+              lag(diff(income)) + year - 1  | 
+              lag(democracy, 2) + lag(income, 2) + year - 1, 
+              DemocracyIncome, index = c("country", "year"),
+              model = "pooling", subset = sample == 1)
+coef(summary(ahsiao))[1:2, ]
+```
+
+Anderson and Hsiao (1982)'s model being consistent, one expects the estimated autoregressive coefficient to be comprised between that of the *within* model (biased downwards) and that of the OLS model (biased upwards). 
+
+### GMM Estimation of the Differenced Model 
+
+The IV approach presented in the previous section is inefficient for two reasons: 
+
+1. It does not account for the correlation induced into the errors by first-differencing
+2. There are further valid instruments available
+
+The **GMM** estimation of a panel data model is performed through the `plm::pgmm()` command. 
+```{r}
+diff1 <- pgmm(democracy ~ lag(democracy) + lag(income) | # regulars regressors
+              lag(democracy, 2:99)| #  GMM instruments
+              lag(income, 2), # "normal" instruments
+              DemocracyIncome, index=c("country", "year"), 
+              model="onestep", effect="twoways",  # Estimation procedure
+              subset = sample == 1)
+coef(summary(diff1))
+```
+
+
+The two-step model is obtained by setting the `model` argument to `twosteps`
+```{r}
+diff2 <- update(diff1, model = "twosteps")
+coef(summary(diff2))
+```
+
+All available lags have been used and the number of instruments is sizeable. The results are near those of the Anderson and Hsiao (1982) model.  
+
+
+### GMM Estimator in Differences and Levels 
+
+The main drawback of the difference **GMM** estimator is that lagged variables of the dependent variable are often very weakly correlated with its lagged first difference. To solve this weak instruments problem, one can add moment conditions on the model in levels. 
+
+System GMM
+
+```{r}
+sys2 <- pgmm(democracy ~ lag(democracy) + lag(income) |  # regressors 
+             lag(democracy, 2:99)|  # GMM instruments
+              lag(income, 2), # "normal" instruments
+             DemocracyIncome, index = c("country", "year"), 
+             model = "twosteps", effect = "twoways",
+             transformation = "ld") # System GMM level and differences
+coef(summary(sys2))
+```
+
+The autoregressive coefficient obtained with the difference and the system models are close. The income coefficient is now significantly  positive and much larger than previously. 
+
+### Robust Estimation of the Coefficients' Covariance
+
+The two-steps estimator, albeit being robust to the presence of heteroskedasticity and/ or autocorrelation, depends still on the residuals of the one-step model. The estimator is therefore still biased and requires a robust estimator adjustment for the variance. 
+
+The function `vcov` computes the "classical" inconsistent version of the variance.
+
+```{r}
+sqrt(diag(vcov(diff2)))[1:2]
+```
+
+The function `vcovHC` computes the the robust version
+
+```{r}
+sqrt(diag(vcovHC(diff2)))[1:2]
+```
+
+One can see that in this example the classical variance formula seems to be biased downwards. The robust standard errors are clearly superior. 
+
+
+### Overidentifcation test 
+
+Similar to a general IV approach we can test for overidentification using Sargan-Hansen test 
+
+```{r}
+plm::sargan(diff2)
+```
+
+For the difference model the hypothesis of moments's validity is not rejected. 
+
+```{r}
+plm::sargan(sys2)
+```
+
+Also for the system GMM model the hypothesis of moment's validity is not rejected. 
+
+
+### Error Serial Correlation Test 
+
+The GMM is not consistent unless the moment conditions are verified, which, in particular, implies that the innovations are serially correlated. 
+
+```{r}
+plm::mtest(diff2, order = 2)
+```
+
+The hypothesis of no serial correlation is not rejected. 
+
+
+### Macro panel 
+
+Macro panel models are an advanced topic and are therefore not covered in this course. 
 
 
