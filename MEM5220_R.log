@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.11.25)  29 MAR 2021 19:54
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.11.25)  29 MAR 2021 20:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1226,31 +1226,32 @@ Chapter 3.
 [90
 
 ] [91] [92] [93] [94] [95] [96] [97]
-Underfull \vbox (badness 1789) detected at line 8831
+Underfull \vbox (badness 1789) detected at line 8833
  []
 
-[98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108] [109]
+[98] [99] [100] [101] [102] [103] [104] [105] [106] [107] [108]
 
-LaTeX Warning: Float too large for page by 85.46222pt on input line 9805.
+LaTeX Warning: Float too large for page by 85.46222pt on input line 9784.
 
+[109] [110]
 
-LaTeX Warning: Float too large for page by 589.46222pt on input line 9954.
+LaTeX Warning: Float too large for page by 589.46222pt on input line 9933.
 
-[110] [111] [112]
+[111] [112]
 
 Package natbib Warning: Citation `Arellano1991' on page 113 undefined on input 
-line 10042.
+line 10064.
 
 [113]
-<MEM5220_R_files/figure-latex/unnamed-chunk-304-1.png, id=1032, 881.2925pt x 53
+<MEM5220_R_files/figure-latex/unnamed-chunk-307-1.png, id=1032, 881.2925pt x 53
 3.995pt>
-File: MEM5220_R_files/figure-latex/unnamed-chunk-304-1.png Graphic file (type p
+File: MEM5220_R_files/figure-latex/unnamed-chunk-307-1.png Graphic file (type p
 ng)
-<use MEM5220_R_files/figure-latex/unnamed-chunk-304-1.png>
-Package pdftex.def Info: MEM5220_R_files/figure-latex/unnamed-chunk-304-1.png  
-used on input line 10091.
+<use MEM5220_R_files/figure-latex/unnamed-chunk-307-1.png>
+Package pdftex.def Info: MEM5220_R_files/figure-latex/unnamed-chunk-307-1.png  
+used on input line 10113.
 (pdftex.def)             Requested size: 379.41905pt x 229.89856pt.
-[114 <./MEM5220_R_files/figure-latex/unnamed-chunk-304-1.png>] [115] [116] (./M
+[114 <./MEM5220_R_files/figure-latex/unnamed-chunk-307-1.png>] [115] [116] (./M
 EM5220_R.bbl [117])
 
 Package natbib Warning: There were undefined citations.
@@ -1263,11 +1264,11 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 21384 strings out of 479485
- 365978 string characters out of 5871977
+ 21386 strings out of 479485
+ 365998 string characters out of 5871977
  788137 words of memory out of 5000000
  37325 multiletter control sequences out of 15000+600000
- 658550 words of font info for 180 fonts, out of 8000000 for 9000
+ 658633 words of font info for 181 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  79i,13n,85p,1241b,866s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/lo
@@ -1296,7 +1297,7 @@ t/fonts/type1/public/lm/lmtko10.pfb></usr/local/texlive/2020/texmf-dist/fonts/t
 ype1/public/lm/lmtt10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/publi
 c/lm/lmtt8.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtti1
 0.pfb>
-Output written on MEM5220_R.pdf (119 pages, 2321529 bytes).
+Output written on MEM5220_R.pdf (119 pages, 2322290 bytes).
 PDF statistics:
  1373 PDF objects out of 1440 (max. 8388607)
  1147 compressed objects within 12 object streams

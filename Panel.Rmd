@@ -28,6 +28,8 @@ PACKAGES<-c(
   "wooldridge",  # Wooldrige Datasets
   "car", 
   "plm", # Panel data models
+  "pglm", # Panel maximum likelihood estimator
+  "splm", # ML and GM estimation and diagnostic testing of econometric models for spatial panel data
   "pder", # Panel data datasets
   "fixest", # Panel data models
   "lmtest", # Testing linear regression models
@@ -735,9 +737,29 @@ sapply(re.models, function(x) sqrt(ercomp(x)$sigma2))
 
 ## Maximum Liklihood Estimator 
 
+An alternative to OLS estimator is the maximum likelihood estimator. Contrary to the GLS estimator, the parameters are not estimated sequentially but simultaniously. 
+
+The maximum likelihood estimator is available in the **pglm** package. We have to specify the distribution of the errors of the model by setting the *family* argument. 
+
+```{r}
+data("RiceFarms", package = "splm")
+Rice <- pdata.frame(RiceFarms, index = "id")
+```
 
 
+Maximum likelihood
 
+```{r}
+rice.ml <- pglm(log(goutput) ~ log(seed) + log(totlabor) + log(size),
+                data = Rice, family = gaussian)
+```
+
+
+```{r}
+summary(rice.ml)
+```
+
+The two parameters `sd.idios` and `sd.id` are the estimated standard deviations of the idiosyncratic and of the individual parts of the *error*. 
 
 
 ## Dynamic Panel Data Models
