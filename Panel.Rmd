@@ -246,9 +246,13 @@ crime2.p[1:6,c("id","time","year","crmrte","dcrmrte","unem","dunem")]
 # Estimate FD model with lm on differenced data:
 coeftest( lm(dcrmrte~dunem, data=crime2.p))
 
-# Estimate FD model with plm on original data:
+# Estimate FD approach model with plm on original data:
 coeftest( plm(crmrte~unem, data=crime2.p, model="fd") )
+```
 
+```{r}
+# Estimate within approach model with plm on original data:
+coeftest( plm(crmrte~unem, data=crime2.p, model="within"))
 ```
 
 Another example
@@ -453,7 +457,7 @@ pdim(RiceFarms, index = "id")
 
 ```{r}
 fm <- log(goutput) ~ log(seed) + log(totlabor) + log(size)
-rice.re <- plm(fm, Rice, model='random')
+rice.re <- plm(fm, RiceFarms, model='random')
 ```
 
 
@@ -649,54 +653,6 @@ coeftest(reg, vcovHC)
 coeftest(reg, vcovHC(reg, type="sss"))
 ```
 
-
-### Panel Data with Instrumental Variables
-
-Consider a model estimating the demand (measured in number of packs) for cigarettes
-
-$$
-log(Q_{it} = \beta_0 + \beta_1log(P_{it})+\beta_2log(income_{it})+ e_{it})
-$$
-  
-  As an IV for the price we use
-
-- $SalesTax_{it}$: the proportion of taxes on cigarettes arising from the general sales tax. 
-  - Relevant as it is included in the after-tax price
-  - Exogenous(independent) since the sales tax does not influence demand directly, but indirectly through the price.
-- $CigTax_{it}$: CigTaxit
-
-```{r}
-data("CigarettesSW")
-Cigdata <- CigarettesSW %>% 
-  mutate( rincome = (income / population) / cpi) %>% 
-  mutate( rprice  = price / cpi ) %>% 
-  mutate( salestax = (taxs - tax) / cpi ) %>% 
-  mutate( cigtax = tax/cpi ) 
-```
-
-```{r}
-# OLS
-result_1 <- felm( log(packs) ~ log(rprice) + log(rincome)  | 0 | 0 | state, data = Cigdata )
-```
-
-```{r}
-# State FE
-result_2 <- felm( log(packs) ~ log(rprice) + log(rincome)  | state | 0 | state, data = Cigdata )
-```
-
-```{r}
-# IV without FE
-result_3 <- felm( log(packs) ~ log(rincome)  | 0 | (log(rprice) ~  salestax + cigtax) | state, data = Cigdata )
-```
-
-```{r}
-# IV with FE 
-result_4 <- felm( log(packs) ~ log(rincome)  | state | (log(rprice) ~  salestax + cigtax) | state, data = Cigdata )
-```
-
-```{r}
-stargazer::stargazer(result_1, result_2, result_3, result_4, type = "text")
-```
 
 ## Unbalanced panels 
 
