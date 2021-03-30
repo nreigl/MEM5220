@@ -747,7 +747,6 @@ Rice <- pdata.frame(RiceFarms, index = "id")
 ```
 
 
-Maximum likelihood
 
 ```{r}
 rice.ml <- pglm(log(goutput) ~ log(seed) + log(totlabor) + log(size),
