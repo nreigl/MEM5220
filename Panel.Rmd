@@ -48,13 +48,16 @@ lapply(PACKAGES, require, character.only=T)
 
 Pooled cross sections consist of random samples from the same population at different points in time. 
 
+
+**Changes to return to education and teh gender wage gap**
+
 The data set `cps78_85` includes two pooled cross-sections for the year 1978 and 1985. The dummy variable **y85** is equal to one for observations in 1985 and 0 for observations in 1978. 
 
 We estimate a model for
 
 
 $$
-\log(w) = \beta_0 + \delta_{0}y85 + \beta_1 educ + \delta_{1} (y85 \times educ) +  \beta_{2} exper + \beta_3 exper^2 + \beta_{3} \frac{exper^2}{100} + \beta_{4} union + \beta_{5}female + \delta_{2} (y85 \times female) + \epsilon
+\log(w) = \beta_0 + \delta_{0}y85 + \beta_1 educ + \delta_{1} (y85 \times educ) +  \beta_{2} exper +  \beta_{3} \frac{exper^2}{100} + \beta_{4} union + \beta_{5}female + \delta_{2} (y85 \times female) + \epsilon
 $$
 
 
@@ -83,11 +86,16 @@ Return to education
 df_cps_ols <- tidy(cps_ols)
 # Singe male
 delta1 <- df_cps_ols %>%
-  dplyr::filter(term == "y85") %>% 
+  dplyr::filter(term == "y85:educ") %>% 
   dplyr::select(estimate) %>% 
   pull() # pull out the single coefficient value of the dataframe
 ```
 
+The return to education is estimated to have increased by: 
+
+```{r}
+delta1
+```
 
 
 Gender wage gap
@@ -100,7 +108,12 @@ beta5 <- df_cps_ols %>%
   pull() # pull out the single coefficient value of the dataframe
 ```
 
-Change in gender wage gap
+The gender wage gap in absolute value is: 
+```{r}
+beta5
+```
+
+Gender wage gap in 1985
 
 ```{r}
 delta5 <- df_cps_ols %>%
@@ -109,12 +122,15 @@ delta5 <- df_cps_ols %>%
   pull() # pull out the single coefficient value of the dataframe
 ```
 
-Gender wage gap in 1985
+```{r}
+delta5
+```
+
+The gender wage gap decreased in absolute value to:
 
 ```{r}
 beta5+delta5
 ```
-
 
 
 
@@ -370,15 +386,17 @@ fixef_reg.fe2w <- plm::fixef(reg.fe2w)
 head(summary(fixef_reg.fe2w, effect = "time"))
 ```
 
+## Tests on panel data models
 
-#### Hausman test
+
+### F and LM test
 
 ```{r}
 # Test whether the fixed effects are significant. H0: FE are irrelevant
 pFtest(reg.fe, reg.po)
 ```
 
-
+We can reject the null hypothesis. The Fixed effects are significant.
 
 ```{r}
 # Lagrange Multiplier Test - (Breusch-Pagan) for balanced panels
@@ -388,6 +406,8 @@ plmtest(reg.po, effect="time", type="bp")
 ```
 
 
+### Hausman test
+
 The RE estimator needs stronger assumptions to be consistent than the FE estimator. On the other hand, it is more efficient if in these assumptions hold and we can include time constant regressors. A widely used test of this additional assumption is the Hausman test. 
 
 
@@ -395,66 +415,124 @@ The RE estimator needs stronger assumptions to be consistent than the FE estimat
 phtest(reg.fe, reg.re)
 ```
 
-Breusch-Godfrey/Wooldridge test for serial correlation in panel models
+With a p-value of 0.003, the null hypthosis of the RE model being consistent is rejected. 
+Robust Hausman test
+
+The presence of heteroskedasdicity can matter for the outcome of the Hausman test. 
+
 ```{r}
-reg.fe <- plm(lwage~                      I(exper^2)+married+union+yr, 
-                                      data=wagepan.p, model="within")
+data("RDSpillovers", package = "pder")
+pehs <- pdata.frame(RDSpillovers, index = c("id", "year"))
+ehsfm <- lny ~ lnl + lnk + lnrd # just the random effects model formula to the vcov
+```
+
+Regression based Hausman test
+
+```{r}
+phtest(ehsfm, pehs, method = "aux") 
+```
+
+Regression based Hausman test with robust estimator for the covariance. 
+
+```{r}
+phtest(ehsfm, pehs, method = "aux", vcov = vcovHC) 
+```
+
+The robust version of the Hausman test does not reject the random effects hypothesis anymore.The robust version of the Hausman test does not reject the random effects hypothesis anymore.  
+
+
+### Serial correlation
+
+ - Breusch-Godfrey/Durbin Watson test for serial correlation in panel models
+
+```{r}
+data("RiceFarms", package = "splm")
+pdim(RiceFarms, index = "id")
+```
+
+
+```{r}
+fm <- log(goutput) ~ log(seed) + log(totlabor) + log(size)
+rice.re <- plm(fm, Rice, model='random')
 ```
 
 
 
-
 ```{r}
-# H0: No seriel correlation
-pbgtest(reg.fe)
-```
-
-```{r}
-# Add year dummies using the "twoways" argument in plm function and see if it improves the outcome
-reg.fe2w <- (plm(lwage~I(exper^2)+married+union+yr, 
-                                      data=wagepan.p, model="within", effect="twoways") )
+pbgtest(rice.re, order = 2)
+pdwtest(rice.re, order = 2)
 ```
 
 
+ - Wald Tests for Serial correlation using *within* and First-difference Estimators 
+
+This test is applicable to an FE panel model and in particular to "short" panels with small $T$ and large $N$. 
+
 ```{r}
-pbgtest(reg.fe2w)
+data("EmplUK", package = "plm")
+pwartest(log(emp) ~ log(wage) + log(capital), data = EmplUK)
+```
+
+We strongly reject the null of no serial correlation. The evidence of serial correlation is so strong that we should think whether the residuals are stationary at all. A first difference specification might be preferable. 
+
+
+```{r}
+pwfdtest(log(emp) ~ log(wage) + log(capital), data = EmplUK)
+```
+
+We can't reject the null hypothesis, indicating that a first difference specification removes the residual serial correlation. 
+
+
+However, results are not always clear cut. 
+
+
+```{r}
+W.fd <- matrix(ncol = 2, nrow =2)
+H0 <- c("fd", "fe")
+dimnames(W.fd) <- list(c("test", "p-value"), H0)
+for(i in H0) {
+    mytest <- pwfdtest(fm, Rice, h0 = i)
+    W.fd[1, i] <- mytest$statistic
+    W.fd[2, i] <- mytest$p.value
+    }
+round(W.fd, 6)
+```
+
+Both specifications reject the null. Whichever estimate you run, you will have serially correlated errors. In that case it is advisable to use an autocorrelation-robust covariance matrix. 
+
+### Cross-sectional dependence
+
+ - Pesaran CD test for cross-sectional dependence in panels
+
+Cross-sectional dependence can arise if individuals respond to common shocks or if spatial diffusion processes are present ("shock" affecting individuals on a measure of distance). 
+
+```{r}
+data("HousePricesUS", package = "pder")
+php <- pdata.frame(HousePricesUS)
 ```
 
 
-```{r}
-data("Grunfeld", package = "plm")
-g.reg.fe <- plm(inv ~ value + capital, data = Grunfeld, model = "within")
-g.reg.fe2w <- plm(inv ~ value + capital, data = Grunfeld, model = "within", effect = "twoways") # two-way fixed effects homogeneous model
-pbgtest(g.reg.fe)
-pbgtest(g.reg.fe2w)
-```
-
-```{r}
-g.reg.re <- plm(inv ~ value + capital, data = Grunfeld, model = "random")
-g.reg.re2w <- plm(inv ~ value + capital, data = Grunfeld, model = "random", effect = "twoways")
-pbgtest(g.reg.re)
-pbgtest(g.reg.re2w)
-```
-
-Pesaran CD test for cross-sectional dependence in panels
-
-```{r}
-# H0: No cross-sectional dependence
-pcdtest(g.reg.fe)  # Oneway (individual) effect Within Model
-pcdtest(g.reg.fe2w) # test on two-way fixed effects homogeneous model
+```{r, warning=FALSE}
+cbind("rho"   = pcdtest(diff(log(php$price)), test = "rho")$statistic,
+      "|rho|" = pcdtest(diff(log(php$price)), test = "absrho")$statistic)
 ```
 
 
- Wooldridge test for serial correlation (only in fixed-effects panel models)
+The overall averages $\hat\rho$ and $\hat\rho_{ABS}$ are quite large in magnitude and very close to each other, indicating substantial positive correlation. 
+
+We can analyse whether this spatial dependence is geographically uniform or not. 
 
 ```{r}
-# H0: No serial correlation
-pwartest(g.reg.fe)
-pwartest(g.reg.fe2w)
+regions.names <- c("New Engl", "Mideast", "Southeast", "Great Lks",
+                   "Plains", "Southwest", "Rocky Mnt", "Far West")
+corr.table.hp <- cortab(diff(log(php$price)), grouping = php$region, # cortab is from plm package
+                        groupnames = regions.names)
+colnames(corr.table.hp) <- substr(rownames(corr.table.hp), 1, 5)
+round(corr.table.hp, 2)
 ```
 
-Under the null of no serial correlation in the errors, the residuals of a FE model must be negatively serially correlated, with $cor(\hat{u}_{it}, \hat{u}_{is})=-1/(T-1)$ for each $t,s$. Therefore, you might want to adjust (clustered) heterogeneity in the residuals. 
 
+There seems to be a strong dependence with neighbouring regions. 
 
 
 
@@ -473,7 +551,6 @@ summary(reg.fgls)
 ```
 
 Whereas the general FGLS estimator is based in the first step on an OLS model, the fixed effects _pggls_ is based on the estimation of a within model in the first step; the rest is the same. 
-
 
 ```{r, eval=F}
 reg.fgls.fe<- pggls(log(gsp) ~ log(pcap) + log(pc) + log(emp) + unemp, data = Produc, model = "within")
@@ -733,6 +810,63 @@ Extract the total error variance from the three methods of estimation.
 ```{r}
 sapply(re.models, function(x) sqrt(ercomp(x)$sigma2))
 ```
+
+
+## Unrestricted Generalized Least Squares
+
+The GLS estimator is a matrix-weighted average of the *between* and the *within* estimator. The combination of both estimators is more efficient than either of these alone. 
+
+The "random effect" equivalent, general GLS, is estimated by specifying the *model* argument as `pooling`
+
+```{r}
+data("EmplUK", package = "plm")
+pdim(EmplUK)
+```
+
+
+```{r}
+gglsmod <- pggls(log(emp) ~ log(wage) + log(capital),
+                 data = EmplUK, model = "pooling")
+summary(gglsmod)
+```
+
+Group covariance matrix of errors 
+
+```{r}
+round(gglsmod$sigma,3)
+```
+
+The correlations between the pairs of residuals (in time) for the same individual do do not die in out with the distance in time, resembling very much the random effects structure. 
+
+
+Fixed effects GLS (FEGLS)
+
+```{r}
+feglsmod <- pggls(log(emp) ~ log(wage) + log(capital), data = EmplUK,
+                  model = "within")
+summary(feglsmod)
+```
+
+Run a Hausman test
+
+```{r}
+phtest(feglsmod, gglsmod)
+```
+
+The Hausman test clearly rejects the Null Hypthosis. We favour the FEGLS specification. 
+
+If we assume (or analyse) that the residuals of FEGLS regression are not stationary, we can also estimate the model in first differences. 
+
+First difference GLS (FDGLS)
+
+
+```{r}
+fdglsmod <- pggls(log(emp) ~ log(wage) + log(capital), data = EmplUK,
+                  model = "fd")
+summary(fdglsmod)
+```
+
+
 
 
 ## Maximum Liklihood Estimator 
