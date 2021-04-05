@@ -295,11 +295,18 @@ pdim(wagepan.p)
 ```
 
 ```{r}
-# Estimate FE model
+# Estimate FE model with one sided FE
 summary( plm(lwage~married+union+factor(year)*educ, 
                                         data=wagepan.p, model="within"))
 ```
 
+
+
+```{r}
+# Estimate FE model with one twosided
+summary( plm(lwage~married+union+factor(year)*educ, 
+                                        data=wagepan.p, model="within", effect = "twoways"))
+```
 
 
 
@@ -538,29 +545,6 @@ round(corr.table.hp, 2)
 
 There seems to be a strong dependence with neighbouring regions. 
 
-
-
-## General Feasible Generalized Least Squares (FGLS) Models
-
-The function `pggls` estimates general FGLS models with either fixed or "random" effects^[The "random" effect is better termed "general FGSLS" models, as in fact it does not have a proper random effects structure.].
-
-```{r}
-data("Produc", package = "plm")
-```
-
-
-```{r}
-reg.fgls <- pggls(log(gsp) ~ log(pcap) + log(pc) + log(emp) + unemp, data = Produc, model = "pooling") # Note: pooling stands for "random" fgls
-summary(reg.fgls)
-```
-
-Whereas the general FGLS estimator is based in the first step on an OLS model, the fixed effects _pggls_ is based on the estimation of a within model in the first step; the rest is the same. 
-
-```{r, eval=F}
-reg.fgls.fe<- pggls(log(gsp) ~ log(pcap) + log(pc) + log(emp) + unemp, data = Produc, model = "within")
-summary(reg.fgls.fe)
-```
-
 ## Dummy Variable Regression and Correlated Random Effects
 
 We can get the FE parameter estimates in two other ways than the within transformation. The dummy variable equation uses OLS on the original variables instead of the transformed ones. But it adds $n-1$ dummy variables (or $n$ dummies and removes the constant), one for each cross-sectional unit $i = 1, \dots, n$. The simplest (although not the most computationally efficient) way to implement this in R is to use the cross-sectional index as another factor variable. The third way is the correlated random effects (CRE) approach. Instead of assuming that the individual affects $a_i$ are independent on the regressors $x_{itj}$, it is assumed that they only depend on the averages over time $\bar{x}_{ij} = \frac{1}{T_{i}} \sum^{2}_{i=1}T_{i}$. 
@@ -613,6 +597,9 @@ summary(plm(lwage~married+union+educ+black+hisp+Between(married)+
                          Between(union), data=wagepan.p, model="random"))
 ```
 
+
+
+
 ## Robust (Clustered) Standard Errors
 
 Under the RE assumptions, OLS is inefficient but consistent. Instead of using RE, we could use OLS but would have to adjust the standard errors for the fact the composite error term $v_{it} = \alpha_{i}+ u_{it}$ is correlated over time because of the constant individual effect $\alpha_{i}$. In fact, the variance-covariance matrix could be more complex than the RE assumptions with i.i.d. $u_{it}$ implies. These errors terms could be serially correlated and/ or heteroscedastic. This would invalidate the standard errors not only of OLS but also of FD, FE, RE and CRE. 
@@ -647,11 +634,86 @@ coeftest(reg)
 coeftest(reg, vcovHC)
 ```
 
+
+To account for both the spatial correlation between states observed in the same time period and for the serial correlation between states observed in the same time period and for the serial correlation within the same state and across different ones. 
+
+
+```{r}
+coeftest(reg, vcov = plm::vcovSCC) # Single clustering estimators
+```
+
+
+
+```{r}
+coeftest(reg, vcov = plm::vcovDC ) # Double clustering estimators
+```
+
+
+
+Finally, it is also possible, for example for reproduction purposes, to use the adjustment routine that is provided by Stata. 
+
 ```{r}
 # Regression table with "clustered" SE (small-sample correction)
 # This is the default version used by Stata and reported by Wooldridge:
 coeftest(reg, vcovHC(reg, type="sss"))
 ```
+
+
+## Unrestricted Generalized Least Squares
+
+The GLS estimator is a matrix-weighted average of the *between* and the *within* estimator. The combination of both estimators is more efficient than either of these alone. 
+
+The "random effect" equivalent, general GLS, is estimated by specifying the *model* argument as `pooling`^[The "random" effect is better termed "general FGSLS" models, as in fact it does not have a proper random effects structure.].
+
+
+```{r}
+data("EmplUK", package = "plm")
+pdim(EmplUK)
+```
+
+
+```{r}
+gglsmod <- pggls(log(emp) ~ log(wage) + log(capital),
+                 data = EmplUK, model = "pooling")
+summary(gglsmod)
+```
+
+Group covariance matrix of errors 
+
+```{r}
+round(gglsmod$sigma,3)
+```
+
+The correlations between the pairs of residuals (in time) for the same individual do do not die in out with the distance in time, resembling very much the random effects structure. 
+
+
+Fixed effects GLS (FEGLS)
+
+```{r}
+feglsmod <- pggls(log(emp) ~ log(wage) + log(capital), data = EmplUK,
+                  model = "within")
+summary(feglsmod)
+```
+
+Run a Hausman test
+
+```{r}
+phtest(feglsmod, gglsmod)
+```
+
+The Hausman test clearly rejects the Null Hypothesis. We favour the FEGLS specification. 
+
+If we assume (or analyse) that the residuals of FEGLS regression are not stationary, we can also estimate the model in first differences. 
+
+First difference GLS (FDGLS)
+
+
+```{r}
+fdglsmod <- pggls(log(emp) ~ log(wage) + log(capital), data = EmplUK,
+                  model = "fd")
+summary(fdglsmod)
+```
+
 
 
 ## Unbalanced panels 
@@ -765,61 +827,6 @@ Extract the total error variance from the three methods of estimation.
 
 ```{r}
 sapply(re.models, function(x) sqrt(ercomp(x)$sigma2))
-```
-
-
-## Unrestricted Generalized Least Squares
-
-The GLS estimator is a matrix-weighted average of the *between* and the *within* estimator. The combination of both estimators is more efficient than either of these alone. 
-
-The "random effect" equivalent, general GLS, is estimated by specifying the *model* argument as `pooling`
-
-```{r}
-data("EmplUK", package = "plm")
-pdim(EmplUK)
-```
-
-
-```{r}
-gglsmod <- pggls(log(emp) ~ log(wage) + log(capital),
-                 data = EmplUK, model = "pooling")
-summary(gglsmod)
-```
-
-Group covariance matrix of errors 
-
-```{r}
-round(gglsmod$sigma,3)
-```
-
-The correlations between the pairs of residuals (in time) for the same individual do do not die in out with the distance in time, resembling very much the random effects structure. 
-
-
-Fixed effects GLS (FEGLS)
-
-```{r}
-feglsmod <- pggls(log(emp) ~ log(wage) + log(capital), data = EmplUK,
-                  model = "within")
-summary(feglsmod)
-```
-
-Run a Hausman test
-
-```{r}
-phtest(feglsmod, gglsmod)
-```
-
-The Hausman test clearly rejects the Null Hypthosis. We favour the FEGLS specification. 
-
-If we assume (or analyse) that the residuals of FEGLS regression are not stationary, we can also estimate the model in first differences. 
-
-First difference GLS (FDGLS)
-
-
-```{r}
-fdglsmod <- pggls(log(emp) ~ log(wage) + log(capital), data = EmplUK,
-                  model = "fd")
-summary(fdglsmod)
 ```
 
 
