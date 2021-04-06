@@ -1,3 +1,14 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: 72
+---
+
+
 # Qualitative and LDV Models {#binarymodels}
 
 
@@ -10,15 +21,17 @@ To load the dataset and necessary functions:
 PACKAGES<-c(
             "tidyverse",  # for data manipulation and ggplots
             "broom",  # Tidy regression output
+            "tidymodels", # packages for modeling and machine learning using 
             "Hmisc", # Harrell Miscellaneous functions
             "psych", # Procedures for Psychometric research
             "car", # Companion to applied regression
             "knitr", # knit functions
+            "modelsummary", 
             # "kableExtra", # extended knit functions for objects exported from other packages
             "huxtable", #  Regression tables, broom compatible
             "stargazer", # Regression tables
             "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
-            "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+             # "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
             "wooldridge",  # Wooldrige Datasets
             "MCMCpack", # Contains functions to perform Bayesian inference using posterior simulation for a number of ssatistical models.
             "sampleSelection", # Two-step and maximum likelihood estimation of Heckman-type sample selection models
@@ -80,13 +93,10 @@ $$
 $$
 
 
-
-
 ## Linear probability models
 
 
 If a dummy variable is used as the dependent variable $y$, we can still use OLS to estimate its relation to the regressors $x$. 
-
 
 
 ```{r}
@@ -99,12 +109,25 @@ Let us use the `describe()` function from the **Hmisc** package to use a differe
 describe(mroz)
 ```
 
-The function `rcorr()` can be useful to check visually for correlation. 
-
+Looking at the share of women in the labour force in the sample
 
 ```{r}
-rcorr(as.matrix(mroz))
+prop.table(table(mroz$inlf))
 ```
+
+
+
+We want to investigate how female labor market participation depends on non-wife household income, her education, age and number of small children? First, take a look how the labor force participation and the age cohorts are related. 
+
+```{r}
+plot(factor(inlf) ~ age, data = mroz, 
+     ylevels = 2:1,
+     ylab = "in labor force?")
+```
+
+
+Not so much variation with respect to age, except for the later years.
+
 
 Estimate linear probability model
 
@@ -128,7 +151,80 @@ predict(linprob,xpred)
 ```
 
 
-## Logit and Probit Models: Estimation
+We don't have to restrict ourself to two extreme values. For quite a few observations, this model predicts a probability of working which is either greater than 1, or smaller than zero.
+
+
+```{r}
+pr = predict(linprob)
+plot(pr[order(pr)],ylab = "p(inlf = 1)")
+abline(a = 0, b = 0, col = "red")
+abline(a = 1, b = 0, col = "red")
+```
+
+
+In the case of a *saturated* model, that is when only have dummy explanatory variables, this problem does not exist for linear probability models. 
+
+```{r}
+mroz %<>% 
+  # classify age into 3 and huswage into 2 classes
+  mutate(age_fct = cut(age,breaks = 3,labels = FALSE),
+         huswage_fct = cut(huswage, breaks = 2,labels = FALSE)) %>%
+  mutate(classes = paste0("age_",age_fct,"_hus_",huswage_fct))
+```
+
+```{r}
+LPM_saturated = mroz %>%
+  lm(inlf ~ classes, data = .)
+
+mroz$pred <- predict(LPM_saturated)
+```
+
+
+```{r}
+ggplot(mroz[order(mroz$pred),], aes(x = 1:nrow(mroz),y = pred,color = classes)) + 
+  geom_point() + 
+  theme_bw() + 
+  scale_y_continuous(limits = c(0,1), name = "p(inlf)") +
+  labs(title = "LPM model in a saturated setting", 
+       subtitle = "only mutually exhaustive dummy variables on the RHS.")
+```
+
+or example you see that women from the youngest age category and lowest husband income (class age_1_hus_1) have the highest probability of working (0.611).
+
+## LPM, Probit, Logit simulation
+
+
+```{r}
+# Simulated data
+set.seed(12345)
+y <- rbinom(100, 1, 0.5)
+x <- rnorm(100) + 2 * y
+
+# Estimation 
+linpr.res <- lm(y~x)
+logit.res <-glm(y ~x, family = binomial(link = logit))
+probit.res <-glm(y ~x, family = binomial(link = probit))
+
+# Prediction from a regular grid of x values
+xp <- seq(from= min(x), to=max(x), length=50)
+linpr.p <- predict(linpr.res, list(x = xp), type = "response")
+logit.p <- predict(logit.res, list(x = xp), type = "response")
+probit.p <- predict(probit.res, list(x = xp), type = "response")
+```
+
+
+```{r fig22, fig.cap='Predictions from binary response models (simulated data)', out.width='80%', fig.asp=.75, fig.align='center'}
+plot(x,y)
+lines(xp, linpr.p, lwd=2, lty = 1)
+lines(xp, logit.p, lwd=2, lty = 2)
+lines(xp, probit.p, lwd=1, lty = 1)
+legend("topleft", 
+       c("linear prob.", "logit", "probit"), 
+       lwd = c(2,2,1), lty = c(1,2,1))
+```
+
+
+## Logit 
 
 
 For binary response models, the most widely used specification for G are
@@ -179,6 +275,176 @@ round(resultsTable, digits = 5)
 This gives you $e^\beta$, the multiplicative change in the odds ratio for $y=1$ if the covariate associated with $\beta$ increases by 1. 
 
 
+## Probit 
+
+
+```{r fig21, fig.cap='The shape of the probit function is the standard normal distribution', out.width='80%', fig.asp=.75, fig.align='center'}
+par(mfrow=c(1,2))  
+x <- seq(-3,3, .2)
+plot(x, pnorm(x), type="l", xlab="b1+b2x", ylab="P[y=1]")
+plot(x, dnorm(x), type="l")
+```
+
+
+
+```{r}
+detach("package:PoEdata", unload=TRUE)
+data("mroz", package='wooldridge')
+attach(mroz)
+# Estimate probit model
+probitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
+               family=binomial(link=probit),data=mroz)
+#Summary of results:
+summary(probitres)
+# Log likelihood value:
+logLik(probitres) 
+# McFadden's pseudo R2:
+1 - probitres$deviance/probitres$null.deviance
+```
+
+
+
+### Inference
+
+We can implement the test for overall significance for the probit model using both manual and automatic calculations. 
+
+
+```{r}
+# Test of overall significance:
+# Manual calculation of the LR test statistic:
+probitres$null.deviance - probitres$deviance
+```
+
+
+```{r}
+# Test of H0: experience and age are irrelevant
+restr <- glm(inlf~nwifeinc+educ+ kidslt6+kidsge6, 
+             family=binomial(link=logit),data=mroz)
+```
+
+
+```{r}
+lrtest(restr,probitres)
+```
+
+
+### Predictions
+
+The command `predict()` can calculate predicted values for the estimation sample or arbitrary sets of regressor values. 
+
+We can calculate 
+
+```{r}
+# predictions for two "extreme" women:
+xpred <- list(nwifeinc=c(100,0),educ=c(5,17),exper=c(0,30),
+              age=c(20,52),kidslt6=c(2,0),kidsge6=c(0,0))
+# Predictions from linear probability, probit and logit model:
+predict(linprob,  xpred,type = "response")
+predict(logitres, xpred,type = "response")
+predict(probitres,xpred,type = "response")
+```
+
+
+```{r}
+# Probit
+# Summary of results:
+summary(probitres)
+
+# Log likelihood value:
+logLik(probitres) 
+# McFadden's pseudo R2:
+1 - probitres$deviance/probitres$null.deviance
+```
+
+Another way to obtain the pseudo-R2 is to estimate the null model using `glm()` and extract the maximized log-likelihoods for both the null and the full model using the function logLik().
+
+```{r}
+probit_null<-glm(inlf~1,
+               family=binomial(link=probit),data=mroz)
+
+```
+
+Compute the pseudo-R2 using 'logLik
+
+```{r}
+1 - logLik(probitres)[1]/logLik(probit_null)[1]
+```
+
+
+```{r}
+modelsummary::modelsummary(list("Logit" = logitres,"Probit" = probitres), stars = TRUE)
+```
+
+From this table, we learn that the coefficient for age is -0.088 for logit and -0.053 for probit, respectively. In both cases, this tells us that the impact of an additional year of age on the probability of working is negative. However, we cannot straightforwardly read off the magnitude of the effect. 
+
+
+## Marginal (partial) effects
+
+Several packages provide estimates of marginal effects for different types of models. Among these are **car**, **alr3**, **mfx**, **erer**, among others. Unfortunately, none of these packages implement marginal effects correctly (i.e., correctly account for interrelated variables such as interaction terms (e.g., a:b) or power terms (e.g., I(a^2)) and the packages all implement quite different interfaces for different types of models. The **margins** and **prediction** packages are a combined effort to calculate marginal effects that include complex terms and provide a uniform interface for doing those calculations.
+
+
+To know how much a variable influences the labour force participation, one has to use `margins()` command:
+
+```{r}
+effects_logit_participation <- margins::margins(logitres) 
+```
+
+
+```{r}
+summary(effects_logit_participation)
+```
+
+
+```{r}
+plot(effects_logit_participation)
+```
+
+
+If one desires subgroup effects, simply pass a subset of data to the data argument:
+
+```{r}
+effects_logit_participation_subset <- margins::margins(logitres, data = subset(mroz, kidslt6 == 0)) # no kids < 6 years
+```
+
+```{r}
+summary(effects_logit_participation_subset)
+```
+
+
+
+```{r fig23, fig.cap='Logit effect plot', out.width='80%', fig.asp=.75, fig.align='center'}
+ggplot(data = summary(effects_logit_participation)) +
+  geom_point(aes(factor, AME)) +
+  geom_errorbar(aes(x = factor, ymin = lower, ymax = upper)) +
+  geom_hline(yintercept = 0, color="lightgrey") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+You can also extract the marginal effects of a single variable, with `dydx`:
+
+```{r}
+head(margins::dydx(mroz, logitres, "educ"))
+```
+
+The function `cplot()` provides the commonly needed visual summaries of predictions or average marginal effects conditional on a covariate.
+
+```{r fig24, fig.cap='Marginal effects for logit model', out.width='80%', fig.asp=.75, fig.align='center'}
+margins::cplot(logitres, x = "educ", se.type = "shade")
+```
+
+
+Average marginal effects
+
+```{r}
+effects_logit <- margins::margins(logitres)
+effects_probit <- margins::margins(probitres)
+```
+
+```{r}
+modelsummary::modelsummary(list("Logit" = effects_logit,"Probit" = effects_probit), stars = TRUE, notes = "Average marginal effects")
+```
+
 
 ### Multinomial Logit
 
@@ -195,7 +461,7 @@ data("nels_small", package="PoEdata")
 ```
 
 ```{r}
-nels.multinom <- multinom(psechoice~grades, data=nels_small)
+nels.multinom <- nnet::multinom(psechoice~grades, data=nels_small)
 summary(nels.multinom)
 ```
 
@@ -209,6 +475,8 @@ pred <- predict(nels.multinom, newdat, "probs")
 pred
 ```
 
+
+The usual function `predict` can calculate the predicted probabilities of choosing any of the three secondary education levels for two arbitrary grades: one at the median grade in the sample, and the other at the top fifth percent.
 
 
 ### The Conditional Logit Model
@@ -236,27 +504,36 @@ for (j in 1:N3){
   if(cola$choice[3*j-1]==1) bchoice[j] <- "2"
   if(cola$choice[3*j]==1) bchoice[j] <- "3"
 }
-cola.clogit <- MCMCmnl(bchoice ~
-                         choicevar(price1, "b2", "1")+
-                         choicevar(price2, "b2", "2")+
+```
+
+
+```{r}
+library(MCMCpack)
+cola.clogit <- MCMCpack::MCMCmnl(bchoice~choicevar(price1, "b2", "1")
+                                 +       choicevar(price2, "b2", "2")+
                          choicevar(price3, "b2", "3"),
                        baseline="3", mcmc.method="IndMH")
 ```
 
-The output from function multinom gives coefficient estimates for each level of the response variable psechoice, except for the first level, which is the benchmark.
 
-We can calculate the probability that individual  $i$  chooses  pepsi  and  sevenup  for some given values of the prices that individual  $i$.  Coke is not shown as it is the baseline choice. 
+The output from function `multinom `gives coefficient estimates for each level of the response variable **psechoice**, except for the first level, which is the benchmark.
+
 
 
 ```{r}
 sclogit <- summary(cola.clogit)
 tabMCMC <- as.data.frame(sclogit$statistics)[,1:2]
 row.names(tabMCMC)<- c("b2","b11","b12")
+
+```
+
+```{r}
 kable(tabMCMC, digits=4, align="c",
       caption="Conditional logit estimates for the 'cola' problem")
 ```
 
 
+Choice 3 (coke) being the baseline, which makes $\beta_{13}$ equal to zero.
 
 We can also estimate the probabilities of individual $i$ choosing Pepsi or Sevenup for a given price. 
 
@@ -281,14 +558,13 @@ PiSevenup <- exp(b12+b2*pSevenup)/
 PiCoke <- 1-PiPepsi-PiSevenup
 ```
 
-The calculatred probabilities are:
+The calculated probabilities are:
 
  - $p_{i,pepsi}=0.483$ 
  - $p_{i,sevenup}=0.227$ 
  - $p_{i,coke}=0.289$ 
 
 The three probabilities are different for different individuals because different individuals face different prices; in a more complex model other regressors may be included, some of which may reflect individual characteristics.
-
 
 
 
@@ -309,248 +585,117 @@ kable(tabOprobit, digits=4, align="c",
 
 
 The results from MCMCoprobit can be translated into the textbook notations as follows:
-
-- $\mu_1$ =− (Intercept)
-- $\beta$ = grades
-- $\mu_2$ = gamma2 − (Intercept)
-
+  
+  - $\mu_1$ =− (Intercept)
+  - $\beta$ = grades
+  - $\mu_2$ = gamma2 − (Intercept)
+  
 The probabilities for each choice can be calculated as in the next code fragment:
-
+    
 ```{r}
-mu1 <- -tabOprobit[1]
-b <- tabOprobit[2]
-mu2 <- tabOprobit[3]-tabOprobit[1]
-xGrade <- c(mean(nels_small$grades), 
-            quantile(nels_small$grades, 0.05))
-
-# Probabilities:
-prob1 <- pnorm(mu1-b*xGrade)
-prob2 <- pnorm(mu2-b*xGrade)-pnorm(mu1-b*xGrade)
-prob3 <- 1-pnorm(mu2-b*xGrade)
-
-# Marginal effects:
-Dp1DGrades <- -pnorm(mu1-b*xGrade)*b
-Dp2DGrades <- (pnorm(mu1-b*xGrade)-pnorm(mu2-b*xGrade))*b
-Dp3DGrades <- pnorm(mu2-b*xGrade)*b
+  mu1 <- -tabOprobit[1]
+  b <- tabOprobit[2]
+  mu2 <- tabOprobit[3]-tabOprobit[1]
+  xGrade <- c(mean(nels_small$grades), 
+              quantile(nels_small$grades, 0.05))
+  
+  # Probabilities:
+  prob1 <- pnorm(mu1-b*xGrade)
+  prob2 <- pnorm(mu2-b*xGrade)-pnorm(mu1-b*xGrade)
+  prob3 <- 1-pnorm(mu2-b*xGrade)
+  
+  # Marginal effects:
+  Dp1DGrades <- -pnorm(mu1-b*xGrade)*b
+  Dp2DGrades <- (pnorm(mu1-b*xGrade)-pnorm(mu2-b*xGrade))*b
+  Dp3DGrades <- pnorm(mu2-b*xGrade)*b
 ```
-
+  
 For instance, the marginal effect of grades on the probability of attending a four-year college for a student with average grade and for a student in the top 5 percent are, respectively, `r round(Dp3DGrades[1], digits = 3)` and `r round(Dp3DGrades[[2]], digits = 3)`.
-
-
-### Probit model 
-
-```{r fig21, fig.cap='The shape of the probit function is the standard normal distribution', out.width='80%', fig.asp=.75, fig.align='center'}
-par(mfrow=c(1,2))  
-x <- seq(-3,3, .2)
-plot(x, pnorm(x), type="l", xlab="b1+b2x", ylab="P[y=1]")
-plot(x, dnorm(x), type="l")
-```
-
-
-
-```{r}
-detach("package:PoEdata", unload=TRUE)
-data("mroz", package='wooldridge')
-attach(mroz)
-# Estimate probit model
-probitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
-               family=binomial(link=probit),data=mroz)
-# Summary of results:
-summary(probitres)
-# Log likelihood value:
-logLik(probitres) 
-# McFadden's pseudo R2:
-1 - probitres$deviance/probitres$null.deviance
-```
-
-
-Take a boostrap sample for the 95% confidence interval for each parameter. 
-
-
-```{r, cache=TRUE}
-data("mroz", package='wooldridge')
-
-boot_probitres <- mroz %>% 
-  bootstrap(500) %>% 
-  do(tidy(glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
-               family=binomial(link=probit),.)))
-boot_probitres %>% 
-  group_by(term) %>% 
-  dplyr::summarise(low = quantile(estimate, .025), 
-                   high = quantile(estimate, .0975))
-```
-
-
-### Inference
-
-We can implement the test for overall significance for the probit model using both manual and automatic calculations. 
-
-
-```{r}
-# Test of overall significance:
-# Manual calculation of the LR test statistic:
-probitres$null.deviance - probitres$deviance
-
-# Automatic calculations including p-values,...:
-lrtest(probitres)
-
-# Test of H0: experience and age are irrelevant
-restr <- glm(inlf~nwifeinc+educ+ kidslt6+kidsge6, 
-             family=binomial(link=logit),data=mroz)
-lrtest(restr,probitres)
-
-```
-
-### Predictions
-
-The command `predict()` can calculate predicted values for the estimation sample or arbitrary sets of regressor values. 
-
-We can calculate 
-
-
-```{r}
-# predictions for two "extreme" women:
-xpred <- list(nwifeinc=c(100,0),educ=c(5,17),exper=c(0,30),
-              age=c(20,52),kidslt6=c(2,0),kidsge6=c(0,0))
-# Predictions from linear probability, probit and logit model:
-predict(linprob,  xpred,type = "response")
-predict(logitres, xpred,type = "response")
-predict(probitres,xpred,type = "response")
-```
-
-```{r}
-# Simulated data
-set.seed(12345)
-y <- rbinom(100, 1, 0.5)
-x <- rnorm(100) + 2 * y
-
-# Estimation 
-linpr.res <- lm(y~x)
-logit.res <-glm(y ~x, family = binomial(link = logit))
-probit.res <-glm(y ~x, family = binomial(link = probit))
-
-# Prediction from a regular grid of x values
-xp <- seq(from= min(x), to=max(x), length=50)
-linpr.p <- predict(linpr.res, list(x = xp), type = "response")
-logit.p <- predict(logit.res, list(x = xp), type = "response")
-probit.p <- predict(probit.res, list(x = xp), type = "response")
-```
-
-
-
-```{r fig22, fig.cap='Predictions from binary response models (simulated data)', out.width='80%', fig.asp=.75, fig.align='center'}
-plot(x,y)
-lines(xp, linpr.p, lwd=2, lty = 1)
-lines(xp, logit.p, lwd=2, lty = 2)
-lines(xp, probit.p, lwd=1, lty = 1)
-legend("topleft", 
-       c("linear prob.", "logit", "probit"), 
-       lwd = c(2,2,1), lty = c(1,2,1))
-```
-
-
-### Marginal (partial) effects
-
-Several packages provide estimates of marginal effects for different types of models. Among these are **car**, **alr3**, **mfx**, **erer**, among others. Unfortunately, none of these packages implement marginal effects correctly (i.e., correctly account for interrelated variables such as interaction terms (e.g., a:b) or power terms (e.g., I(a^2)) and the packages all implement quite different interfaces for different types of models. The **margins** and **prediction** packages are a combined effort to calculate marginal effects that include complex terms and provide a uniform interface for doing those calculations.
-
-
-To know how much a variable influences the labour force participation, one has to use `margins()` command:
-
-```{r}
-effects_logit_participation <- margins(logitres) 
-summary(effects_logit_participation)
-plot(effects_logit_participation)
-```
-
-If one desires subgroup effects, simply pass a subset of data to the data argument:
-
-```{r}
-summary(margins(logitres, data = subset(mroz, kidslt6 == 0))) # no kids < 6 years
-```
-
-
-```{r fig23, fig.cap='Logit effect plot', out.width='80%', fig.asp=.75, fig.align='center'}
-ggplot(data = summary(effects_logit_participation)) +
-  geom_point(aes(factor, AME)) +
-  geom_errorbar(aes(x = factor, ymin = lower, ymax = upper)) +
-  geom_hline(yintercept = 0, color="lightgrey") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45))
-```
-
-You can also extract the marginal effects of a single variable, with `dydx`:
-
-```{r}
-head(dydx(mroz, logitres, "educ"))
-```
-
-The function `cplot()` provides the commonly needed visual summaries of predictions or average marginal effects conditional on a covariate.
-
-```{r fig24, fig.cap='Marginal effects for logit model', out.width='80%', fig.asp=.75, fig.align='center'}
-cplot(logitres, x = "educ", se.type = "shade")
-```
-
-
+  
+  
+  
 ## Count data: The Poisson Regression Model 
-
-Instead of just 0/1-coded binary data, count data can take any non-negative integer $0, 1, 2, \dots$. If they take very large numbers (like the number of students in a school), they can be approximated reasonably well as contiouns variables in a linear models and estimated using OLS. If the numbers are relativly small, this approximation might not work well. 
-
+  
+Instead of just 0/1-coded binary data, count data can take any non-negative integer $0, 1, 2, \dots$. If they take very large numbers (like the number of students in a school), they can be approximated reasonably well as continuous variables in a linear models and estimated using OLS. If the numbers are relatively small, this approximation might not work well. 
+  
 The Poisson regression model is the most basic and convenient model explicitly model explicitly designed for count data. 
-
+  
 Poisson regression models can be estimated in R via the `glm()` function with the specification **family= poisson**
-
-Estimating the model with **quasipoisson** is to adjust for potential vioalations of the Poisson distribution. 
-
-```{r}
-data(crime1, package='wooldridge')
-
-# Estimate linear model
-lm.res      <-  lm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
-                     black+hispan+born60, data=crime1)
-# Estimate Poisson model
-Poisson.res <- glm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
-                     black+hispan+born60, data=crime1, family=poisson)
-# Quasi-Poisson model
-QPoisson.res<- glm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
-                     black+hispan+born60, data=crime1, family=quasipoisson)
-```
-
+    
+    Estimating the model with **quasipoisson** is to adjust for potential violations of the Poisson distribution. 
+  
 
 ```{r}
-stargazer(lm.res,Poisson.res,QPoisson.res,type="text",keep.stat="n")
+  data(crime1, package='wooldridge')
+  
+  # Estimate linear model
+  lm.res      <-  lm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                       black+hispan+born60, data=crime1)
+  # Estimate Poisson model
+  Poisson.res <- glm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                       black+hispan+born60, data=crime1, family=poisson)
+  # Quasi-Poisson model
+  QPoisson.res<- glm(narr86~pcnv+avgsen+tottime+ptime86+qemp86+inc86+
+                       black+hispan+born60, data=crime1, family=quasipoisson)
 ```
-
-By construction, the parameter estiamtes are the same but the standard errors are larger for the QMLE. 
-
-
+  
+  
+```{r}
+  modelsummary(list("OLS" = lm.res,"Poisson" = Poisson.res,"Quasi Poisson" =QPoisson.res), stars=TRUE)
+```
+  
+  
+By construction, the parameter estimates are the same but the standard errors are larger for the QMLE. 
+  
+```{r}
+effects_poisson <- margins::margins(Poisson.res)
+effects_Qpoisson <- margins::margins(QPoisson.res)
+```
+  
+```{r}
+modelsummary(list("OLS" = lm.res,"Poisson" = effects_poisson,"Quasi Poisson" =effects_Qpoisson), stars=TRUE, notes = "Average maringal effects of Poisson and Quasi Poisson Model")
+```
+  
+  Note that the original implementation of Quasi Poisson link function does not report information criteria! You can obtain "quasi AIC" by using the **quasi** package.
+  
+  
 ### Corner Solution Response: The Tobit Model
 
-Corner solutions describe situations where the variable of interest is continous but restricted in range. Typically, it cannot be negative. 
+Corner solutions describe situations where the variable of interest is continuous but restricted in range. Typically, it cannot be negative. 
 
 The package **censReg** offers the command `censReg()` for estimating a Tobit model. 
 
 
-We have already estimated labor supply mdoeld for the women in the dataset *mroz*, ignoring the fact that the hours worked is necessarily non-negative. 
+We have already estimated labor supply modelled for the women in the dataset *mroz*, ignoring the fact that the hours worked is necessarily non-negative. 
 
 ```{r}
 # Estimate Tobit model using censReg:
-TobitRes <- censReg(hours~nwifeinc+educ+exper+I(exper^2)+ 
-                      age+kidslt6+kidsge6, data=mroz )
-summary(TobitRes)
+TobitRes1 <- censReg(hours~nwifeinc+educ+exper+I(exper^2)+ 
+                       age+kidslt6+kidsge6, data=mroz )
+summary(TobitRes1)
 
-# Partial Effects at the average x:
-margEff(TobitRes)
 ```
+
+
+
+```{r}
+# Partial Effects at the average x:
+margEff(TobitRes1)
+```
+
 
 Another alternative for estimating Tobit models is the command **survreg** from the package survival. It is less straightforward to use but more flexible. 
 
 ```{r}
 # Estimate Tobit model using survreg:
-res <- survreg(Surv(hours, hours>0, type="left") ~ nwifeinc+educ+exper+
-                 I(exper^2)+age+kidslt6+kidsge6, data=mroz, dist="gaussian")
-summary(res)
+TobitRes2 <- survreg(Surv(hours, hours>0, type="left") ~ nwifeinc+educ+exper+
+                       I(exper^2)+age+kidslt6+kidsge6, data=mroz, dist="gaussian")
+summary(TobitRes2)
 ```
 
+```{r}
+TobitRes2_margin <- margins::margins(TobitRes2, vce = c("bootstrap")) # sometimes there are convergence problems in the default estimation procedure that is used for estimating variances. Here, in the face of high correlation between some of the predictors, I resort to a bootstrapping procedure.
+```
 
 
 ## Censored and Truncated Regression Models
@@ -574,19 +719,55 @@ res<-survreg(Surv(log(durat),uncensored, type="right") ~ workprg+priors+
 summary(res)
 ```
 
+
+```{r}
+res_margins <- margins::margins(res, vce = c("bootstrap")) 
+```
+
+
 ### The Heckman, or Sample Selection Model
 
-The models are useful when the sample selection is not random, but whehter an individual is in the sample depends on individual characteristics. For example, when studying wage determination for married women, some women are not in the labour force, therefore their wages are zero.
+The models are useful when the sample selection is not random, but whether an individual is in the sample depends on individual characteristics. For example, when studying wage determination for married women, some women are not in the labour force, therefore their wages are zero.
 
 The Heckit procedure involves two steps, estimating both the selection equation and the equation of interest. Function `selection()` in the **sampleSelection** package performs both steps; therefore, it needs both equations among its arguments. (The selection equation is, in fact, a probit model.)
+
+As comparison we estimate a linear model
+
+```{r}
+wage.lm <- lm(log(wage)~educ+exper, 
+              data=mroz)
+```
 
 
 ```{r}
 data("mroz", package='wooldridge')
-wage.heckit <- selection(inlf~age+educ+I(kidslt6+kidsge6)+mtr,
-                         log(wage)~educ+exper, 
-                         data=mroz, method="ml")
+# One step ML procedure
+wage.heckit <- sampleSelection::selection(inlf~age+educ+I(kidslt6+kidsge6)+mtr, # modelling the selection
+                                          log(wage)~educ+exper, # regression of interest
+                                          data=mroz, method="ml")
+
+```
+
+
+```{r}
 summary(wage.heckit)
 ```
 
+```{r}
+wage.heckit_2S <- sampleSelection::selection(inlf~age+educ+I(kidslt6+kidsge6)+mtr, # modelling the selection
+                                             log(wage)~educ+exper, # regression of interest
+                                             method = "2step",
+                                             data=mroz)
+
+```
+
+
+```{r}
+summary(wage.heckit_2S)
+```
+
+
+```{r}
+modelsummary(list(wage.heckit))
+```
 
