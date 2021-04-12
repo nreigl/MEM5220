@@ -8,7 +8,7 @@ editor_options:
     wrap: 72
 ---
 
-```{r setup, include=FALSE}
+```{r setup, inclde=FALSE}
 knitr::opts_chunk$set(echo = TRUE, autodep = TRUE)
 # Set plotting to bw plot default, but with transparent background elements.
 # Note transparency requires the panel.background, plot.background, and device background all be set!

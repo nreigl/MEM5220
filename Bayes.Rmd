@@ -1,0 +1,46 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+editor_options: 
+  chunk_output_type: console
+  markdown: 
+    wrap: 72
+---
+
+
+# Bayesian econometrics {#bayes}
+
+
+To load the dataset and necessary functions: 
+
+
+```{r, echo=TRUE, message=FALSE, results='hide'}
+# This function 1. checks if the packages are installed. 2. It installs the packages if they were not in the list of installed packages. 3. It loads the packages into the workspace
+# devtools::install_github("ccolonescu/PoEdata")
+PACKAGES<-c(
+            "tidyverse",  # for data manipulation and ggplots
+            "broom",  # Tidy regression output
+            "tidymodels", # packages for modeling and machine learning using 
+            "car", # Companion to applied regression
+            "knitr", # knit functions
+            "modelsummary", 
+            "brms", 
+            # "kableExtra", # extended knit functions for objects exported from other packages
+            "AER", #  Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008)
+             # "PoEdata", # R data sets for "Principles of Econometrics" by Hill, Griffiths, and Lim, 4e, Wiley. https://github.com/ccolonescu/PoEdata
+            "wooldridge",  # Wooldrige Datasets
+            "scales", # scale helper functions such as percent 
+            "margins", # Stata like margin functions
+            "magrittr") #  pipes
+inst<-match(PACKAGES, .packages(all=TRUE))
+need<-which(is.na(inst))
+# if (length(need)>0) pak::pkg_install(PACKAGES[need])
+if (length(need)>0) install.packages(PACKAGES[need])
+lapply(PACKAGES, require, character.only=T)
+```
+
+This section serves as an easy introduction into the concept of Bayesian statistics. 
+
+
+

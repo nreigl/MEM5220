@@ -684,7 +684,7 @@ Group covariance matrix of errors
 round(gglsmod$sigma,3)
 ```
 
-The correlations between the pairs of residuals (in time) for the same individual do do not die in out with the distance in time, resembling very much the random effects structure. 
+The correlations between the pairs of residuals (in time) for the same individual do not die out with the distance in time, resembling very much the random effects structure. 
 
 
 Fixed effects GLS (FEGLS)
@@ -922,7 +922,7 @@ head(DemocracyIncome, 4)
 Estimate an OLS model with *within* time fixed effects. 
 
 ```{r}
-mco <- plm(democracy ~ lag(democracy) + lag(income), 
+mco <- plm(democracy ~ plm::lag(democracy) + plm::lag(income), # note he lag
            DemocracyIncome, index = c("country", "year"), 
            model = "within", effect = "time",
            subset = sample == 1)
@@ -946,9 +946,9 @@ With respect to the OLS model, the autoregressive coefficient is smaller. After 
 Now we estimate the model with the Anderson and Hsiao (1982) estimator. For that one must specify that both the regressand and regressors are differenced and that the lagged endogenous variable in differences is instrumented wit the endogenous in levels lagged two periods. Acemoglu et al. (2008) use the second lag of per capita income as a second instrument. 
 
 ```{r}
-ahsiao <- plm(diff(democracy) ~ lag(diff(democracy)) + 
-              lag(diff(income)) + year - 1  | 
-              lag(democracy, 2) + lag(income, 2) + year - 1, 
+ahsiao <- plm(diff(democracy) ~ plm::lag(diff(democracy)) + 
+              plm::lag(diff(income)) + year - 1  | 
+              plm::lag(democracy, 2) + plm::lag(income, 2) + year - 1, 
               DemocracyIncome, index = c("country", "year"),
               model = "pooling", subset = sample == 1)
 coef(summary(ahsiao))[1:2, ]
@@ -965,9 +965,9 @@ The IV approach presented in the previous section is inefficient for two reasons
 
 The **GMM** estimation of a panel data model is performed through the `plm::pgmm()` command. 
 ```{r}
-diff1 <- pgmm(democracy ~ lag(democracy) + lag(income) | # regulars regressors
-              lag(democracy, 2:99)| #  GMM instruments
-              lag(income, 2), # "normal" instruments
+diff1 <- pgmm(democracy ~ plm::lag(democracy) + plm::lag(income) | # regulars regressors
+              plm::lag(democracy, 2:99)| #  GMM instruments
+              plm::lag(income, 2), # "normal" instruments
               DemocracyIncome, index=c("country", "year"), 
               model="onestep", effect="twoways",  # Estimation procedure
               subset = sample == 1)
@@ -991,9 +991,9 @@ The main drawback of the difference **GMM** estimator is that lagged variables o
 System GMM
 
 ```{r}
-sys2 <- pgmm(democracy ~ lag(democracy) + lag(income) |  # regressors 
-             lag(democracy, 2:99)|  # GMM instruments
-              lag(income, 2), # "normal" instruments
+sys2 <- pgmm(democracy ~ plm::lag(democracy) + plm::lag(income) |  # regressors 
+             plm::lag(democracy, 2:99)|  # GMM instruments
+              plm::lag(income, 2), # "normal" instruments
              DemocracyIncome, index = c("country", "year"), 
              model = "twosteps", effect = "twoways",
              transformation = "ld") # System GMM level and differences
