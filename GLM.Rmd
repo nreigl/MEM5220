@@ -469,14 +469,12 @@ datasummary_skim(nels_small)
 ```
 
 
-
 ```{r}
 nels_small %>%
   dplyr::select(psechoice, grades) %>% 
   dplyr::group_by(psechoice) %>%
   datasummary_skim()
 ```
-
 
 
 ```{r}
@@ -834,3 +832,9 @@ summary(wage.heckit_2S)
 
 As you can see, the selection corrections did not have a big effect on any of the parameters of interest. The estimated returns to education and experience are a bit larger in the selection regressions, but the difference is really small. The OLS estimates diverge more from the Heckit estimates, indicating a bias stemming from a sample selection problem. The 2-stage model also provides  the estimated coefficient on the inverse Mills ratio is given for the Heckman model. The fact that it is weakly statistically different from zero is consistent with the idea that selection bias might be a problem in this case. 
 
+## Non-linear Panel data 
+
+Generalized linear models are estimated using the maximum liklihood method, which requires to make strong hypothesis concerning the distribution of the response. When those hypothesis are not valid, the estimator is no longer consistent. That is a general drawback of maximum liklihood estimated adds another layer to that problem. In linear panels, the individual effect can be removed using the *within* or first differences transformation or can be directly estimated. This is not the case for limited dependent variables. When individual effects are estimated, their inconsistency "contaminates" the estimation of $\beta$, which becomes inconsistent as well. This incidental parameter problems leads to abandoning the linear fixed effects model. Three possible alternatives aer most common: 
+
+ - RE model
+ - FE model with sufficient statistic
