@@ -786,24 +786,32 @@ The models are useful when the sample selection is not random, but whether an in
 
 The Heckit procedure involves two steps, estimating both the selection equation and the equation of interest. Function `selection()` in the **sampleSelection** package performs both steps; therefore, it needs both equations among its arguments. (The selection equation is, in fact, a probit model.)
 
+```{r}
+data("mroz", package='wooldridge')
+```
+
+
 As comparison we estimate a linear model
 
+
+
 ```{r}
-# OLS: log wage regression on LF participants only
-wage.lm <- lm(log(wage)~educ+exper, 
-              data=subset(mroz, inlf==1))
+# OLS: log wage regression on observed data (LF participants only)
+wage.lm_obs <- lm(log(wage)~educ+exper, 
+              data=subset(mroz, inlf==1)) 
 ```
+
 
 In principle, the selection equation and the wage equation could have exactly the same set of regressors. But this is usually not a good idea. To get a good estimate of the selection model, it is very desirable to have at least one variable in the selection equation that acts like an instrument: that is, a variable that one expects would affect the selection process, but not the wage process, except through selection. In this example, the kids variable might play such a role, if we can assume that women with kids may be more likely to be stay-at-home moms, but for working moms having kids would not affect their hourly pay rate.
 
 ```{r}
-data("mroz", package='wooldridge')
 # One step ML procedure
 wage.heckit <- sampleSelection::selection(inlf~age+educ+I(kidslt6+kidsge6)+mtr, # modelling the selection
-                                          log(wage)~educ+exper, # regression of interest
+                                          log(wage)~educ+exper, # outcome equation
                                           data=mroz, method="ml")
 
 ```
+
 
 
 ```{r}
@@ -819,8 +827,9 @@ wage.heckit_2S <- sampleSelection::selection(inlf~age+educ+I(kidslt6+kidsge6)+mt
 ```
 
 ```{r}
-summary(wage.lm)
+summary(wage.lm_obs)
 ```
+
 
 ```{r}
 summary(wage.heckit)
@@ -830,7 +839,28 @@ summary(wage.heckit)
 summary(wage.heckit_2S)
 ```
 
+
+
+
 As you can see, the selection corrections did not have a big effect on any of the parameters of interest. The estimated returns to education and experience are a bit larger in the selection regressions, but the difference is really small. The OLS estimates diverge more from the Heckit estimates, indicating a bias stemming from a sample selection problem. The 2-stage model also provides  the estimated coefficient on the inverse Mills ratio is given for the Heckman model. The fact that it is weakly statistically different from zero is consistent with the idea that selection bias might be a problem in this case. 
+I don't know if marginal effects can be calculated directly from the sampleSelection object. Calculation marginal for the model selection separately can be easily done though. 
+
+```{r}
+mroz$allkids <- mroz$kidslt6 + mroz$kidsge6 # I(kidslt6+kidsge6) is not a term that can be "broomed"
+selection_probit <- glm(inlf~age+educ+allkids+mtr, family = binomial(link = probit), data = mroz)
+summary(selection_probit)
+```
+
+```{r}
+summary(margins(selection_probit))
+```
+
+
+```{r}
+cplot(selection_probit, "allkids")
+```
+
+
 
 ## Non-linear Panel data 
 
