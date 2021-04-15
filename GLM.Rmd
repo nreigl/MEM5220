@@ -400,6 +400,19 @@ plot(effects_logit_participation)
 ```
 
 
+
+Average marginal effects
+
+```{r}
+effects_logit <- margins::margins(logitres)
+effects_probit <- margins::margins(probitres)
+```
+
+```{r}
+modelsummary::modelsummary(list("Logit" = effects_logit,"Probit" = effects_probit), stars = TRUE, notes = "Average marginal effects")
+```
+
+
 If one desires subgroup effects, simply pass a subset of data to the data argument:
 
 ```{r}
@@ -409,7 +422,6 @@ effects_logit_participation_subset <- margins::margins(logitres, data = subset(m
 ```{r}
 summary(effects_logit_participation_subset)
 ```
-
 
 
 ```{r fig23, fig.cap='Logit effect plot', out.width='80%', fig.asp=.75, fig.align='center'}
@@ -433,17 +445,23 @@ The function `cplot()` provides the commonly needed visual summaries of predicti
 margins::cplot(logitres, x = "educ", se.type = "shade")
 ```
 
+Margins works also with predictions: 
 
-Average marginal effects
 
 ```{r}
-effects_logit <- margins::margins(logitres)
-effects_probit <- margins::margins(probitres)
+effects_logit_participation_prediction1 <- margins::margins(logitres, at = list(kidslt6 = 3)) # marginal effect if everyone had 3 kids which are younger than 6 years.
 ```
 
 ```{r}
-modelsummary::modelsummary(list("Logit" = effects_logit,"Probit" = effects_probit), stars = TRUE, notes = "Average marginal effects")
+summary(effects_logit_participation_prediction1)
 ```
+
+```{r}
+effects_logit_participation_prediction2 <- margins::margins(logitres, at = list(kidslt6 = 3, kidsge6 = 3)) # marginal effect if everyone had 3 kids which are younger than 6 years and 3 kids greater equal 6 years old.
+```
+
+
+
 
 
 ## Multinomial Logit
@@ -468,14 +486,7 @@ data("nels_small", package="PoEdata")
 datasummary_skim(nels_small)
 ```
 
-
-```{r}
-nels_small %>%
-  dplyr::select(psechoice, grades) %>% 
-  dplyr::group_by(psechoice) %>%
-  datasummary_skim()
-```
-
+We selected the group who did not attend a college to be our base group, so that the parameters $\beta_{11} = \beta{21} = 0$.
 
 ```{r}
 nels.multinom <- nnet::multinom(psechoice~grades, data=nels_small)
@@ -483,11 +494,15 @@ summary(nels.multinom)
 ```
 
 ```{r}
-summary(margins::marginal_effects(nels.multinom))
+margins::margins(nels.multinom, vce = "none")
 ```
 
 
 Recall that a larger numerical value of the variable grades represents a poorer academic performance. If the value of GRADES increases, the probability that high school graduates will choose a two-year or a four-year college goes down, relative to the probability of not attending college.
+
+
+The usual function `predict` can calculate the predicted probabilities of choosing any of the three secondary education levels for two arbitrary grades: one at the median grade in the sample, and the other at the top fifth percent.
+
 
 ```{r}
 medGrades <- median(nels_small$grades)
@@ -498,8 +513,14 @@ pred
 ```
 
 
-The usual function `predict` can calculate the predicted probabilities of choosing any of the three secondary education levels for two arbitrary grades: one at the median grade in the sample, and the other at the top fifth percent.
+```{r}
+predi1 <-prediction::prediction(nels.multinom, data = (newdat))
+```
 
+
+
+
+Choosing no college is 0.1810 for the student with median grades, but this probability is reduced to 0.0178 for students with top grades. Similarly, the probability of choosing a two-year school is 0.2856 for the average student but is 0.0966 for the better student. 
 
 
 Plot cumulative predicted probabilities 
@@ -666,7 +687,7 @@ The probabilities for each choice can be calculated as in the next code fragment
   Dp3DGrades <- pnorm(mu2-b*xGrade)*b
 ```
   
-For instance, the marginal effect of grades on the probability of attending a four-year college for a student with average grade (6.64) and for a student in the top 5 percent (2.635) are, respectively, `r round(Dp3DGrades[1], digits = 3)` and `r round(Dp3DGrades[[2]], digits = 3)`. These are similar magnitudes as in the the multinonomial logit example.  
+For instance, the marginal effect of grades on the probability of attending a four-year college for a student with average grade (6.64) and for a student in the top 5 percent (2.635) are, respectively, `r round(Dp3DGrades[1], digits = 3)` and `r round(Dp3DGrades[[2]], digits = 3)`. These are similar magnitudes as in the the multinomial logit example.  
   
   
   
@@ -862,9 +883,3 @@ cplot(selection_probit, "allkids")
 
 
 
-## Non-linear Panel data 
-
-Generalized linear models are estimated using the maximum liklihood method, which requires to make strong hypothesis concerning the distribution of the response. When those hypothesis are not valid, the estimator is no longer consistent. That is a general drawback of maximum liklihood estimated adds another layer to that problem. In linear panels, the individual effect can be removed using the *within* or first differences transformation or can be directly estimated. This is not the case for limited dependent variables. When individual effects are estimated, their inconsistency "contaminates" the estimation of $\beta$, which becomes inconsistent as well. This incidental parameter problems leads to abandoning the linear fixed effects model. Three possible alternatives aer most common: 
-
- - RE model
- - FE model with sufficient statistic

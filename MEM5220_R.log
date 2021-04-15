@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.11.25)  13 APR 2021 16:06
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.11.25)  13 APR 2021 19:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -641,7 +641,8 @@ Package: natbib 2010/09/13 8.31b (PWD, AO)
 \bibsep=\skip75
 LaTeX Info: Redefining \cite on input line 694.
 \c@NAT@ctr=\count329
-) (./MEM5220_R.aux)
+)
+No file MEM5220_R.aux.
 \openout1 = `MEM5220_R.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 160.
@@ -822,8 +823,7 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 [1
 
 
-{/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (./MEM5
-220_R.toc)
+{/usr/local/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 \tf@toc=\write4
 \openout4 = `MEM5220_R.toc'.
 
@@ -835,11 +835,60 @@ l.169 \chapter*{Introduction}\label{introduction}}
                                                    [1
 
 ]
+
+Package natbib Warning: Citation `team2013r' on page 2 undefined on input line 
+178.
+
+
+Package natbib Warning: Citation `heiss2016using' on page 2 undefined on input 
+line 203.
+
+
+Package natbib Warning: Citation `wooldridge2015introductory' on page 2 undefin
+ed on input line 203.
+
+
+Package natbib Warning: Citation `heiss2016using' on page 2 undefined on input 
+line 212.
+
+
+Package natbib Warning: Citation `dalpiaz2016' on page 2 undefined on input lin
+e 212.
+
+
+Package natbib Warning: Citation `colonescu2018' on page 2 undefined on input l
+ine 212.
+
+
+Package natbib Warning: Citation `Hanck2018' on page 2 undefined on input line 
+212.
+
+
+Package natbib Warning: Citation `Rodrigues2018' on page 2 undefined on input l
+ine 212.
+
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 2
 17.
 (/usr/local/texlive/2020/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [2
+)
+
+Package natbib Warning: Citation `Hanck2018' on page 2 undefined on input line 
+217.
+
+
+Package natbib Warning: Citation `dalpiaz2016' on page 2 undefined on input lin
+e 219.
+
+
+Package natbib Warning: Citation `colonescu2018' on page 2 undefined on input l
+ine 221.
+
+
+Package natbib Warning: Citation `oswald2018introduction' on page 2 undefined o
+n input line 223.
+
+[2
 
 ]
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
@@ -889,7 +938,7 @@ LaTeX Warning: Float too large for page by 589.46222pt on input line 3089.
 Package natbib Warning: Citation `Arellano1991' on page 30 undefined on input l
 ine 3220.
 
-<MEM5220_R_files/figure-latex/unnamed-chunk-100-1.png, id=348, 881.2925pt x 533
+<MEM5220_R_files/figure-latex/unnamed-chunk-100-1.png, id=267, 881.2925pt x 533
 .995pt>
 File: MEM5220_R_files/figure-latex/unnamed-chunk-100-1.png Graphic file (type p
 ng)
@@ -900,10 +949,14 @@ used on input line 3269.
 [30] [31 <./MEM5220_R_files/figure-latex/unnamed-chunk-100-1.png>] [32] [33] [3
 4]
 Chapter 2.
+
+Package natbib Warning: Citation `dalpiaz2016' on page 35 undefined on input li
+ne 3610.
+
 [35
 
 ]
-<MEM5220_R_files/figure-latex/unnamed-chunk-119-1.png, id=398, 887.315pt x 417.
+<MEM5220_R_files/figure-latex/unnamed-chunk-119-1.png, id=316, 887.315pt x 417.
 56pt>
 File: MEM5220_R_files/figure-latex/unnamed-chunk-119-1.png Graphic file (type p
 ng)
@@ -912,7 +965,7 @@ Package pdftex.def Info: MEM5220_R_files/figure-latex/unnamed-chunk-119-1.png
 used on input line 4125.
 (pdftex.def)             Requested size: 379.41234pt x 178.54697pt.
 [36]
-<MEM5220_R_files/figure-latex/unnamed-chunk-122-1.png, id=410, 833.1125pt x 397
+<MEM5220_R_files/figure-latex/unnamed-chunk-122-1.png, id=329, 833.1125pt x 397
 .485pt>
 File: MEM5220_R_files/figure-latex/unnamed-chunk-122-1.png Graphic file (type p
 ng)
@@ -921,7 +974,7 @@ Package pdftex.def Info: MEM5220_R_files/figure-latex/unnamed-chunk-122-1.png
 used on input line 4180.
 (pdftex.def)             Requested size: 379.42273pt x 181.02577pt.
 [37 <./MEM5220_R_files/figure-latex/unnamed-chunk-119-1.png>]
-<MEM5220_R_files/figure-latex/unnamed-chunk-125-1.png, id=416, 869.2475pt x 536
+<MEM5220_R_files/figure-latex/unnamed-chunk-125-1.png, id=335, 869.2475pt x 536
 .0025pt>
 File: MEM5220_R_files/figure-latex/unnamed-chunk-125-1.png Graphic file (type p
 ng)
@@ -931,21 +984,21 @@ used on input line 4214.
 (pdftex.def)             Requested size: 379.41945pt x 233.96072pt.
 [38 <./MEM5220_R_files/figure-latex/unnamed-chunk-122-1.png> <./MEM5220_R_files
 /figure-latex/unnamed-chunk-125-1.png>]
-<MEM5220_R_files/figure-latex/fig22-1.png, id=424, 827.09pt x 515.9275pt>
+<MEM5220_R_files/figure-latex/fig22-1.png, id=343, 827.09pt x 515.9275pt>
 File: MEM5220_R_files/figure-latex/fig22-1.png Graphic file (type png)
 <use MEM5220_R_files/figure-latex/fig22-1.png>
 Package pdftex.def Info: MEM5220_R_files/figure-latex/fig22-1.png  used on inpu
 t line 4255.
 (pdftex.def)             Requested size: 433.62297pt x 270.48811pt.
 [39 <./MEM5220_R_files/figure-latex/fig22-1.png>] [40]
-<MEM5220_R_files/figure-latex/fig21-1.png, id=436, 832.10875pt x 517.935pt>
+<MEM5220_R_files/figure-latex/fig21-1.png, id=357, 832.10875pt x 517.935pt>
 File: MEM5220_R_files/figure-latex/fig21-1.png Graphic file (type png)
 <use MEM5220_R_files/figure-latex/fig21-1.png>
 Package pdftex.def Info: MEM5220_R_files/figure-latex/fig21-1.png  used on inpu
 t line 4394.
 (pdftex.def)             Requested size: 433.62592pt x 269.90466pt.
 [41 <./MEM5220_R_files/figure-latex/fig21-1.png>] [42] [43]
-<MEM5220_R_files/figure-latex/unnamed-chunk-141-1.png, id=456, 833.1125pt x 342
+<MEM5220_R_files/figure-latex/unnamed-chunk-141-1.png, id=378, 833.1125pt x 342
 .27875pt>
 File: MEM5220_R_files/figure-latex/unnamed-chunk-141-1.png Graphic file (type p
 ng)
@@ -953,194 +1006,96 @@ ng)
 Package pdftex.def Info: MEM5220_R_files/figure-latex/unnamed-chunk-141-1.png  
 used on input line 4789.
 (pdftex.def)             Requested size: 379.42273pt x 155.8833pt.
-<MEM5220_R_files/figure-latex/fig23-1.png, id=457, 881.2925pt x 651.43375pt>
+<MEM5220_R_files/figure-latex/fig23-1.png, id=379, 881.2925pt x 651.43375pt>
 File: MEM5220_R_files/figure-latex/fig23-1.png Graphic file (type png)
 <use MEM5220_R_files/figure-latex/fig23-1.png>
 Package pdftex.def Info: MEM5220_R_files/figure-latex/fig23-1.png  used on inpu
-t line 4925.
+t line 4969.
 (pdftex.def)             Requested size: 433.62561pt x 320.52734pt.
 [44 <./MEM5220_R_files/figure-latex/unnamed-chunk-141-1.png>]
-<MEM5220_R_files/figure-latex/fig24-1.png, id=463, 832.10875pt x 516.93124pt>
+<MEM5220_R_files/figure-latex/fig24-1.png, id=386, 832.10875pt x 516.93124pt>
 File: MEM5220_R_files/figure-latex/fig24-1.png Graphic file (type png)
 <use MEM5220_R_files/figure-latex/fig24-1.png>
 Package pdftex.def Info: MEM5220_R_files/figure-latex/fig24-1.png  used on inpu
-t line 5015.
+t line 5059.
 (pdftex.def)             Requested size: 433.62592pt x 269.38159pt.
-<MEM5220_R_files/figure-latex//hist_16ce81dcdcbf1.pdf, id=464, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce81dcdcbf1.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce81dcdcbf1.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce81dcdcbf1.pdf  
-used on input line 5103.
+[45 <./MEM5220_R_files/figure-latex/fig23-1.png>]
+<MEM5220_R_files/figure-latex//hist_3c634bd2c059.pdf, id=394, 48.18pt x 12.045p
+t>
+File: MEM5220_R_files/figure-latex//hist_3c634bd2c059.pdf Graphic file (type pd
+f)
+<use MEM5220_R_files/figure-latex//hist_3c634bd2c059.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3c634bd2c059.pdf  u
+sed on input line 5237.
 (pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-<MEM5220_R_files/figure-latex//hist_16ce83e533329.pdf, id=465, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce83e533329.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce83e533329.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce83e533329.pdf  
-used on input line 5104.
+<MEM5220_R_files/figure-latex//hist_3c6355a7d18.pdf, id=395, 48.18pt x 12.045pt
+>
+File: MEM5220_R_files/figure-latex//hist_3c6355a7d18.pdf Graphic file (type pdf
+)
+<use MEM5220_R_files/figure-latex//hist_3c6355a7d18.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3c6355a7d18.pdf  us
+ed on input line 5238.
 (pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-<MEM5220_R_files/figure-latex//hist_16ce8626329ca.pdf, id=466, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce8626329ca.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce8626329ca.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce8626329ca.pdf  
-used on input line 5105.
+<MEM5220_R_files/figure-latex//hist_3c631d4b78fb.pdf, id=396, 48.18pt x 12.045p
+t>
+File: MEM5220_R_files/figure-latex//hist_3c631d4b78fb.pdf Graphic file (type pd
+f)
+<use MEM5220_R_files/figure-latex//hist_3c631d4b78fb.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3c631d4b78fb.pdf  u
+sed on input line 5239.
 (pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-<MEM5220_R_files/figure-latex//hist_16ce8329f2b7b.pdf, id=467, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce8329f2b7b.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce8329f2b7b.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce8329f2b7b.pdf  
-used on input line 5106.
+<MEM5220_R_files/figure-latex//hist_3c633223916.pdf, id=397, 48.18pt x 12.045pt
+>
+File: MEM5220_R_files/figure-latex//hist_3c633223916.pdf Graphic file (type pdf
+)
+<use MEM5220_R_files/figure-latex//hist_3c633223916.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3c633223916.pdf  us
+ed on input line 5240.
 (pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-<MEM5220_R_files/figure-latex//hist_16ce8472c6ba6.pdf, id=468, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce8472c6ba6.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce8472c6ba6.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce8472c6ba6.pdf  
-used on input line 5107.
+<MEM5220_R_files/figure-latex//hist_3c634cf43f81.pdf, id=398, 48.18pt x 12.045p
+t>
+File: MEM5220_R_files/figure-latex//hist_3c634cf43f81.pdf Graphic file (type pd
+f)
+<use MEM5220_R_files/figure-latex//hist_3c634cf43f81.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3c634cf43f81.pdf  u
+sed on input line 5241.
 (pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-<MEM5220_R_files/figure-latex//hist_16ce877559fc4.pdf, id=469, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce877559fc4.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce877559fc4.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce877559fc4.pdf  
-used on input line 5108.
+<MEM5220_R_files/figure-latex//hist_3c637848562a.pdf, id=399, 48.18pt x 12.045p
+t>
+File: MEM5220_R_files/figure-latex//hist_3c637848562a.pdf Graphic file (type pd
+f)
+<use MEM5220_R_files/figure-latex//hist_3c637848562a.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3c637848562a.pdf  u
+sed on input line 5242.
 (pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-<MEM5220_R_files/figure-latex//hist_16ce81b583d97.pdf, id=470, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce81b583d97.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce81b583d97.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce81b583d97.pdf  
-used on input line 5109.
+<MEM5220_R_files/figure-latex//hist_3c63568cfca2.pdf, id=400, 48.18pt x 12.045p
+t>
+File: MEM5220_R_files/figure-latex//hist_3c63568cfca2.pdf Graphic file (type pd
+f)
+<use MEM5220_R_files/figure-latex//hist_3c63568cfca2.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3c63568cfca2.pdf  u
+sed on input line 5243.
 (pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-<MEM5220_R_files/figure-latex//hist_16ce82bd8fcf8.pdf, id=471, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce82bd8fcf8.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce82bd8fcf8.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce82bd8fcf8.pdf  
-used on input line 5110.
+<MEM5220_R_files/figure-latex//hist_3c6346c503a7.pdf, id=401, 48.18pt x 12.045p
+t>
+File: MEM5220_R_files/figure-latex//hist_3c6346c503a7.pdf Graphic file (type pd
+f)
+<use MEM5220_R_files/figure-latex//hist_3c6346c503a7.pdf>
+Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_3c6346c503a7.pdf  u
+sed on input line 5244.
 (pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-<MEM5220_R_files/figure-latex//hist_16ce86b4eb761.pdf, id=472, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce86b4eb761.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce86b4eb761.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce86b4eb761.pdf  
-used on input line 5130.
-(pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-<MEM5220_R_files/figure-latex//hist_16ce843da0c41.pdf, id=473, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce843da0c41.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce843da0c41.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce843da0c41.pdf  
-used on input line 5131.
-(pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-[45 <./MEM5220_R_files/figure-latex/fig23-1.png>] [46 <./MEM5220_R_files/figure
--latex/fig24-1.png>]
-<MEM5220_R_files/figure-latex/unnamed-chunk-153-1.png, id=485, 890.32625pt x 53
-6.0025pt>
-File: MEM5220_R_files/figure-latex/unnamed-chunk-153-1.png Graphic file (type p
-ng)
-<use MEM5220_R_files/figure-latex/unnamed-chunk-153-1.png>
-Package pdftex.def Info: MEM5220_R_files/figure-latex/unnamed-chunk-153-1.png  
-used on input line 5201.
-(pdftex.def)             Requested size: 379.40933pt x 228.41554pt.
-<MEM5220_R_files/figure-latex//hist_16ce876fb5b1f.pdf, id=487, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce876fb5b1f.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce876fb5b1f.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce876fb5b1f.pdf  
-used on input line 5243.
-(pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-<MEM5220_R_files/figure-latex//hist_16ce820d65c99.pdf, id=488, 48.18pt x 12.045
-pt>
-File: MEM5220_R_files/figure-latex//hist_16ce820d65c99.pdf Graphic file (type p
-df)
-<use MEM5220_R_files/figure-latex//hist_16ce820d65c99.pdf>
-Package pdftex.def Info: MEM5220_R_files/figure-latex//hist_16ce820d65c99.pdf  
-used on input line 5244.
-(pdftex.def)             Requested size: 48.42024pt x 12.10504pt.
-[47 <./MEM5220_R_files/figure-latex/unnamed-chunk-153-1.png>] [48] [49] [50] [5
-1] [52]
-Underfull \vbox (badness 10000) detected at line 5848
- []
-
-[53] [54]
-<MEM5220_R_files/figure-latex/unnamed-chunk-184-1.png, id=530, 837.1275pt x 397
-.485pt>
-File: MEM5220_R_files/figure-latex/unnamed-chunk-184-1.png Graphic file (type p
-ng)
-<use MEM5220_R_files/figure-latex/unnamed-chunk-184-1.png>
-Package pdftex.def Info: MEM5220_R_files/figure-latex/unnamed-chunk-184-1.png  
-used on input line 6014.
-(pdftex.def)             Requested size: 379.41188pt x 180.15239pt.
-(./MEM5220_R.bbl [55 <./MEM5220_R_files/figure-latex/unnamed-chunk-184-1.png>] 
-[56] [57] [58 <./MEM5220_R_files/figure-latex//hist_16ce81dcdcbf1.pdf> <./MEM52
-20_R_files/figure-latex//hist_16ce83e533329.pdf> <./MEM5220_R_files/figure-late
-x//hist_16ce8626329ca.pdf> <./MEM5220_R_files/figure-latex//hist_16ce8329f2b7b.
-pdf> <./MEM5220_R_files/figure-latex//hist_16ce8472c6ba6.pdf> <./MEM5220_R_file
-s/figure-latex//hist_16ce877559fc4.pdf> <./MEM5220_R_files/figure-latex//hist_1
-6ce81b583d97.pdf> <./MEM5220_R_files/figure-latex//hist_16ce82bd8fcf8.pdf> <./M
-EM5220_R_files/figure-latex//hist_16ce86b4eb761.pdf> <./MEM5220_R_files/figure-
-latex//hist_16ce843da0c41.pdf> <./MEM5220_R_files/figure-latex//hist_16ce876fb5
-b1f.pdf> <./MEM5220_R_files/figure-latex//hist_16ce820d65c99.pdf>] [59] [60])
-
-Package natbib Warning: There were undefined citations.
-
-[61
-
-] (./MEM5220_R.aux) ) 
+! Dimension too large.
+\depth ->\dp \collectedbox 
+                           
+l.27324 \end{threeparttable}\par\end{centerbox}
+                                                
 Here is how much of TeX's memory you used:
- 20895 strings out of 479485
- 355414 string characters out of 5871977
- 865311 words of memory out of 5000000
- 37100 multiletter control sequences out of 15000+600000
- 648666 words of font info for 169 fonts, out of 8000000 for 9000
+ 20663 strings out of 479485
+ 349631 string characters out of 5871977
+ 4161667 words of memory out of 5000000
+ 36955 multiletter control sequences out of 15000+600000
+ 648204 words of font info for 164 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 79i,13n,85p,843b,868s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-
-ts1.enc}{/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/
-usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texl
-ive/2020/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2020/t
-exmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}{/usr/local/texlive/2020/texmf-dist/
-fonts/enc/dvips/lm/lm-ec.enc}</usr/local/texlive/2020/texmf-dist/fonts/type1/pu
-blic/lm/lmbx10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lm
-bx12.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmbx5.pfb></
-usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmbx7.pfb></usr/local/t
-exlive/2020/texmf-dist/fonts/type1/public/lm/lmex10.pfb></usr/local/texlive/202
-0/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/texlive/2020/texmf-di
-st/fonts/type1/public/lm/lmmi5.pfb></usr/local/texlive/2020/texmf-dist/fonts/ty
-pe1/public/lm/lmmi7.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/
-lm/lmmib10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmr10.
-pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmr12.pfb></usr/l
-ocal/texlive/2020/texmf-dist/fonts/type1/public/lm/lmr17.pfb></usr/local/texliv
-e/2020/texmf-dist/fonts/type1/public/lm/lmr5.pfb></usr/local/texlive/2020/texmf
--dist/fonts/type1/public/lm/lmr6.pfb></usr/local/texlive/2020/texmf-dist/fonts/
-type1/public/lm/lmr7.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public
-/lm/lmr8.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmri10.p
-fb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmro10.pfb></usr/l
-ocal/texlive/2020/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></usr/local/texli
-ve/2020/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></usr/local/texlive/2020/tex
-mf-dist/fonts/type1/public/lm/lmsy7.pfb></usr/local/texlive/2020/texmf-dist/fon
-ts/type1/public/lm/lmtk10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/p
-ublic/lm/lmtt10.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/l
-mtt8.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on MEM5220_R.pdf (62 pages, 795460 bytes).
-PDF statistics:
- 876 PDF objects out of 1000 (max. 8388607)
- 742 compressed objects within 8 object streams
- 238 named destinations out of 1000 (max. 500000)
- 22916 words of extra memory for PDF output out of 24883 (max. 10000000)
+ 79i,13n,85p,820b,869s stack positions out of 5000i,500n,10000p,200000b,80000s
 
+!  ==> Fatal error occurred, no output PDF file produced!
