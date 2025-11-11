@@ -8,7 +8,7 @@ editor_options:
     wrap: 72
 ---
 
-```{r setup, inclde=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, autodep = TRUE)
 # Set plotting to bw plot default, but with transparent background elements.
 # Note transparency requires the panel.background, plot.background, and device background all be set!
@@ -210,26 +210,25 @@ The ordinary least squares (OLS) estimators are
 Ingredients for the OLS formulas
 
 ```{r}
-attach(ceosal1)
-cov(roe, salary)
+cov(ceosal1$roe, ceosal1$salary)
 ```
 
 ```{r}
-var(roe)
+var(ceosal1$roe)
 ```
 
 ```{r}
-mean(salary)
+mean(ceosal1$salary)
 ```
 
 Manual calculation of the OLS coefficients
 
 ```{r}
-b1hat <- cov(roe,salary)/var(roe)
+b1hat <- cov(ceosal1$roe, ceosal1$salary)/var(ceosal1$roe)
 ```
 
 ```{r}
-b0hat <- mean(salary) - b1hat * mean(roe)
+b0hat <- mean(ceosal1$salary) - b1hat * mean(ceosal1$roe)
 ```
 
 Or use the `lm()` function
@@ -1108,7 +1107,6 @@ sample of 141 students.
 
 ```{r}
 data("gpa1", package = "wooldridge")
-attach(gpa1)
 ?gpa1
 ```
 
@@ -1501,7 +1499,6 @@ during pregnancy and the family income.
 
 ```{r}
 data("bwght")
-attach(bwght)
 ```
 
 ```{r}
@@ -2323,10 +2320,9 @@ coeftest(wlsreg)
 coeftest(wlsreg,hccm)
 
 coeftest(wlsreg, vcov. = vcovHC)
-```
 
-```{r}
-# waldtest(wlsreg, vcov = vcovHC)
+# Note: waldtest with vcov argument removed due to compatibility issues
+# Alternative approach: use linearHypothesis() for testing with robust SE
 ```
 
 The assumption that the variance is proportional to a regressor is

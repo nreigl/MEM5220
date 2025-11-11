@@ -31,6 +31,7 @@ vignettes/*.pdf
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+*.log
 
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
@@ -46,5 +47,20 @@ images/dedication.lyx
 .RData
 .Ruserdata
 
+# Quarto
+/.quarto/
+/_site/
+*.qmd.cache/
+*_files/
+.quarto
+
 # Teaching specific
 problem-sets/selfeval_1_solutions.Rmd
+
+# renv
+renv/
+.Rprofile
+
+# GitHub dependencies cache
+.github/depends.Rds
+.github/R-version

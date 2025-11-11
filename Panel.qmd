@@ -1,0 +1,328 @@
+# Panel Data Models {#sec-panel}
+
+::: {.callout-note}
+## Chapter Overview
+This chapter covers panel data econometrics, including:
+
+- Pooled cross-sections and panel data structure
+- Fixed effects and random effects models
+- Testing procedures for panel data
+- Dynamic panel data models
+:::
+
+```{r}
+#| label: setup-panel
+#| include: false
+# Packages are loaded in before-chapter.R
+# Additional panel-specific packages are already available:
+# plm, pglm, fixest, lfe, lme4, pmdplyr
+```
+
+## Pooled Cross-Sections
+
+Pooled cross sections consist of random samples from the same population at different points in time.
+
+### Changes to Return to Education and the Gender Wage Gap
+
+The data set `cps78_85` includes two pooled cross-sections for the year 1978 and 1985. The dummy variable **y85** is equal to one for observations in 1985 and 0 for observations in 1978.
+
+We estimate a model for:
+
+$$
+\log(w) = \beta_0 + \delta_{0}y85 + \beta_1 educ + \delta_{1} (y85 \times educ) +  \beta_{2} exper +  \beta_{3} \frac{exper^2}{100} + \beta_{4} union + \beta_{5}female + \delta_{2} (y85 \times female) + \epsilon
+$$ {#eq-wage-model}
+
+```{r}
+#| label: load-cps-data
+#| message: false
+data("cps78_85", package = "wooldridge")
+head(cps78_85)
+```
+
+```{r}
+#| label: pooled-ols
+cps_ols <- lm(lwage ~ y85 * (educ + female) + exper + I((exper^2)/100) + union,
+              data = cps78_85)
+summary(cps_ols)
+```
+
+::: {.panel-tabset}
+
+## Summary Output
+
+```{r}
+#| echo: false
+library(broom)
+tidy(cps_ols) %>%
+  knitr::kable(digits = 4)
+```
+
+## Stargazer Table
+
+```{r}
+stargazer::stargazer(cps_ols, type = "text")
+```
+
+:::
+
+### Interpreting Coefficients
+
+**Return to education:**
+
+```{r}
+#| label: return-education
+df_cps_ols <- tidy(cps_ols)
+delta1 <- df_cps_ols %>%
+  dplyr::filter(term == "y85:educ") %>%
+  dplyr::select(estimate) %>%
+  pull()
+```
+
+::: {.callout-tip}
+## Interpretation
+The return to education is estimated to have increased by `r round(delta1, 4)` log points between 1978 and 1985.
+:::
+
+**Gender wage gap:**
+
+```{r}
+#| label: gender-gap
+beta5 <- df_cps_ols %>%
+  dplyr::filter(term == "female") %>%
+  dplyr::select(estimate) %>%
+  pull()
+
+delta5 <- df_cps_ols %>%
+  dplyr::filter(term == "y85:female") %>%
+  dplyr::select(estimate) %>%
+  pull()
+```
+
+The gender wage gap in 1978 was `r round(beta5, 4)` log points.
+
+In 1985, the gap decreased to `r round(beta5 + delta5, 4)` log points, representing a narrowing of `r round(-delta5, 4)` log points.
+
+## Organizing Panel Data {#sec-organizing-panel}
+
+::: {.callout-important}
+## Panel Data Structure
+For panel data methods to work correctly, data must be systematically organized. Usually panel data comes in a **long** structure where each row corresponds to one combination of unit $i$ and time $t$.
+:::
+
+The **plm**, **fixest**, and **lfe** packages are widely used for panel data in R:
+
+- **plm**: Comprehensive panel data package with many estimators
+- **fixest**: Fast fixed effects estimation (recommended for large datasets)
+- **lfe**: Linear models with multiple fixed effects
+- **lme4**: Multilevel and hierarchical models
+- **pmdplyr**: Panel data manipulation with dplyr syntax
+
+::: {.panel-tabset}
+
+## plm Package
+
+For unbalanced panels, specify a panel data frame with `pdata.frame(mydf, index = c("ivar", "tvar"))`. For balanced panels, you can simply define the index `pdata.frame(mydf, index = n)`.
+
+```{r}
+#| label: plm-organize
+data("crime2", package = "wooldridge")
+head(crime2, 5)
+```
+
+::: {.callout-note}
+Wooldridge remarks that the study observations result in a balanced panel of 46 cities, properly sorted.
+:::
+
+```{r}
+#| label: create-pdata
+crime2.p <- plm::pdata.frame(crime2, index = 46)
+```
+
+```{r}
+#| label: show-pdata
+crime2.p[1:6, c("id", "time", "year", "pop", "crimes", "crmrte", "unem")]
+```
+
+## pmdplyr Package
+
+The **pmdplyr** package extends dplyr for panel data:
+
+```{r}
+#| label: pmdplyr-organize
+library(pmdplyr)
+crime2 <- crime2 %>%
+  as_pibble(.i = id, .t = year)
+
+crime2
+```
+
+## fixest Package
+
+**fixest** is the fastest option for large datasets:
+
+```{r}
+#| label: fixest-organize
+#| eval: false
+# fixest works directly with regular data frames
+# No special panel data class needed
+# Just specify panel structure in the formula
+```
+
+:::
+
+### Panel-Specific Computations
+
+```{r}
+#| label: panel-dimensions
+plm::pdim(crime2.p)
+```
+
+## Estimation Methods {#sec-estimation}
+
+::: {.panel-tabset}
+
+## Pooled OLS
+
+Standard OLS ignoring panel structure:
+
+```{r}
+#| label: pooled-model
+pooled <- plm::plm(log(crmrte) ~ d83 + d84 + d85 + d86 + d87 +
+                  lprbarr + lprbconv + lprbpris + lavgsen + lpolpc,
+                data = crime2.p, model = "pooling")
+summary(pooled)
+```
+
+## Fixed Effects
+
+Removes time-invariant unobserved heterogeneity:
+
+```{r}
+#| label: fe-model
+fe_plm <- plm::plm(log(crmrte) ~ d83 + d84 + d85 + d86 + d87 +
+                lprbarr + lprbconv + lprbpris + lavgsen + lpolpc,
+              data = crime2.p, model = "within")
+summary(fe_plm)
+```
+
+## Random Effects
+
+Assumes individual effects uncorrelated with regressors:
+
+```{r}
+#| label: re-model
+re_model <- plm::plm(log(crmrte) ~ d83 + d84 + d85 + d86 + d87 +
+                  lprbarr + lprbconv + lprbpris + lavgsen + lpolpc,
+                data = crime2.p, model = "random")
+summary(re_model)
+```
+
+## First Differences
+
+Eliminates individual effects by differencing:
+
+```{r}
+#| label: fd-model
+fd_model <- plm::plm(log(crmrte) ~ d83 + d84 + d85 + d86 + d87 +
+                  lprbarr + lprbconv + lprbpris + lavgsen + lpolpc,
+                data = crime2.p, model = "fd")
+summary(fd_model)
+```
+
+:::
+
+::: {.callout-tip}
+## Which Estimator to Use?
+- **Pooled OLS**: Only if no individual effects
+- **Fixed Effects**: Consistent even if effects correlated with X
+- **Random Effects**: More efficient if effects uncorrelated with X
+- **First Differences**: Useful when strict exogeneity fails
+:::
+
+## Testing {#sec-panel-tests}
+
+::: {.panel-tabset}
+
+## F Test
+
+Test if fixed effects are needed:
+
+```{r}
+#| label: f-test
+plm::pFtest(fe_plm, pooled)
+```
+
+## LM Test
+
+Breusch-Pagan test for random effects:
+
+```{r}
+#| label: lm-test
+plm::plmtest(pooled, type = "bp")
+```
+
+## Hausman Test
+
+Choose between FE and RE:
+
+```{r}
+#| label: hausman
+plm::phtest(fe_plm, re_model)
+```
+
+:::
+
+::: {.callout-important}
+## Hausman Test Interpretation
+- **p < 0.05**: Use Fixed Effects (reject RE)
+- **p ≥ 0.05**: Use Random Effects (more efficient)
+:::
+
+## Robust Standard Errors {#sec-robust}
+
+Panel data requires cluster-robust standard errors:
+
+```{r}
+#| label: robust-se
+lmtest::coeftest(fe_plm, vcov = plm::vcovHC(fe_plm, type = "HC1", cluster = "group"))
+```
+
+::: {.callout-warning}
+Always use cluster-robust standard errors with panel data!
+:::
+
+## Dynamic Panel Models {#sec-dynamic}
+
+Include lagged dependent variables:
+
+```{r}
+#| label: dynamic-panel
+#| eval: false
+# Arellano-Bond GMM estimator
+library(plm)
+pgmm(log(emp) ~ lag(log(emp), 1:2) + lag(log(wage), 0:1) +
+       lag(log(capital), 0:1) | lag(log(emp), 2:99),
+     data = EmplUK, effect = "twoways", model = "onestep")
+```
+
+::: {.callout-note}
+## Dynamic Panel Estimators
+- **Arellano-Bond**: First-difference GMM
+- **Blundell-Bond**: System GMM (more efficient)
+:::
+
+## Summary
+
+Key takeaways from panel data analysis:
+
+1. Check panel structure with `pdim()` and `pvar()`
+2. Use Hausman test to choose between FE and RE
+3. Always use cluster-robust standard errors
+4. For dynamic panels, use GMM estimators
+5. **fixest** package is fastest for large datasets
+
+## Further Reading
+
+- Wooldridge (2010): *Econometric Analysis of Cross Section and Panel Data*
+- [plm vignette](https://cran.r-project.org/web/packages/plm/vignettes/plmPackage.html)
+- [fixest documentation](https://lrberge.github.io/fixest/)

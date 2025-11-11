@@ -1,0 +1,230 @@
+# Special Topics {#sec-special}
+
+::: {.callout-note}
+## Chapter Overview
+This chapter covers specialized econometric methods:
+
+- Difference-in-Differences estimation
+- Regression Discontinuity Design
+- Instrumental Variables applications
+- Synthetic Control Methods
+:::
+
+```{r}
+#| label: setup-special
+#| include: false
+# Standard packages loaded in before-chapter.R
+```
+
+## Difference-in-Differences {#sec-did}
+
+Difference-in-Differences (DiD) is an important quasi-experimental method for identifying causal effects. It estimates the effect of a policy intervention by comparing the change over time in outcomes between treated and control groups.
+
+::: {.callout-important}
+## DiD Assumptions
+1. **Parallel Trends**: Treatment and control groups would have followed parallel trends absent treatment
+2. **No anticipation**: Units don't change behavior before treatment
+3. **SUTVA**: Treatment of one unit doesn't affect others
+:::
+
+### Basic DiD Framework
+
+The DiD estimator compares the difference in outcomes before and after treatment between treatment and control groups:
+
+$$
+\text{DiD} = [E(Y_{1,treated}) - E(Y_{0,treated})] - [E(Y_{1,control}) - E(Y_{0,control})]
+$$ {#eq-did-estimator}
+
+### Regression Specification
+
+$$
+Y_{it} = \beta_0 + \beta_1 \text{Treat}_i + \beta_2 \text{Post}_t + \beta_3 (\text{Treat}_i \times \text{Post}_t) + \epsilon_{it}
+$$ {#eq-did-regression}
+
+Where $\beta_3$ is the DiD estimate of the treatment effect.
+
+### Example: Garbage Incinerator and Housing Prices
+
+We examine whether construction of a garbage incinerator affected nearby house values.
+
+```{r}
+#| label: load-kielmc
+data("kielmc", package = "wooldridge")
+head(kielmc)
+```
+
+::: {.panel-tabset}
+
+## Separate Regressions
+
+Estimate effects for each year separately:
+
+```{r}
+#| label: separate-regressions
+# 1978 (before incinerator)
+model_1978 <- lm(rprice ~ nearinc, data = kielmc, subset = (year == 1978))
+
+# 1981 (after incinerator)
+model_1981 <- lm(rprice ~ nearinc, data = kielmc, subset = (year == 1981))
+
+# Compare coefficients
+data.frame(
+  Year = c(1978, 1981),
+  Coefficient = c(coef(model_1978)["nearinc"],
+                  coef(model_1981)["nearinc"])
+)
+```
+
+## DiD Regression
+
+Joint regression with interaction:
+
+```{r}
+#| label: did-model
+did_model <- lm(rprice ~ nearinc * y81, data = kielmc)
+lmtest::coeftest(did_model)
+```
+
+::: {.callout-tip}
+## Interpretation
+The coefficient on `nearinc:y81` is the DiD estimate: the differential effect of being near the incinerator after it was built.
+:::
+
+## One-Tailed Test
+
+Test if incinerator decreased house values (H₁: β < 0):
+
+```{r}
+#| label: one-tailed-test
+summary_did <- summary(did_model)
+pt(coef(summary_did)[, 3], did_model$df, lower = TRUE)
+```
+
+:::
+
+### Log Specification with Controls
+
+A logarithmic specification implies constant percentage effects:
+
+```{r}
+#| label: did-log-models
+# Log specification without controls
+did_log1 <- lm(log(rprice) ~ nearinc * y81, data = kielmc)
+
+# Log specification with controls
+did_log2 <- lm(log(rprice) ~ nearinc * y81 + age + I(age^2) +
+                 log(intst) + log(land) + log(area) +
+                 rooms + baths,
+               data = kielmc)
+```
+
+```{r}
+#| label: tbl-did-comparison
+#| tbl-cap: "Difference-in-Differences estimates"
+huxtable::huxreg(did_log1, did_log2,
+                 statistics = c("N" = "nobs", "R²" = "r.squared"))
+```
+
+::: {.callout-note}
+## DiD Results Interpretation
+With log(rprice) as outcome:
+
+- Coefficient ≈ percentage change in house value
+- Controls reduce omitted variable bias
+- Standard errors should be clustered if repeated observations
+:::
+
+## Recent Developments in DiD {#sec-modern-did}
+
+::: {.callout-warning}
+## Staggered Adoption & Two-Way Fixed Effects
+Recent research shows traditional two-way fixed effects DiD can be biased with:
+
+- **Staggered treatment** adoption
+- **Heterogeneous** treatment effects
+- **Dynamic** effects
+
+**Solutions**:
+- Callaway & Sant'Anna (2021) estimator
+- Sun & Abraham (2021) interaction-weighted estimator
+- Borusyak et al. (2022) imputation estimator
+:::
+
+### Modern DiD Packages
+
+```{r}
+#| label: modern-did
+#| eval: false
+# Callaway & Sant'Anna
+library(did)
+out <- att_gt(yname = "y",
+              tname = "year",
+              idname = "id",
+              gname = "first_treat",
+              data = mydata)
+
+# Sun & Abraham
+library(fixest)
+feols(y ~ x | id + year, data = mydata,
+      sunab = TRUE)
+```
+
+## Other Special Topics {#sec-other-topics}
+
+### Regression Discontinuity Design (RDD)
+
+RDD exploits discontinuities in treatment assignment:
+
+```{r}
+#| label: rdd-example
+#| eval: false
+library(rdd)
+# Sharp RD
+rd_est <- RDestimate(y ~ running_var, data = mydata, cutpoint = 0)
+```
+
+::: {.callout-note}
+**RDD Types**:
+- **Sharp RD**: Treatment changes discontinuously at cutoff
+- **Fuzzy RD**: Treatment probability changes at cutoff
+:::
+
+### Synthetic Control Methods
+
+For comparative case studies with one treated unit:
+
+```{r}
+#| label: synth-example
+#| eval: false
+library(Synth)
+# Create synthetic control
+synth_out <- synth(
+  data.prep.obj = dataprep_out,
+  method = "BFGS"
+)
+```
+
+## Summary
+
+Special topics covered:
+
+✅ **Difference-in-Differences**: Parallel trends assumption critical
+✅ **Modern DiD**: Account for staggered adoption and heterogeneity
+✅ **RDD**: Local treatment effects at discontinuity
+✅ **Synthetic Control**: Comparative case studies
+
+::: {.callout-tip}
+## Causal Inference Best Practices
+1. **Clearly state identifying assumptions**
+2. **Test assumptions when possible** (e.g., parallel trends)
+3. **Conduct robustness checks**
+4. **Report standard errors** (clustered appropriately)
+5. **Visualize treatment effects**
+:::
+
+## Further Reading
+
+- Angrist & Pischke (2009): *Mostly Harmless Econometrics*
+- Cunningham (2021): [*Causal Inference: The Mixtape*](https://mixtape.scunning.com/)
+- Huntington-Klein (2021): [*The Effect*](https://theeffectbook.net/)
+- [did package vignette](https://bcallaway11.github.io/did/)

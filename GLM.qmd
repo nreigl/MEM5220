@@ -1,0 +1,362 @@
+# Qualitative and Limited Dependent Variable Models {#sec-glm}
+
+::: {.callout-note}
+## Chapter Overview
+This chapter covers models for qualitative and limited dependent variables:
+
+- Binary choice models (Logit, Probit)
+- Multinomial and conditional logit
+- Ordered choice models
+- Count data models (Poisson, Negative Binomial)
+- Censored and truncated models (Tobit, Heckman)
+:::
+
+```{r}
+#| label: setup-glm
+#| include: false
+# Packages loaded in before-chapter.R
+# GLM-specific: nnet, survival, sampleSelection, censReg
+```
+
+## Generalized Linear Models Framework
+
+Binary dependent variables are frequently studied in applied economics. Because a dummy variable $y$ can only take values 0 and 1, its (conditional) expected value equals the (conditional) probability that $y=1$:
+
+$$
+E(y|x) = 0 \times P(y = 0|x) + 1 \times P(y = 1|x) = P(y=1|x)
+$$ {#eq-binary-expectation}
+
+An important class of models specifies the success probability as:
+
+$$
+P(y = 1 | x) = G(\beta_0 + \beta_1 x_1 + \dots + \beta_k x_k) = G(\mathbf{x}'\boldsymbol{\beta})
+$$ {#eq-glm-general}
+
+::: {.callout-important}
+## Link Functions
+GLMs relate the mean of the response to a linear combination of predictors through a **link function** $g()$:
+
+$$
+\eta(\mathbf{x}) = g\left(\text{E}[Y \mid \mathbf{X} = \mathbf{x}]\right)
+$$
+
+The mean is then: $\text{E}[Y \mid \mathbf{X} = \mathbf{x}] = g^{-1}(\eta(\mathbf{x}))$
+:::
+
+### Common GLM Families {#sec-glm-families}
+
+::: {.panel-tabset}
+
+## Linear Regression
+
+- **Distribution**: Normal $N(\mu(\mathbf{x}), \sigma^2)$
+- **Link**: Identity $\eta(\mathbf{x}) = \mu(\mathbf{x})$
+- **Use**: Numeric continuous data
+
+## Logistic Regression
+
+- **Distribution**: Bernoulli $\text{Bern}(p(\mathbf{x}))$
+- **Link**: Logit $\eta(\mathbf{x}) = \log\left(\frac{p(\mathbf{x})}{1-p(\mathbf{x})}\right)$
+- **Mean**: $p(\mathbf{x}) = \frac{1}{1 + e^{-\eta(\mathbf{x})}}$
+- **Use**: Binary outcomes
+
+## Probit Regression
+
+- **Distribution**: Bernoulli $\text{Bern}(p(\mathbf{x}))$
+- **Link**: Probit (inverse normal CDF)
+- **Mean**: $p(\mathbf{x}) = \Phi(\eta(\mathbf{x}))$
+- **Use**: Binary outcomes (normal latent variable)
+
+## Poisson Regression
+
+- **Distribution**: Poisson $\text{Pois}(\lambda(\mathbf{x}))$
+- **Link**: Log $\eta(\mathbf{x}) = \log(\lambda(\mathbf{x}))$
+- **Mean**: $\lambda(\mathbf{x}) = e^{\eta(\mathbf{x})}$
+- **Use**: Count data
+
+:::
+
+## Binary Choice Models {#sec-binary-choice}
+
+### Linear Probability Model (LPM)
+
+The simplest approach uses OLS with a binary dependent variable:
+
+$$
+y_i = \mathbf{x}_i'\boldsymbol{\beta} + \epsilon_i
+$$ {#eq-lpm}
+
+::: {.callout-warning}
+## LPM Limitations
+1. Predicted probabilities can be < 0 or > 1
+2. Heteroskedastic errors by construction
+3. Linear marginal effects (unrealistic)
+
+**Use robust standard errors!**
+:::
+
+### Logit Model
+
+The logit model uses the logistic CDF:
+
+$$
+P(y=1|\mathbf{x}) = \frac{\exp(\mathbf{x}'\boldsymbol{\beta})}{1 + \exp(\mathbf{x}'\boldsymbol{\beta})} = \frac{1}{1 + \exp(-\mathbf{x}'\boldsymbol{\beta})}
+$$ {#eq-logit}
+
+```{r}
+#| label: logit-example
+#| eval: false
+# Logit model
+data("mroz", package = "wooldridge")
+logit_model <- glm(inlf ~ nwifeinc + educ + exper + I(exper^2) +
+                     age + kidslt6 + kidsge6,
+                   family = binomial(link = "logit"), data = mroz)
+summary(logit_model)
+```
+
+### Probit Model
+
+The probit model uses the standard normal CDF:
+
+$$
+P(y=1|\mathbf{x}) = \Phi(\mathbf{x}'\boldsymbol{\beta})
+$$ {#eq-probit}
+
+```{r}
+#| label: probit-example
+#| eval: false
+# Probit model
+probit_model <- glm(inlf ~ nwifeinc + educ + exper + I(exper^2) +
+                      age + kidslt6 + kidsge6,
+                    family = binomial(link = "probit"), data = mroz)
+summary(probit_model)
+```
+
+::: {.callout-tip}
+## Logit vs Probit
+- Very similar predicted probabilities in practice
+- Logit has fatter tails (more weight on extreme values)
+- Probit assumes normal latent variable
+- **Convention**: Use logit unless theory suggests probit
+:::
+
+### Marginal Effects {#sec-marginal-effects}
+
+Coefficients in logit/probit are not directly interpretable. We compute **marginal effects**:
+
+$$
+\frac{\partial P(y=1|\mathbf{x})}{\partial x_k} = g(\mathbf{x}'\boldsymbol{\beta}) \beta_k
+$$ {#eq-marginal-effects}
+
+where $g()$ is the PDF of the link function.
+
+::: {.panel-tabset}
+
+## At Means (MEM)
+
+Evaluate at mean values of $\mathbf{x}$:
+
+```{r}
+#| label: mem-logit
+#| eval: false
+library(margins)
+margins(logit_model, at = list(x = mean(x)))
+```
+
+## Average Marginal Effects (AME)
+
+Average marginal effects across all observations:
+
+```{r}
+#| label: ame-logit
+#| eval: false
+margins(logit_model)  # AME is the default
+```
+
+:::
+
+::: {.callout-note}
+**Best Practice**: Report Average Marginal Effects (AME) for better interpretability.
+:::
+
+## Multinomial Models {#sec-multinomial}
+
+### Multinomial Logit
+
+For unordered choices with $J > 2$ alternatives:
+
+$$
+P(y_i = j | \mathbf{x}_i) = \frac{\exp(\mathbf{x}_i'\boldsymbol{\beta}_j)}{\sum_{h=1}^J \exp(\mathbf{x}_i'\boldsymbol{\beta}_h)}
+$$ {#eq-mlogit}
+
+```{r}
+#| label: mlogit-example
+#| eval: false
+library(nnet)
+mlogit_model <- multinom(occupation ~ educ + exper + age, data = mydata)
+```
+
+::: {.callout-warning}
+## IIA Assumption
+Multinomial logit assumes **Independence of Irrelevant Alternatives** (IIA).
+
+If violated, use:
+- Nested logit
+- Mixed logit
+- Multinomial probit
+:::
+
+### Ordered Logit/Probit
+
+For ordered outcomes (e.g., ratings: poor, fair, good, excellent):
+
+```{r}
+#| label: ologit-example
+#| eval: false
+library(MASS)
+ologit_model <- polr(rating ~ income + age + education,
+                     data = mydata, method = "logistic")
+```
+
+## Count Data Models {#sec-count-data}
+
+### Poisson Regression
+
+For count outcomes ($y \geq 0$):
+
+$$
+P(Y = y | \mathbf{x}) = \frac{e^{-\lambda} \lambda^y}{y!}, \quad \lambda = \exp(\mathbf{x}'\boldsymbol{\beta})
+$$ {#eq-poisson}
+
+```{r}
+#| label: poisson-example
+#| eval: false
+poisson_model <- glm(num_arrests ~ age + educ + income,
+                     family = poisson(link = "log"), data = mydata)
+```
+
+::: {.callout-warning}
+## Overdispersion
+Poisson assumes $\text{Var}(Y) = E(Y)$ (equidispersion).
+
+If $\text{Var}(Y) > E(Y)$ (overdispersion), use:
+- **Negative Binomial** regression
+- Quasi-Poisson
+:::
+
+### Negative Binomial
+
+Relaxes equidispersion assumption:
+
+```{r}
+#| label: negbin-example
+#| eval: false
+library(MASS)
+negbin_model <- glm.nb(num_arrests ~ age + educ + income, data = mydata)
+```
+
+## Limited Dependent Variables {#sec-limited-dv}
+
+### Tobit Model (Corner Solution)
+
+For outcomes censored at zero (e.g., hours worked, expenditures):
+
+$$
+y_i^* = \mathbf{x}_i'\boldsymbol{\beta} + \epsilon_i, \quad y_i = \max(0, y_i^*)
+$$ {#eq-tobit}
+
+```{r}
+#| label: tobit-example
+#| eval: false
+library(censReg)
+tobit_model <- censReg(hours ~ educ + age + kids, data = mydata)
+```
+
+::: {.callout-note}
+**Tobit** is appropriate when zeros represent corner solutions, not missing data.
+:::
+
+### Heckman Selection Model
+
+For sample selection bias (non-random missing data):
+
+**Selection equation**: $s_i^* = \mathbf{z}_i'\boldsymbol{\gamma} + u_i$, observe $s_i = 1(s_i^* > 0)$
+
+**Outcome equation**: $y_i = \mathbf{x}_i'\boldsymbol{\beta} + \epsilon_i$, observe $y_i$ only if $s_i = 1$
+
+```{r}
+#| label: heckman-example
+#| eval: false
+library(sampleSelection)
+heckman_model <- selection(selection = inlf ~ age + educ + kids,
+                           outcome = log(wage) ~ educ + exper,
+                           data = mydata)
+```
+
+::: {.callout-important}
+## Heckman Two-Step vs ML
+- **Two-step**: Faster, easier diagnostics
+- **ML**: More efficient, joint estimation
+
+Both require **exclusion restriction**: variable in selection but not outcome.
+:::
+
+## Model Comparison {#sec-model-comparison}
+
+::: {.panel-tabset}
+
+## Information Criteria
+
+```{r}
+#| label: ic-comparison
+#| eval: false
+AIC(logit_model, probit_model)
+BIC(logit_model, probit_model)
+```
+
+## Likelihood Ratio Test
+
+```{r}
+#| label: lr-test
+#| eval: false
+lrtest(restricted_model, unrestricted_model)
+```
+
+## Vuong Test
+
+For non-nested models:
+
+```{r}
+#| label: vuong-test
+#| eval: false
+library(pscl)
+vuong(model1, model2)
+```
+
+:::
+
+## Summary
+
+Key takeaways for qualitative and limited DV models:
+
+1. **LPM**: Simple but problematic (use for robustness checks)
+2. **Logit/Probit**: Very similar in practice
+3. **Report AME**: More interpretable than coefficients
+4. **Count data**: Check for overdispersion
+5. **Corner solutions**: Use Tobit
+6. **Sample selection**: Use Heckman with exclusion restriction
+
+::: {.callout-tip}
+## Practical Advice
+Always:
+- Check model assumptions
+- Report marginal effects
+- Use robust standard errors
+- Compare models with IC
+:::
+
+## Further Reading
+
+- Greene (2018): *Econometric Analysis*
+- Wooldridge (2010): *Econometric Analysis of Cross Section and Panel Data*
+- [margins package](https://cran.r-project.org/web/packages/margins/vignettes/Introduction.html)

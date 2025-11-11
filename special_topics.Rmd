@@ -37,9 +37,7 @@ Effect of a Garbage Incinerator's Location on Housing Prices
 We are interested in whether and how much the construction of a new garbage incinerator affected the value of nearby houses. 
 
 ```{r}
-
 data("kielmc", package="wooldridge")
-attach(kielmc)
 head(kielmc)
 ```
 

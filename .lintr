@@ -1,0 +1,12 @@
+linters: linters_with_defaults(
+    line_length_linter(120),
+    object_name_linter = NULL,  # Allow common R naming conventions
+    cyclocomp_linter = NULL,    # Don't check complexity in teaching materials
+    commented_code_linter = NULL  # Allow commented examples in teaching materials
+  )
+exclusions: list(
+    "renv" = TRUE,
+    "_book" = TRUE,
+    "_bookdown_files" = TRUE,
+    "problem-sets" = TRUE
+  )

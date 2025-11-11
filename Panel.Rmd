@@ -63,7 +63,6 @@ $$
 
 ```{r, message=FALSE}
 data("cps78_85", package="wooldridge")
-attach(cps78_85)
 head(cps78_85)
 ```
 
@@ -152,7 +151,6 @@ For unbalanced panels I can specify a panel data frame with `pdata.frame(mydf, i
 
 ```{r}
 data("crime2", package = "wooldridge")
-attach(crime2)
 head(crime2, 5)
 ```
 

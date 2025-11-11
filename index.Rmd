@@ -1,8 +1,8 @@
 ---
 title: "MEM52220 - Applied Econometrics"
 author: "Nicolas Reigl"
-subtitle: "Spring semester 2021"
-description: "This manual constitutues the classroom material of the applied econometrics course at Tallinn University of Technology"
+subtitle: "Tallinn University of Technology"
+description: "This manual constitutes the classroom material of the applied econometrics course at Tallinn University of Technology"
 cover-image: "images/TalTech_Gradient_print.jpg"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site

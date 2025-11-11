@@ -3,8 +3,13 @@ before_chapter_script: "before-chapter.R"
 delete_merged_file: TRUE
 rmd_files: [
   "index.Rmd",
+  "LM.Rmd",
   "Panel.Rmd",
   "GLM.Rmd",
+  "IV.Rmd",
+  "TimeSeries.Rmd",
+  "Bayes.Rmd",
+  "special_topics.Rmd",
   "references.Rmd"
 ]
 
