@@ -290,7 +290,6 @@ plot(x, dnorm(x), type="l")
 ```{r}
 detach("package:PoEdata", unload=TRUE)
 data("mroz", package='wooldridge')
-attach(mroz)
 # Estimate probit model
 probitres<-glm(inlf~nwifeinc+educ+exper+I(exper^2)+age+kidslt6+kidsge6,
                family=binomial(link=probit),data=mroz)

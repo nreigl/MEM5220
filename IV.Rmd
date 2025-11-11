@@ -176,7 +176,6 @@ Load and become familiar with data.
 
 ```{r data, message=FALSE}
 data("mroz", package="wooldridge")
-attach(mroz)
 head(mroz)
 ```
 
