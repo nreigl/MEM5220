@@ -60,7 +60,7 @@ Test if series has a unit root (non-stationary):
 ```{r}
 #| label: adf-test
 #| eval: false
-library(ur ca)
+library(urca)
 # ADF test
 adf_test <- ur.df(y, type = "drift", lags = 4)
 summary(adf_test)
