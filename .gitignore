@@ -49,3 +49,11 @@ images/dedication.lyx
 
 # Teaching specific
 problem-sets/selfeval_1_solutions.Rmd
+
+# renv
+renv/
+.Rprofile
+
+# GitHub dependencies cache
+.github/depends.Rds
+.github/R-version

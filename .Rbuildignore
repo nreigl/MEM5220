@@ -1,0 +1,13 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^README\.md$
+^LICENSE$
+^\.github$
+^\.git$
+^renv$
+^renv\.lock$
+^\.Rprofile$
+^_book$
+^_bookdown_files$
+^\.lintr$
+^\.pre-commit-config\.yaml$

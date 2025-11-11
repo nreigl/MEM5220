@@ -4,7 +4,11 @@
 
 # Install pacman if not already installed
 if (!requireNamespace("pacman", quietly = TRUE)) {
-  install.packages("pacman", repos = "https://cran.rstudio.com")
+  tryCatch({
+    install.packages("pacman", repos = "https://cran.rstudio.com")
+  }, error = function(e) {
+    stop("Failed to install pacman package: ", e$message)
+  })
 }
 
 # Comprehensive package list for all chapters
@@ -61,17 +65,37 @@ PACKAGES <- c(
   "skimr", "stringr"
 )
 
-# Install missing packages
+# Install missing packages with error handling
 inst <- match(PACKAGES, .packages(all = TRUE))
 need <- which(is.na(inst))
+
 if (length(need) > 0) {
-  install.packages(PACKAGES[need], repos = "https://cran.rstudio.com")
+  message("Installing ", length(need), " missing package(s)...")
+  tryCatch({
+    install.packages(PACKAGES[need], repos = "https://cran.rstudio.com")
+  }, error = function(e) {
+    warning("Some packages failed to install: ", e$message)
+    warning("Missing packages: ", paste(PACKAGES[need], collapse = ", "))
+  })
 }
 
-# Load all packages quietly
-suppressPackageStartupMessages({
-  lapply(PACKAGES, require, character.only = TRUE, quietly = TRUE)
+# Load all packages quietly with error handling
+loaded <- suppressPackageStartupMessages({
+  sapply(PACKAGES, function(pkg) {
+    tryCatch({
+      require(pkg, character.only = TRUE, quietly = TRUE)
+    }, error = function(e) {
+      warning("Failed to load package '", pkg, "': ", e$message)
+      FALSE
+    })
+  })
 })
+
+# Report any packages that failed to load
+failed <- PACKAGES[!loaded]
+if (length(failed) > 0) {
+  warning("The following packages failed to load: ", paste(failed, collapse = ", "))
+}
 
 # KNITR CONFIGURATION
 library(dplyr)
@@ -97,16 +121,45 @@ knitr::opts_chunk$set(
 )
 
 # UTILITY FUNCTIONS
+
+#' Print formatted text
+#'
+#' A wrapper around sprintf and cat for convenient formatted printing
+#'
+#' @param pattern A character string with format specifiers
+#' @param ... Values to substitute into pattern
+#' @return NULL (invisibly). Prints to console as side effect.
+#' @examples
+#' printf("The mean is %.2f", 3.14159)
 printf <- function(pattern, ...) {
   cat(sprintf(pattern, ...))
 }
 
+#' Print contents of a file
+#'
+#' Reads and prints all lines from a file
+#'
+#' @param file Path to the file to read
+#' @return NULL (invisibly). Prints to console as side effect.
+#' @examples
+#' print_file("README.md")
 print_file <- function(file) {
-  cat(paste(readLines(file), "\n", sep = ""), sep = "")
+  if (!file.exists(file)) {
+    stop("File does not exist: ", file)
+  }
+  tryCatch({
+    cat(paste(readLines(file), "\n", sep = ""), sep = "")
+  }, error = function(e) {
+    stop("Error reading file '", file, "': ", e$message)
+  })
 }
 
 # GENERAL R CONFIGURATION
 options(htmltools.dir.version = FALSE)
 
 # Set seed for reproducibility (can be overridden in individual chapters)
-set.seed(42)
+SEED_FOR_REPRODUCIBILITY <- 42
+set.seed(SEED_FOR_REPRODUCIBILITY)
+
+# Log package loading completion
+message("Package loading complete. ", sum(loaded), "/", length(PACKAGES), " packages loaded successfully.")

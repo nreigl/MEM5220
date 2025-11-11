@@ -1,0 +1,36 @@
+# Pre-commit hooks for MEM5220 project
+# Install pre-commit: pip install pre-commit
+# Setup hooks: pre-commit install
+# See https://pre-commit.com for more information
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # Basic file checks
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude: '\.Rd$'
+      - id: trailing-whitespace
+        exclude: '\.Rd$'
+      - id: mixed-line-ending
+
+  # R-specific hooks
+  - repo: https://github.com/lorenzwalthert/precommit
+    rev: v0.3.2.9025
+    hooks:
+      - id: style-files
+        args: [--style_pkg=styler, --style_fun=tidyverse_style]
+        exclude: '^(renv/|_book/|_bookdown_files/)'
+      - id: roxygenize
+        additional_dependencies:
+          - devtools
+        exclude: '^(renv/|_book/|_bookdown_files/)'
+      - id: spell-check
+        exclude: '^(renv/|_book/|_bookdown_files/|\.github/)'
+      - id: readme-rmd-rendered
+        exclude: '^(renv/|_book/|_bookdown_files/)'

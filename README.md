@@ -94,29 +94,54 @@ Additional resources and attributions are listed in the book's Introduction.
 
 ## Contributing
 
-Contributions are welcome! Please:
+Contributions are welcome! This project uses:
+
+- **CI/CD**: Automated builds and testing via GitHub Actions
+- **Code Style**: Enforced with `lintr` and `styler`
+- **Pre-commit Hooks**: Automatic code formatting before commits
+
+For detailed contribution guidelines, please read [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### Quick Start for Contributors
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/improvement`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add improvement'`)
-5. Push to the branch (`git push origin feature/improvement`)
-6. Open a Pull Request
+3. Make your changes following the [style guide](https://style.tidyverse.org/)
+4. Test your changes by building the book locally
+5. Commit your changes with clear messages
+6. Push to the branch (`git push origin feature/improvement`)
+7. Open a Pull Request
 
 ### Reporting Issues
 
 If you find errors or have suggestions, please [open an issue](https://github.com/nreigl/MEM5220/issues).
 
+## Continuous Integration
+
+This project uses GitHub Actions for:
+- **Automated book building** on every push/PR
+- **Code quality checks** with lintr
+- **Automated deployment** to GitHub Pages (on main branch)
+
+Check the [Actions tab](https://github.com/nreigl/MEM5220/actions) to see build status.
+
 ## Version History
+
+### Version 3.2.0 (Current Development)
+- **Code Quality**: Removed all `attach()` usage (best practice)
+- **Error Handling**: Improved package loading with comprehensive error handling
+- **Documentation**: Added roxygen2 style function documentation
+- **CI/CD**: Added GitHub Actions for automated builds and testing
+- **Code Style**: Added lintr and styler configuration
+- **Pre-commit Hooks**: Added pre-commit configuration for code quality
+- **Contributing**: Created comprehensive CONTRIBUTING.md guide
+- **Build System**: Updated bookdown configuration to include all chapters
 
 ### Version 3.1.0 (March 15, 2021)
 - Cleanup of outdated functions (dplyr::arrange)
 - Removed `renv` dependency management
 - Added quantile regression subsection to Linear Models
 - Added heteroskedasticity simulations
-
-### Known Issues
-- Line 2329 in LM.Rmd: `waldtest` example commented out due to compilation issue
 
 ## License
 
