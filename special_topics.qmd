@@ -1,0 +1,12 @@
+# special_topics {.unnumbered}
+
+::: {.callout-warning}
+## Temporary Note
+This chapter is being migrated from R Markdown to Quarto. 
+The content below is included from the original .Rmd file.
+:::
+
+```{r}
+#| child: "special_topics.Rmd"
+```
+

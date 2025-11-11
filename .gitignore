@@ -47,6 +47,13 @@ images/dedication.lyx
 .RData
 .Ruserdata
 
+# Quarto
+/.quarto/
+/_site/
+*.qmd.cache/
+*_files/
+.quarto
+
 # Teaching specific
 problem-sets/selfeval_1_solutions.Rmd
 

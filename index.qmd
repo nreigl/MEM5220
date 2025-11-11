@@ -1,0 +1,135 @@
+# Introduction {.unnumbered}
+
+```{r}
+#| child: "_setup.Rmd"
+```
+
+```{r}
+#| label: fig-regression-visual
+#| fig-cap: "Normal and simulated Gaussian densities on a regression line"
+#| echo: false
+#| eval: !expr identical(knitr:::pandoc_to(), "html")
+#| fig-align: center
+knitr::include_graphics('images/lregression.jpeg', dpi = NA)
+```
+
+This handout is designed for the use with MEM5220 - Applied Econometrics at [Tallinn University of Technology, Department of Economics and Finance](https://taltech.ee/en/department-economics-and-finance).
+
+## Prerequisites {.unnumbered}
+
+::: {.callout-note}
+## Required Background
+A basic knowledge of the R [@team2013r] programming language is required.
+:::
+
+In order to reproduce the examples in this script you need the statistical software package R. Additionally I recommend using the [RStudio](https://www.rstudio.com) integrated developer environment (IDE) which will improve your R working experience.
+
+### Installation of R and RStudio {.unnumbered}
+
+Go to the following webpages and download the software adequate for your operating system:
+
+1. [The Statistical Software Package R](http://cran.r-project.org)
+2. [RStudio IDE](https://www.rstudio.com)
+
+Install R first and then proceed with RStudio. Afterwards start RStudio. For accessing packages and datasets from [GitHub](https://github.com/) we need to install the **devtools** package.
+
+::: {.callout-tip}
+## Platform-Specific Setup
+- **Windows**: Download and install [Rtools](https://cran.r-project.org/bin/windows/Rtools/), and devtools takes care of the rest
+- **Mac**: Install the Xcode command line tools
+- **Linux**: Install the R development package, usually called `r-devel` or `r-base-dev`
+:::
+
+## Resources {.unnumbered}
+
+Our primary resource is @heiss2016using ^[Heiss (2016) builds on the popular Introductory Econometrics by Wooldridge (2016) and demonstrates how to replicate the applications discussed therein using R.]. The book is available as free [online](http://www.urfie.net/read.html) version. For theoretical concepts I refer to @wooldridge2015introductory^[[Introductory Econometrics: A Modern Approach](https://books.google.ee/books/about/Introductory_Econometrics_A_Modern_Appro.html?id=wUF4BwAAQBAJ&source=kp_cover&redir_esc=y).].
+For the timeseries part of the course a good reference material is [Introductory Econometrics for Finance](https://www.cambridge.org/pt/academic/subjects/economics/finance/introductory-econometrics-finance-3rd-edition?format=PB&isbn=9781107661455).
+
+### Attribution {.unnumbered}
+
+This lecture material would not be possible without many other open-source econometrics teaching materials and of course the R package developers. In addition to the main resources, examples and code of this workbook have been drawn from a number of free econometrics eBooks, blogs, R-vignette help pages and other researchers teaching materials.
+
+Chapter 1.1.2 Simulating SLR is based on @heiss2016using but adds parts of @dalpiaz2016 and @colonescu2018 teaching materials. Chapter 1.2.2 includes additional material from @Hanck2018. Chapter 1.4 Heteroskedasticity has been amended with material from @Rodrigues2018 blog. The time series part is closely related to the teaching material of Andres Vörk. The finite distributed lags model is adapted from Constantin Colonescu.
+
+**Additional Resources:**
+
+- [Using R for Introduction to Econometrics](https://emwikts1970.github.io/URFITE-Bookdown/), @Hanck2018
+- [Applied Statistics with R](https://daviddalpiaz.github.io/appliedstats/), @dalpiaz2016
+- [Principles of Econometrics with R](https://bookdown.org/ccolonescu/RPoE4/), @colonescu2018
+- [Introduction to Econometrics with R](https://scpoecon.github.io/ScPoEconometrics/), @oswald2018introduction
+- [Broadening Your Statistical Horizons](https://bookdown.org/roback/bookdown-bysh/)
+
+## Updates {.unnumbered}
+
+For a brief rundown of the version history, we have:
+
+### Version 3.2.0 (Quarto Migration) {.unnumbered}
+
+::: {.callout-important}
+## Major Update: Quarto Migration
+This version migrates the entire book from R Markdown/bookdown to Quarto for improved features and maintainability.
+:::
+
+**Key improvements:**
+
+- **Modern Output**: Enhanced HTML with dark mode, responsive design
+- **Better Cross-references**: Native Quarto cross-referencing system
+- **Interactive Features**: Code folding, copy buttons, search
+- **Performance**: Selective code execution with freeze
+- **Code Quality**: Removed all `attach()` usage
+- **Error Handling**: Comprehensive package loading with error reporting
+- **CI/CD**: GitHub Actions for automated builds and deployment
+- **Documentation**: Added CONTRIBUTING.md and improved README
+
+### Version 3.1.0 (March 15, 2021) {.unnumbered}
+
+- Cleanup of certain outdated functions (dplyr::arrange)
+- Remove `renv`
+- Add quantile regression subsection to LM.Rmd
+- Add heteroskedasticity simulations
+
+## Software information and conventions {.unnumbered}
+
+The R session information when compiling this book is shown below:
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| results: hide
+pacman::p_unload(pacman::p_loaded(), character.only = TRUE)
+```
+
+I do not add prompts (`>` and `+`) to R source code in this book, and I comment out the text output with two hashes `##` by default, as you can see from the R session information above. This is for your convenience when you want to copy and run the code (the text output will be ignored since it is commented out).
+
+::: {.callout-note}
+## Code Conventions
+
+* R code blocks and their output appear in a gray background. E.g.,
+
+```{r}
+2 + 2 == 5
+```
+
+* Functions and inline code are in a typewriter font and followed by parentheses, all atop a gray background (e.g., `brm()`).
+
+* When I want to make explicit the package a given function comes from, I insert the double-colon operator `::` between the package name and the function (e.g., `tidybayes::mode_hdi()`).
+
+* Package names are in bold text (e.g., **rmarkdown**).
+
+* Content with **Note**, **Your turn** and **Overthinking** is surrounded by callout boxes. **Overthinking** sections serve as additional information for the interested reader but will not be covered in detail in class.
+:::
+
+## Contribute {.unnumbered}
+
+You can contribute to this teaching material. Please file an issue, improve the material or checkout alternative versions of this project.
+
+The source code of the project is available on GitHub at [https://github.com/nreigl/MEM5220](https://github.com/nreigl/MEM5220).
+
+And if you're unacquainted with GitHub, check out my short [Git for Economists](https://github.com/nreigl/git-for-economists) presentation or take a look at @bryanHappyGitGitHub2020 [*Happy Git and GitHub for the useR*](https://happygitwithr.com/).
+
+For detailed contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Acknowledgements {.unnumbered}
+
+I thank Kadri Männasoo and Juan Carlos Cuestas for their useful comments.

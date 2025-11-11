@@ -1,0 +1,90 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "MEM5220 - Applied Econometrics"
+  author: "Nicolas Reigl"
+  date: today
+  repo-url: https://github.com/nreigl/MEM5220
+  repo-actions: [edit, issue]
+  sharing: [twitter, facebook, linkedin]
+  site-url: https://nreigl.github.io/MEM5220/
+  cover-image: images/TalTech_Gradient_print.jpg
+  favicon: images/TalTech_Gradient_print.jpg
+
+  sidebar:
+    style: docked
+    background: light
+    logo: images/TalTech_Gradient_print.jpg
+    search: true
+    collapse-level: 2
+
+  page-navigation: true
+
+  chapters:
+    - index.qmd
+    - LM.qmd
+    - Panel.qmd
+    - GLM.qmd
+    - IV.qmd
+    - TimeSeries.qmd
+    - Bayes.qmd
+    - special_topics.qmd
+    - references.qmd
+
+  appendices:
+    - CONTRIBUTING.md
+
+bibliography: MEM5220.bib
+
+format:
+  html:
+    theme:
+      light: [cosmo, custom.scss]
+      dark: [cosmo, custom-dark.scss]
+    code-copy: true
+    code-fold: false
+    code-tools: true
+    code-link: true
+    toc: true
+    toc-depth: 3
+    toc-expand: 2
+    number-sections: true
+    number-depth: 3
+    fig-width: 8
+    fig-height: 5
+    fig-dpi: 300
+    callout-appearance: simple
+
+  pdf:
+    documentclass: book
+    classoption: [oneside, openany]
+    geometry:
+      - margin=0.5in
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    colorlinks: true
+    urlcolor: blue
+    keep-tex: true
+    include-in-header:
+      - text: |
+          \usepackage{underscore}
+          \usepackage[T1]{fontenc}
+          \usepackage{tabu}
+
+execute:
+  freeze: auto  # Re-run only when source changes
+  cache: true
+  echo: true
+  warning: false
+  message: false
+
+knitr:
+  opts_chunk:
+    comment: "#>"
+    collapse: true
+    fig.align: "center"
+    out.width: "70%"
+    dpi: 150

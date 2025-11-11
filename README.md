@@ -49,19 +49,50 @@ The necessary packages will be automatically installed when you build the book. 
 
 ## Building the Book
 
-### Build HTML version
+This project now supports **two** build systems:
 
-```r
-bookdown::render_book("index.Rmd", "bookdown::gitbook")
+### 🎯 Quarto (Recommended - Modern)
+
+Quarto is the next-generation publishing system with better features and performance.
+
+**Prerequisites**: Install [Quarto CLI](https://quarto.org/docs/get-started/)
+
+```bash
+# Preview with live reload
+quarto preview
+
+# Build HTML version
+quarto render
+
+# Build PDF version
+quarto render --to pdf
+
+# Clean build artifacts
+quarto clean
 ```
 
-### Build PDF version
+The compiled book will be in the `_book/` directory.
+
+**Why Quarto?**
+- ✨ Modern, responsive HTML with dark mode
+- 🚀 Better performance (freeze feature)
+- 📱 Mobile-friendly output
+- 🔍 Superior search functionality
+- 🎨 Enhanced features (callouts, tabsets, code folding)
+
+See [QUARTO_MIGRATION.md](QUARTO_MIGRATION.md) for details.
+
+### 📚 Bookdown (Legacy - Maintained)
+
+The original R Markdown/bookdown system is still supported:
 
 ```r
+# Build HTML version
+bookdown::render_book("index.Rmd", "bookdown::gitbook")
+
+# Build PDF version
 bookdown::render_book("index.Rmd", "bookdown::pdf_book")
 ```
-
-The compiled book will be available in the `_book/` directory.
 
 ## Project Structure
 
@@ -127,7 +158,36 @@ Check the [Actions tab](https://github.com/nreigl/MEM5220/actions) to see build 
 
 ## Version History
 
-### Version 3.2.0 (Current Development)
+### Version 4.0.0 (Current - Quarto Migration)
+
+**🎯 Major Update: Migration to Quarto**
+
+This version introduces Quarto as the primary build system while maintaining backward compatibility with bookdown.
+
+**New Features:**
+- **Quarto Support**: Full migration to Quarto publishing system
+  - Modern, responsive HTML output with dark mode
+  - Better cross-referencing system
+  - Enhanced code display (folding, copying, highlighting)
+  - Callout blocks for notes, warnings, and tips
+  - Freeze feature for faster builds
+  - Mobile-friendly design
+
+- **Dual Build System**:
+  - Quarto (.qmd files) - recommended
+  - Bookdown (.Rmd files) - legacy support
+
+- **Enhanced Styling**:
+  - Custom Tallinn University of Technology theme
+  - Dark mode support
+  - Improved typography and layout
+
+- **Documentation**:
+  - Created QUARTO_MIGRATION.md guide
+  - Updated README with Quarto instructions
+  - GitHub Actions for Quarto deployment
+
+### Version 3.2.0 (Development Best Practices)
 - **Code Quality**: Removed all `attach()` usage (best practice)
 - **Error Handling**: Improved package loading with comprehensive error handling
 - **Documentation**: Added roxygen2 style function documentation
