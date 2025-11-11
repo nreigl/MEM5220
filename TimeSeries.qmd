@@ -1,12 +1,145 @@
-# TimeSeries {.unnumbered}
+# Time Series Analysis {#sec-timeseries}
 
-::: {.callout-warning}
-## Temporary Note
-This chapter is being migrated from R Markdown to Quarto. 
-The content below is included from the original .Rmd file.
+::: {.callout-note}
+## Chapter Status
+This chapter has been partially converted to Quarto. Full conversion with interactive time series visualizations is in progress.
+
+For complete content, the original TimeSeries.Rmd is included via child chunk below.
+:::
+
+```{r}
+#| label: setup-ts
+#| include: false
+# Packages: dynlm, forecast, urca, fUnitRoots loaded in before-chapter.R
+```
+
+## Introduction to Time Series
+
+Time series data has temporal ordering where observations are indexed by time $t$. This creates unique challenges:
+
+::: {.callout-important}
+## Time Series Challenges
+1. **Serial correlation**: Observations correlated over time
+2. **Non-stationarity**: Mean/variance change over time
+3. **Trends**: Deterministic or stochastic
+4. **Seasonality**: Periodic patterns
+:::
+
+## Stationarity {#sec-stationarity}
+
+A series is **weakly stationary** if:
+
+1. Constant mean: $E(Y_t) = \mu$ for all $t$
+2. Constant variance: $\text{Var}(Y_t) = \sigma^2$ for all $t$
+3. Autocovariance depends only on lag: $\text{Cov}(Y_t, Y_{t-k}) = \gamma_k$
+
+::: {.panel-tabset}
+
+## Stationary Series
+
+- Mean-reverting
+- No trend or seasonality
+- Suitable for standard time series models
+
+## Non-Stationary Series
+
+- Trending mean or variance
+- Unit root processes
+- Requires differencing or detrending
+
+:::
+
+## Unit Root Testing {#sec-unit-root}
+
+Test if series has a unit root (non-stationary):
+
+::: {.panel-tabset}
+
+## Augmented Dickey-Fuller
+
+```{r}
+#| label: adf-test
+#| eval: false
+library(ur ca)
+# ADF test
+adf_test <- ur.df(y, type = "drift", lags = 4)
+summary(adf_test)
+```
+
+## Phillips-Perron
+
+```{r}
+#| label: pp-test
+#| eval: false
+PP.test(y)
+```
+
+## KPSS
+
+```{r}
+#| label: kpss-test
+#| eval: false
+kpss.test(y)
+```
+
+:::
+
+::: {.callout-tip}
+## Testing Strategy
+1. Visual inspection (plot series)
+2. ADF test (H₀: unit root)
+3. KPSS test (H₀: stationarity)
+4. If non-stationary: difference series
+:::
+
+## ARIMA Models {#sec-arima}
+
+**AR(p)**: Autoregressive
+
+$$
+Y_t = c + \phi_1 Y_{t-1} + \cdots + \phi_p Y_{t-p} + \epsilon_t
+$$ {#eq-ar}
+
+**MA(q)**: Moving Average
+
+$$
+Y_t = c + \epsilon_t + \theta_1 \epsilon_{t-1} + \cdots + \theta_q \epsilon_{t-q}
+$$ {#eq-ma}
+
+**ARIMA(p,d,q)**: Combined with d differences
+
+```{r}
+#| label: arima-example
+#| eval: false
+library(forecast)
+# Fit ARIMA
+fit <- auto.arima(y)
+# Forecast
+forecast(fit, h = 12)
+```
+
+## Vector Autoregression (VAR) {#sec-var}
+
+For multivariate time series:
+
+$$
+\mathbf{Y}_t = \mathbf{c} + \mathbf{\Phi}_1 \mathbf{Y}_{t-1} + \cdots + \mathbf{\Phi}_p \mathbf{Y}_{t-p} + \mathbf{\epsilon}_t
+$$ {#eq-var}
+
+```{r}
+#| label: var-example
+#| eval: false
+library(vars)
+var_model <- VAR(data, p = 2, type = "const")
+summary(var_model)
+```
+
+## Detailed Content
+
+::: {.callout-note}
+The complete Time Series chapter is being converted with plans for interactive visualizations using Observable JS. Current content includes the original R Markdown below.
 :::
 
 ```{r}
 #| child: "TimeSeries.Rmd"
 ```
-

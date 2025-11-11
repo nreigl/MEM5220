@@ -1,12 +1,119 @@
-# Bayes {.unnumbered}
+# Bayesian Econometrics {#sec-bayes}
 
-::: {.callout-warning}
-## Temporary Note
-This chapter is being migrated from R Markdown to Quarto. 
-The content below is included from the original .Rmd file.
+::: {.callout-note}
+## Chapter Status
+This chapter is currently a placeholder for future Bayesian econometrics content.
+
+Planned topics:
+- Bayesian inference fundamentals
+- Prior specification
+- Posterior distributions
+- MCMC methods
+- Bayesian regression with `brms`
 :::
 
 ```{r}
-#| child: "Bayes.Rmd"
+#| label: setup-bayes
+#| include: false
+# Packages: MCMCpack, brms available in before-chapter.R
 ```
 
+## Introduction
+
+This section serves as an introduction to Bayesian statistics and econometrics.
+
+::: {.callout-tip}
+## Recommended Resources
+For Bayesian econometrics in R:
+
+- [Statistical Rethinking](https://xcelab.net/rm/statistical-rethinking/) by Richard McElreath
+- [brms package](https://paul-buerkner.github.io/brms/) documentation
+- [Bayesian Data Analysis](http://www.stat.columbia.edu/~gelman/book/) by Gelman et al.
+:::
+
+## Bayesian vs Frequentist
+
+::: {.panel-tabset}
+
+## Frequentist Approach
+
+- Parameters are **fixed** but unknown
+- Probability describes long-run frequency
+- Inference via sampling distributions
+- Confidence intervals
+
+## Bayesian Approach
+
+- Parameters are **random** variables
+- Probability describes degree of belief
+- Inference via Bayes' theorem
+- Credible intervals
+:::
+
+## Bayes' Theorem
+
+$$
+p(\theta | y) = \frac{p(y | \theta) p(\theta)}{p(y)}
+$$ {#eq-bayes-theorem}
+
+Where:
+
+- $p(\theta | y)$ is the **posterior** distribution
+- $p(y | \theta)$ is the **likelihood**
+- $p(\theta)$ is the **prior** distribution
+- $p(y)$ is the marginal likelihood (normalizing constant)
+
+::: {.callout-important}
+## Key Insight
+The posterior combines prior beliefs with data evidence:
+
+**Posterior ∝ Likelihood × Prior**
+:::
+
+## Bayesian Linear Regression
+
+Simple linear regression in Bayesian framework:
+
+$$
+\begin{aligned}
+y_i &\sim N(\beta_0 + \beta_1 x_i, \sigma^2) \\
+\beta_0, \beta_1 &\sim N(0, 10^2) \\
+\sigma &\sim \text{Half-Cauchy}(0, 5)
+\end{aligned}
+$$ {#eq-bayes-lm}
+
+```{r}
+#| label: bayes-lm-example
+#| eval: false
+library(brms)
+
+# Bayesian linear regression
+bayes_model <- brm(
+  y ~ x,
+  data = mydata,
+  family = gaussian(),
+  prior = c(
+    prior(normal(0, 10), class = "b"),
+    prior(cauchy(0, 5), class = "sigma")
+  ),
+  chains = 4,
+  iter = 2000
+)
+
+summary(bayes_model)
+```
+
+## Further Development
+
+This chapter will be expanded to include:
+
+- [ ] Prior selection and sensitivity analysis
+- [ ] Posterior predictive checks
+- [ ] Bayesian model comparison (Bayes factors, LOO-CV)
+- [ ] Hierarchical/multilevel models
+- [ ] Practical applications in econometrics
+
+::: {.callout-note}
+## Contribute!
+If you're interested in expanding this chapter, please see [CONTRIBUTING.md](CONTRIBUTING.md).
+:::

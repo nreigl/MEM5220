@@ -1,12 +1,179 @@
-# LM {.unnumbered}
+# Linear Regression {#sec-lm}
+
+::: {.callout-note}
+## Chapter Status
+This is the largest chapter (2800+ lines). Full native Quarto conversion is in progress.
+
+For complete content, the original LM.Rmd is included via child chunk below.
+:::
+
+```{r}
+#| label: setup-lm
+#| include: false
+# Packages loaded in before-chapter.R
+```
+
+## Simple Linear Regression {#sec-slr}
+
+The simple linear regression model:
+
+$$
+Y_i = \beta_0 + \beta_1 X_i + \epsilon_i
+$$ {#eq-slr}
+
+Where:
+
+- $Y_i$: Dependent variable
+- $X_i$: Independent variable
+- $\beta_0$: Intercept
+- $\beta_1$: Slope coefficient
+- $\epsilon_i$: Error term with $E(\epsilon_i|X_i) = 0$
+
+::: {.callout-important}
+## OLS Assumptions (SLR)
+1. **Linearity**: True relationship is linear
+2. **Random sampling**: $(X_i, Y_i)$ are i.i.d.
+3. **No perfect collinearity**: Variation in $X$
+4. **Zero conditional mean**: $E(\epsilon|X) = 0$
+5. **Homoskedasticity**: $\text{Var}(\epsilon|X) = \sigma^2$
+:::
+
+### OLS Estimators {#sec-ols-slr}
+
+$$
+\hat{\beta}_1 = \frac{\sum(X_i - \bar{X})(Y_i - \bar{Y})}{\sum(X_i - \bar{X})^2} = \frac{\text{Cov}(X,Y)}{\text{Var}(X)}
+$$ {#eq-beta1}
+
+$$
+\hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{X}
+$$ {#eq-beta0}
+
+## Multiple Linear Regression {#sec-mlr}
+
+With $k$ explanatory variables:
+
+$$
+Y_i = \beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i} + \cdots + \beta_k X_{ki} + \epsilon_i
+$$ {#eq-mlr}
+
+In matrix form:
+
+$$
+\mathbf{Y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}
+$$ {#eq-mlr-matrix}
+
+$$
+\hat{\boldsymbol{\beta}} = (\mathbf{X}'\mathbf{X})^{-1}\mathbf{X}'\mathbf{Y}
+$$ {#eq-ols-matrix}
+
+::: {.callout-important}
+## MLR Assumptions (Gauss-Markov)
+1. **Linear in parameters**
+2. **Random sampling**
+3. **No perfect multicollinearity**
+4. **Zero conditional mean**: $E(\epsilon|\mathbf{X}) = 0$
+5. **Homoskedasticity**: $\text{Var}(\epsilon|\mathbf{X}) = \sigma^2$
+
+Under these: OLS is **BLUE** (Best Linear Unbiased Estimator)
+:::
+
+## Inference {#sec-inference}
+
+### Standard Errors {#sec-se}
+
+$$
+\text{SE}(\hat{\beta}_j) = \sqrt{\frac{\hat{\sigma}^2}{SST_j(1-R_j^2)}}
+$$ {#eq-se}
+
+### t-Tests {#sec-t-test}
+
+Test $H_0: \beta_j = 0$:
+
+$$
+t = \frac{\hat{\beta}_j}{\text{SE}(\hat{\beta}_j)} \sim t_{n-k-1}
+$$ {#eq-t-stat}
+
+### F-Tests {#sec-f-test}
+
+Test multiple restrictions $H_0: \beta_1 = \beta_2 = \cdots = \beta_k = 0$:
+
+$$
+F = \frac{(SSR_r - SSR_{ur})/q}{SSR_{ur}/(n-k-1)} \sim F_{q,n-k-1}
+$$ {#eq-f-stat}
+
+## Heteroskedasticity {#sec-hetero}
+
+When $\text{Var}(\epsilon_i|X_i) = \sigma_i^2$ varies with $X$:
 
 ::: {.callout-warning}
-## Temporary Note
-This chapter is being migrated from R Markdown to Quarto. 
-The content below is included from the original .Rmd file.
+## Consequences of Heteroskedasticity
+- OLS still **unbiased** and **consistent**
+- Standard errors are **biased**
+- t-tests and F-tests **invalid**
+
+**Solution**: Use robust (heteroskedasticity-consistent) standard errors
+:::
+
+### Robust Standard Errors {#sec-robust-se}
+
+```{r}
+#| label: robust-se-example
+#| eval: false
+library(lmtest)
+library(sandwich)
+
+# OLS model
+model <- lm(y ~ x1 + x2, data = mydata)
+
+# Robust SEs (HC1)
+coeftest(model, vcov = vcovHC(model, type = "HC1"))
+```
+
+## Model Selection {#sec-model-selection}
+
+::: {.panel-tabset}
+
+## Adjusted R²
+
+$$
+\bar{R}^2 = 1 - \frac{SSR/(n-k-1)}{SST/(n-1)}
+$$ {#eq-adj-r2}
+
+Penalizes adding variables
+
+## AIC
+
+$$
+AIC = \log(SSR/n) + 2(k+1)/n
+$$ {#eq-aic}
+
+## BIC
+
+$$
+BIC = \log(SSR/n) + (k+1)\log(n)/n
+$$ {#eq-bic}
+
+Stronger penalty for model complexity
+
+:::
+
+## Detailed Content
+
+::: {.callout-note}
+## Full Chapter Conversion
+The complete Linear Regression chapter covers:
+
+- Simple and multiple regression
+- Dummy variables and interactions
+- Functional forms (log, polynomial, splines)
+- Outliers and influential observations
+- Heteroskedasticity testing and correction
+- Specification tests
+- Quantile regression
+
+Full native Quarto conversion is planned for Phase 3.
 :::
 
 ```{r}
 #| child: "LM.Rmd"
 ```
-

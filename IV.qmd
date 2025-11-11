@@ -1,12 +1,132 @@
-# IV {.unnumbered}
+# Instrumental Variables {#sec-iv}
+
+::: {.callout-note}
+## Chapter Status
+This chapter has been partially converted to Quarto. Full conversion with all examples is in progress.
+
+For complete content, the original IV.Rmd is included via child chunk below.
+:::
+
+```{r}
+#| label: setup-iv
+#| include: false
+# Packages loaded in before-chapter.R
+```
+
+## Introduction to Instrumental Variables
+
+When explanatory variables are correlated with the error term (endogeneity), OLS estimates are biased and inconsistent. **Instrumental Variables** (IV) provides consistent estimates under endogeneity.
+
+::: {.callout-important}
+## Sources of Endogeneity
+1. **Omitted variables**: Unobserved confounders
+2. **Measurement error**: In explanatory variables
+3. **Simultaneity**: Reverse causation
+4. **Sample selection**: Non-random selection into sample
+:::
+
+## Valid Instruments {#sec-valid-instruments}
+
+A variable $Z$ is a valid instrument for endogenous $X$ if:
+
+::: {.panel-tabset}
+
+## Relevance
+
+$$
+\text{Cov}(Z, X) \neq 0
+$$ {#eq-relevance}
+
+**Testable**: Check with first-stage F-statistic
+
+**Rule of thumb**: F > 10 (weak instrument test)
+
+## Exogeneity
+
+$$
+\text{Cov}(Z, \epsilon) = 0
+$$ {#eq-exogeneity}
+
+**Not testable**: Requires economic reasoning
+
+**Exclusion restriction**: $Z$ affects $Y$ **only** through $X$
+
+:::
 
 ::: {.callout-warning}
-## Temporary Note
-This chapter is being migrated from R Markdown to Quarto. 
-The content below is included from the original .Rmd file.
+## Weak Instruments
+Weak instruments (low relevance) cause:
+
+- Bias toward OLS
+- Poor finite-sample properties
+- Invalid inference
+
+**Solution**: Report first-stage F-statistic, use robust inference
+:::
+
+## Two-Stage Least Squares (2SLS) {#sec-2sls}
+
+**First stage**: Regress endogenous $X$ on instrument $Z$ and controls:
+
+$$
+X_i = \pi_0 + \pi_1 Z_i + \pi_2 W_i + v_i
+$$ {#eq-first-stage}
+
+**Second stage**: Regress $Y$ on predicted $\hat{X}$ and controls:
+
+$$
+Y_i = \beta_0 + \beta_1 \hat{X}_i + \beta_2 W_i + \epsilon_i
+$$ {#eq-second-stage}
+
+```{r}
+#| label: iv-example
+#| eval: false
+library(AER)
+# Two-stage least squares
+iv_model <- ivreg(y ~ x + controls | z + controls, data = mydata)
+summary(iv_model, diagnostics = TRUE)
+```
+
+## Testing and Diagnostics {#sec-iv-tests}
+
+::: {.panel-tabset}
+
+## Weak Instruments
+
+First-stage F-test:
+
+```{r}
+#| eval: false
+summary(iv_model, diagnostics = TRUE)$diagnostics["Weak instruments",]
+```
+
+## Overidentification
+
+Sargan/Hansen J-test (only with multiple instruments):
+
+```{r}
+#| eval: false
+summary(iv_model, diagnostics = TRUE)$diagnostics["Sargan",]
+```
+
+## Endogeneity
+
+Hausman test (compare OLS vs IV):
+
+```{r}
+#| eval: false
+ols_model <- lm(y ~ x + controls, data = mydata)
+summary(iv_model, diagnostics = TRUE)$diagnostics["Wu-Hausman",]
+```
+
+:::
+
+## Detailed Content
+
+::: {.callout-note}
+The complete IV chapter with all econometric examples and applications is being gradually converted. Current content includes the original R Markdown below.
 :::
 
 ```{r}
 #| child: "IV.Rmd"
 ```
-
