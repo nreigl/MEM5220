@@ -147,11 +147,32 @@ For detailed contribution guidelines, please read [CONTRIBUTING.md](CONTRIBUTING
 
 If you find errors or have suggestions, please [open an issue](https://github.com/nreigl/MEM5220/issues).
 
+## Testing
+
+### Automated Validation
+
+Before committing, validate the project structure:
+
+```bash
+python3 scripts/validate_quarto.py
+```
+
+This checks for:
+- YAML syntax errors
+- Unclosed code/div blocks
+- Old-style cross-references
+- Missing child files
+- Common typos
+
+See [TESTING.md](TESTING.md) for comprehensive testing guide.
+
 ## Continuous Integration
 
 This project uses GitHub Actions for:
+- **Project validation** before building
 - **Automated book building** on every push/PR
 - **Code quality checks** with lintr
+- **Output verification** after rendering
 - **Automated deployment** to GitHub Pages (on main branch)
 
 Check the [Actions tab](https://github.com/nreigl/MEM5220/actions) to see build status.
