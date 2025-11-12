@@ -239,17 +239,17 @@ library(estimatr)
 set.seed(123)
 dat <- fabricate(
   N = 10000,
+  # Unobserved confounder to create endogeneity
+  U = rnorm(N),
   # Instrument (binary)
   Z1 = rbinom(N, 1, prob = 0.4),
   Z2 = rbinom(N, 1, prob = 0.4),
   # Exogenous variable
   X2 = rnorm(N),
-  # Endogenous variable (affected by instruments)
-  X1 = 2 + 0.5 * Z1 + 0.5 * Z2 + 0.3 * X2 + rnorm(N, sd = 2),
-  # Error term
-  epsilon = rnorm(N),
-  # Outcome (endogeneity: X1 correlated with epsilon through omitted variable)
-  Y = 3 + 0.8 * X1 + 0.5 * X2 + 0.4 * X1 * epsilon + rnorm(N, sd = 1)
+  # Endogenous variable (correlated with U)
+  X1 = 2 + 0.5 * Z1 + 0.5 * Z2 + 0.3 * X2 + U + rnorm(N, sd = 2),
+  # Outcome (also affected by U, creating endogeneity in the Y ~ X1 relationship)
+  Y = 3 + 0.8 * X1 + 0.5 * X2 + U + rnorm(N, sd = 1)
 )
 
 head(dat)
