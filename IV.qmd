@@ -1,11 +1,4 @@
-# Instrumental Variables {#sec-iv}
-
-::: {.callout-note}
-## Chapter Status
-This chapter has been partially converted to Quarto. Full conversion with all examples is in progress.
-
-For complete content, the original IV.Rmd is included via child chunk below.
-:::
+# Instrumental Variables and Two Stage Least Squares {#sec-iv}
 
 ```{r}
 #| label: setup-iv
@@ -13,120 +6,686 @@ For complete content, the original IV.Rmd is included via child chunk below.
 # Packages loaded in before-chapter.R
 ```
 
-## Introduction to Instrumental Variables
+::: {.callout-note}
+## Chapter Overview
+This chapter covers instrumental variables (IV) estimation, a solution to endogeneity:
 
-When explanatory variables are correlated with the error term (endogeneity), OLS estimates are biased and inconsistent. **Instrumental Variables** (IV) provides consistent estimates under endogeneity.
-
-::: {.callout-important}
-## Sources of Endogeneity
-1. **Omitted variables**: Unobserved confounders
-2. **Measurement error**: In explanatory variables
-3. **Simultaneity**: Reverse causation
-4. **Sample selection**: Non-random selection into sample
+- The endogeneity problem and its sources
+- Instrumental variable requirements
+- Two-stage least squares (2SLS) estimation
+- Testing for weak instruments and overidentification
+- Panel IV estimation
+- GMM estimation
 :::
 
-## Valid Instruments {#sec-valid-instruments}
+## The Endogeneity Problem {#sec-endogeneity}
 
-A variable $Z$ is a valid instrument for endogenous $X$ if:
+### What is Endogeneity? {#sec-what-endogeneity}
+
+In OLS regression, we assume that explanatory variables are **exogenous**:
+
+$$E(\epsilon|X) = 0 \quad \text{or equivalently} \quad Cov(X_k, \epsilon) = 0$$
+
+When this fails, we have **endogeneity**: $Cov(X_k, \epsilon) \neq 0$
+
+::: {.callout-warning}
+## Consequences of Endogeneity
+- OLS is **biased**: $E(\hat{\beta}) \neq \beta$
+- OLS is **inconsistent**: $\hat{\beta} \not\xrightarrow{p} \beta$
+- Cannot interpret coefficients as causal effects
+- **Solution**: Instrumental Variables (IV) or experiments
+:::
+
+### Sources of Endogeneity {#sec-sources-endogeneity}
 
 ::: {.panel-tabset}
 
-## Relevance
+## 1. Omitted Variables
 
-$$
-\text{Cov}(Z, X) \neq 0
-$$ {#eq-relevance}
+**Problem**: Relevant variable left out of model
 
-**Testable**: Check with first-stage F-statistic
+**Example**: Returns to education
+- True model: $\log(wage) = \beta_0 + \beta_1 educ + \beta_2 ability + \epsilon$
+- Estimated: $\log(wage) = \beta_0 + \beta_1 educ + u$
+- Since $Cov(educ, ability) \neq 0$, education is endogenous
 
-**Rule of thumb**: F > 10 (weak instrument test)
+**Bias**: $E(\hat{\beta}_1) = \beta_1 + \beta_2 \frac{Cov(educ, ability)}{Var(educ)}$
 
-## Exogeneity
+## 2. Measurement Error
 
-$$
-\text{Cov}(Z, \epsilon) = 0
-$$ {#eq-exogeneity}
+**Problem**: Variable measured with error
 
-**Not testable**: Requires economic reasoning
+**Example**: True income vs reported income
+- True model: $consumption = \beta_0 + \beta_1 income^* + \epsilon$
+- Observed: $income = income^* + \nu$ (measurement error)
+- This creates $Cov(income, u) \neq 0$ where $u = \epsilon - \beta_1\nu$
 
-**Exclusion restriction**: $Z$ affects $Y$ **only** through $X$
+**Result**: **Attenuation bias** (coefficient biased toward zero)
+
+## 3. Simultaneity
+
+**Problem**: $X$ and $Y$ jointly determined (reverse causality)
+
+**Example**: Supply and demand
+- Price and quantity determined simultaneously
+- $Q^d = \alpha_0 + \alpha_1 P + \epsilon_d$ (demand)
+- $Q^s = \beta_0 + \beta_1 P + \epsilon_s$ (supply)
+- Equilibrium: $Q^d = Q^s$
+- Cannot identify elasticities from $(P, Q)$ data alone!
+
+```{r}
+#| label: fig-simultaneity
+#| fig-cap: "Simultaneity: Price and Quantity jointly determined"
+#| echo: false
+#| fig-width: 7
+#| fig-height: 5
+library(ggplot2)
+
+# Simulate supply and demand
+P <- seq(0, 100, by = 1)
+Qd1 <- 100 - 0.5 * P
+Qs1 <- -20 + 0.8 * P
+Qd2 <- 110 - 0.5 * P
+Qs2 <- -15 + 0.8 * P
+
+df <- data.frame(
+  P = rep(P, 4),
+  Q = c(Qd1, Qs1, Qd2, Qs2),
+  Curve = rep(c("Demand 1", "Supply 1", "Demand 2", "Supply 2"), each = length(P))
+)
+
+ggplot(df, aes(x = Q, y = P, color = Curve, linetype = Curve)) +
+  geom_line(linewidth = 1) +
+  scale_color_manual(values = c("Demand 1" = "blue", "Supply 1" = "red",
+                                 "Demand 2" = "blue", "Supply 2" = "red")) +
+  scale_linetype_manual(values = c("Demand 1" = "solid", "Supply 1" = "solid",
+                                     "Demand 2" = "dashed", "Supply 2" = "dashed")) +
+  labs(
+    x = "Quantity",
+    y = "Price",
+    title = "Supply and Demand Shifts",
+    subtitle = "Observed (P,Q) cannot identify elasticities"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right")
+```
 
 :::
 
-::: {.callout-warning}
-## Weak Instruments
-Weak instruments (low relevance) cause:
+## Instrumental Variables {#sec-iv-solution}
 
-- Bias toward OLS
-- Poor finite-sample properties
-- Invalid inference
+### The IV Idea {#sec-iv-idea}
 
-**Solution**: Report first-stage F-statistic, use robust inference
+Consider the simple model with endogenous $X$:
+
+$$
+Y_i = \beta_0 + \beta_1 X_i + \epsilon_i, \quad Cov(X_i, \epsilon_i) \neq 0
+$$
+
+**Solution**: Find an **instrumental variable** $Z$ that satisfies:
+
+::: {.callout-important}
+## Requirements for a Valid Instrument
+
+**1. Independence (Exogeneity)**
+$$Cov(Z, \epsilon) = 0$$
+The instrument is **uncorrelated with the error term**
+
+**2. Relevance**
+$$Cov(Z, X) \neq 0$$
+The instrument is **correlated with the endogenous variable**
+
+These are called the **instrument validity conditions**.
+:::
+
+### Intuition {#sec-iv-intuition}
+
+The IV estimator uses only the variation in $X$ that is **induced by $Z$**:
+
+1. **OLS problem**: Captures correlation between $X$ and $Y$, including:
+   - Direct effect: $X \rightarrow Y$ (what we want)
+   - Indirect effect: $X \leftarrow \epsilon \rightarrow Y$ (bias!)
+
+2. **IV solution**:
+   - $Z$ affects $X$: $Z \rightarrow X$ (relevance)
+   - $Z$ doesn't affect $\epsilon$: $Z \not\rightarrow \epsilon$ (exogeneity)
+   - So variation in $X$ from $Z$ is **exogenous**!
+
+3. **IV captures**: $Corr(Z \rightarrow X, Y)$ = causal effect of $X$ on $Y$
+
+```{r}
+#| label: fig-iv-dag
+#| fig-cap: "Causal Diagram: IV breaks the endogeneity path"
+#| echo: false
+#| eval: false
+# Could include DAG diagram here if dagitty/ggdag packages available
+```
+
+::: {.callout-tip}
+## Classic IV Examples
+
+**Returns to education**
+- Endogenous: Years of education (correlated with ability)
+- Instrument: Distance to college, quarter of birth
+- Logic: Distance affects education but not ability/wage directly
+
+**Effect of police on crime**
+- Endogenous: Number of police (cities hire more police when crime is high)
+- Instrument: Firefighters per capita, election timing
+- Logic: Firefighters correlate with city resources but don't directly affect crime
+
+**Effect of military service on earnings**
+- Endogenous: Veteran status (selection into military)
+- Instrument: Draft lottery number (Vietnam era)
+- Logic: Random lottery affects service but not inherent earning potential
 :::
 
 ## Two-Stage Least Squares (2SLS) {#sec-2sls}
 
-**First stage**: Regress endogenous $X$ on instrument $Z$ and controls:
+### The 2SLS Procedure {#sec-2sls-procedure}
+
+Consider the model:
 
 $$
-X_i = \pi_0 + \pi_1 Z_i + \pi_2 W_i + v_i
-$$ {#eq-first-stage}
-
-**Second stage**: Regress $Y$ on predicted $\hat{X}$ and controls:
-
+Y_i = \beta_0 + \beta_1 X_i + \beta_2 W_i + \epsilon_i
 $$
-Y_i = \beta_0 + \beta_1 \hat{X}_i + \beta_2 W_i + \epsilon_i
-$$ {#eq-second-stage}
 
-```{r}
-#| label: iv-example
-#| eval: false
-library(AER)
-# Two-stage least squares
-iv_model <- ivreg(y ~ x + controls | z + controls, data = mydata)
-summary(iv_model, diagnostics = TRUE)
-```
-
-## Testing and Diagnostics {#sec-iv-tests}
+Where:
+- $X_i$ is endogenous: $Cov(X_i, \epsilon_i) \neq 0$
+- $W_i$ is exogenous: $Cov(W_i, \epsilon_i) = 0$
+- $Z_i$ is an instrumental variable for $X_i$
 
 ::: {.panel-tabset}
 
-## Weak Instruments
+## Stage 1: First Stage
 
-First-stage F-test:
+Regress endogenous variable on **all instruments and exogenous variables**:
 
-```{r}
-#| eval: false
-summary(iv_model, diagnostics = TRUE)$diagnostics["Weak instruments",]
-```
+$$
+X_i = \pi_0 + \pi_1 Z_i + \pi_2 W_i + \nu_i
+$$
 
-## Overidentification
+Get predicted values: $\hat{X}_i = \hat{\pi}_0 + \hat{\pi}_1 Z_i + \hat{\pi}_2 W_i$
 
-Sargan/Hansen J-test (only with multiple instruments):
+**Key test**: Is $\hat{\pi}_1$ significantly different from zero?
+- If not, **weak instrument problem**!
+- Rule of thumb: First-stage F-statistic > 10
 
-```{r}
-#| eval: false
-summary(iv_model, diagnostics = TRUE)$diagnostics["Sargan",]
-```
+## Stage 2: Second Stage
 
-## Endogeneity
+Regress $Y$ on predicted $\hat{X}$ and exogenous variables:
 
-Hausman test (compare OLS vs IV):
+$$
+Y_i = \beta_0 + \beta_1 \hat{X}_i + \beta_2 W_i + error_i
+$$
 
-```{r}
-#| eval: false
-ols_model <- lm(y ~ x + controls, data = mydata)
-summary(iv_model, diagnostics = TRUE)$diagnostics["Wu-Hausman",]
-```
+This gives consistent estimates of $\beta_1$!
+
+**Important**: Standard errors from naive 2SLS are **wrong**
+- Must use proper IV standard errors
+- Or use built-in IV functions (e.g., `iv_robust()`, `ivreg()`)
 
 :::
 
-## Detailed Content
+### Simulation Example {#sec-2sls-simulation}
+
+Let's simulate data to see IV in action:
+
+```{r}
+#| label: simulate-iv-data
+library(fabricatr)
+library(estimatr)
+
+set.seed(123)
+dat <- fabricate(
+  N = 10000,
+  # Instrument (binary)
+  Z1 = rbinom(N, 1, prob = 0.4),
+  Z2 = rbinom(N, 1, prob = 0.4),
+  # Exogenous variable
+  X2 = rnorm(N),
+  # Endogenous variable (affected by instruments)
+  X1 = 2 + 0.5 * Z1 + 0.5 * Z2 + 0.3 * X2 + rnorm(N, sd = 2),
+  # Error term
+  epsilon = rnorm(N),
+  # Outcome (endogeneity: X1 correlated with epsilon through omitted variable)
+  Y = 3 + 0.8 * X1 + 0.5 * X2 + 0.4 * X1 * epsilon + rnorm(N, sd = 1)
+)
+
+head(dat)
+```
+
+```{r}
+#| label: compare-ols-iv
+library(modelsummary)
+
+# OLS (biased due to endogeneity)
+ols_model <- lm(Y ~ X1 + X2, data = dat)
+
+# Manual 2SLS (for illustration)
+# Stage 1: Regress X1 on instruments and exogenous variables
+first_stage <- lm(X1 ~ Z1 + Z2 + X2, data = dat)
+X1_hat <- fitted(first_stage)
+
+# Stage 2: Regress Y on predicted X1
+second_stage <- lm(Y ~ X1_hat + X2, data = dat)
+
+# Proper IV estimation (correct SEs)
+iv_one <- iv_robust(Y ~ X1 + X2 | Z1 + X2, data = dat, diagnostics = TRUE)
+iv_two <- iv_robust(Y ~ X1 + X2 | Z1 + Z2 + X2, data = dat, diagnostics = TRUE)
+
+# Compare
+modelsummary(
+  list("OLS" = ols_model,
+       "2SLS (manual)" = second_stage,
+       "IV (1 instrument)" = iv_one,
+       "IV (2 instruments)" = iv_two),
+  stars = TRUE,
+  gof_map = c("nobs", "r.squared")
+)
+```
 
 ::: {.callout-note}
-The complete IV chapter with all econometric examples and applications is being gradually converted. Current content includes the original R Markdown below.
+## Interpreting Results
+- **OLS**: Biased estimate of $\beta_1$ (endogeneity)
+- **Manual 2SLS**: Correct point estimate, but SEs are wrong!
+- **IV (proper)**: Consistent estimate with correct standard errors
+- **More instruments**: Can improve efficiency (smaller SE)
+:::
+
+## Testing and Diagnostics {#sec-iv-diagnostics}
+
+### Testing for Weak Instruments {#sec-weak-instruments}
+
+**Problem**: If $Cov(Z, X)$ is weak, IV estimator is:
+- Biased in small samples (bias toward OLS)
+- Large standard errors
+- Poor performance
+
+::: {.callout-warning}
+## Weak Instrument Problem
+**Weak instruments** occur when first-stage F-statistic < 10
+
+**Consequences**:
+- IV estimates unreliable
+- Hypothesis tests have wrong size
+- Confidence intervals have wrong coverage
+
+**Rule of thumb**: First-stage F > 10 (Stock and Yogo, 2005)
+- F > 10: Reasonably strong
+- F > 20: Strong instruments
+- F < 10: Weak instruments (be very careful!)
 :::
 
 ```{r}
-#| child: "IV.Rmd"
+#| label: weak-instrument-test
+# Check first-stage F-statistic
+summary(iv_one, diagnostics = TRUE)
+
+# Extract F-stat
+cat("First-stage F-statistic:", iv_one$diagnostic_first_stage_fstatistic[1], "\n")
+
+# Manual calculation
+first_stage <- lm(X1 ~ Z1 + X2, data = dat)
+fs_summary <- summary(first_stage)
+
+# F-test for instruments only (Z1 in this case)
+restricted <- lm(X1 ~ X2, data = dat)
+anova_test <- anova(restricted, first_stage)
+cat("Manual F-statistic:", anova_test$F[2], "\n")
 ```
+
+### Testing for Overidentification {#sec-overid-test}
+
+When you have **more instruments than endogenous variables** (overidentified):
+
+**Sargan-Hansen J test**:
+- $H_0$: All instruments are valid (exogenous)
+- $H_1$: At least one instrument is invalid
+
+::: {.callout-note}
+## Identification Status
+- **Exactly identified**: # instruments = # endogenous variables
+  - Cannot test instrument validity
+- **Overidentified**: # instruments > # endogenous variables
+  - Can test with Sargan/Hansen J test
+  - More efficient estimation
+- **Underidentified**: # instruments < # endogenous variables
+  - Cannot estimate model!
+:::
+
+```{r}
+#| label: overid-test
+# With 2 instruments for 1 endogenous variable, we're overidentified
+summary(iv_two, diagnostics = TRUE)
+
+# J-statistic for overidentification
+cat("J-statistic:", iv_two$diagnostic_overid_test, "\n")
+cat("p-value:", iv_two$diagnostic_overid_test_p, "\n")
+```
+
+**Interpretation**:
+- Large p-value → Cannot reject $H_0$ → Instruments appear valid
+- Small p-value → Reject $H_0$ → At least one instrument likely invalid
+
+### Testing for Endogeneity {#sec-endogeneity-test}
+
+**Durbin-Wu-Hausman test**: Is $X$ actually endogenous?
+
+- $H_0$: $X$ is exogenous (OLS is consistent and efficient)
+- $H_1$: $X$ is endogenous (need IV)
+
+```{r}
+#| label: endogeneity-test
+#| eval: false
+library(AER)
+
+# Hausman test
+ivreg_model <- ivreg(Y ~ X1 + X2 | Z1 + Z2 + X2, data = dat)
+summary(ivreg_model, diagnostics = TRUE)
+```
+
+**If $H_0$ not rejected**: Use OLS (more efficient)
+**If $H_0$ rejected**: Use IV (consistent despite inefficiency)
+
+## Real Data Example {#sec-iv-example}
+
+### Card (1995): Returns to Education {#sec-card-example}
+
+**Research question**: What is the causal effect of education on wages?
+
+**Endogeneity**: $Cov(educ, \epsilon) \neq 0$ due to omitted ability
+
+**Instrument**: Proximity to 4-year college
+- Affects education (relevance)
+- Doesn't directly affect ability/wages (exogeneity)
+
+```{r}
+#| label: card-data
+# Load Card (1995) data
+library(AER)
+data("CollegeDistance", package = "AER")
+
+# Variables:
+# wage: log wage
+# education: years of education
+# distance: distance to nearest 4-year college (miles/10)
+# Controls: gender, ethnicity, urban, unemp, tuition, etc.
+
+# Summary
+datasummary_skim(CollegeDistance[c("wage", "education", "distance")])
+```
+
+::: {.panel-tabset}
+
+## OLS (Biased)
+
+```{r}
+#| label: card-ols
+ols_card <- lm(wage ~ education + gender + ethnicity + unemp + urban,
+               data = CollegeDistance)
+summary(ols_card)
+```
+
+**Return to education** (OLS): `r round(100 * coef(ols_card)["education"], 2)`%
+
+## IV (Consistent)
+
+```{r}
+#| label: card-iv
+iv_card <- ivreg(wage ~ education + gender + ethnicity + unemp + urban |
+                   distance + gender + ethnicity + unemp + urban,
+                 data = CollegeDistance)
+summary(iv_card, diagnostics = TRUE)
+```
+
+**Return to education** (IV): `r round(100 * coef(iv_card)["education"], 2)`%
+
+## Comparison
+
+```{r}
+#| label: card-compare
+modelsummary(
+  list("OLS" = ols_card, "IV" = iv_card),
+  stars = TRUE,
+  gof_map = c("nobs", "r.squared")
+)
+```
+
+:::
+
+**Key findings**:
+- IV estimate > OLS estimate
+- Suggests **negative ability bias** (ability negatively correlated with distance)
+- First-stage F = `r round(summary(iv_card, diagnostics = TRUE)$diagnostics["Weak instruments", "statistic"], 1)` (> 10, strong instrument)
+
+## Robust Standard Errors {#sec-iv-robust}
+
+Just like OLS, IV estimates can have heteroskedasticity:
+
+```{r}
+#| label: iv-robust-se
+library(sandwich)
+library(lmtest)
+
+# IV with robust standard errors
+coeftest(iv_card, vcov = vcovHC(iv_card, type = "HC1"))
+```
+
+Or use `iv_robust()` which gives robust SEs by default:
+
+```{r}
+#| label: iv-robust-estimatr
+iv_robust_card <- iv_robust(
+  wage ~ education + gender + ethnicity + unemp + urban |
+    distance + gender + ethnicity + unemp + urban,
+  data = CollegeDistance
+)
+summary(iv_robust_card)
+```
+
+## Panel IV {#sec-panel-iv}
+
+### Fixed Effects IV {#sec-fe-iv}
+
+With panel data, combine IV with fixed effects:
+
+$$
+Y_{it} = \beta_1 X_{it} + \alpha_i + \lambda_t + \epsilon_{it}
+$$
+
+Where $X_{it}$ is endogenous, $\alpha_i$ are individual fixed effects.
+
+**Instrument**: $Z_{it}$ that varies over time within individuals
+
+```{r}
+#| label: panel-iv-example
+#| eval: false
+library(plm)
+
+# Panel IV with fixed effects
+panel_iv <- plm(
+  y ~ x1 + x2 | z1 + z2,
+  data = panel_data,
+  model = "within",  # Fixed effects
+  index = c("id", "time")
+)
+summary(panel_iv)
+```
+
+### Using fixest for Panel IV {#sec-fixest-iv}
+
+The `fixest` package provides fast and flexible panel IV estimation:
+
+```{r}
+#| label: fixest-iv
+#| eval: false
+library(fixest)
+
+# Panel IV with individual and time fixed effects
+feiv_model <- feols(
+  y ~ x2 | id + time | x1 ~ z1 + z2,
+  data = panel_data,
+  vcov = "hetero"  # Robust SEs
+)
+summary(feiv_model)
+```
+
+**Syntax**: `feols(outcome ~ exog_vars | fixed_effects | endog ~ instruments)`
+
+## GMM Estimation {#sec-gmm}
+
+### Generalized Method of Moments {#sec-gmm-intro}
+
+**GMM** is a general estimation framework that includes IV as a special case.
+
+**Moment conditions**: $E[Z_i(Y_i - X_i'\beta)] = 0$
+
+With **more instruments than parameters** (overidentified):
+- Can estimate efficiently
+- Can test overidentifying restrictions
+
+```{r}
+#| label: gmm-example
+#| eval: false
+library(gmm)
+
+# GMM IV estimation
+g <- function(theta, data) {
+  Y <- data[, 1]
+  X <- data[, 2:3]
+  Z <- data[, 4:6]
+
+  # Moment conditions: E[Z'(Y - X'β)] = 0
+  moments <- Z * (Y - X %*% theta)
+  return(moments)
+}
+
+# Estimate
+gmm_result <- gmm(
+  g,
+  x = cbind(dat$Y, dat$X1, dat$X2, dat$Z1, dat$Z2, dat$X2),
+  t0 = c(1, 1)  # Starting values
+)
+summary(gmm_result)
+```
+
+::: {.callout-note}
+## When to Use GMM?
+- **Overidentified models**: Efficient estimation
+- **Complex moment conditions**: Nonlinear models
+- **Heteroskedasticity/autocorrelation**: GMM automatically robust
+
+**Standard IV = GMM** with orthogonality conditions
+:::
+
+## Local Average Treatment Effect (LATE) {#sec-late}
+
+### What IV Actually Estimates {#sec-late-interpretation}
+
+IV doesn't estimate the **average treatment effect** (ATE)!
+
+Instead, IV estimates the **local average treatment effect** (LATE):
+- Effect for **compliers** only
+- Compliers: Those whose treatment status is affected by the instrument
+
+::: {.callout-important}
+## LATE Framework (Imbens-Angrist, 1994)
+
+**Types of individuals**:
+1. **Compliers**: $D_i(Z=1) = 1, D_i(Z=0) = 0$ (respond to instrument)
+2. **Always-takers**: $D_i(Z=1) = 1, D_i(Z=0) = 1$ (always treated)
+3. **Never-takers**: $D_i(Z=1) = 0, D_i(Z=0) = 0$ (never treated)
+4. **Defiers**: $D_i(Z=1) = 0, D_i(Z=0) = 1$ (do opposite)
+
+**IV identifies**: Effect for compliers only!
+
+$$\beta_{IV} = E[Y_i(1) - Y_i(0) | \text{Complier}]$$
+
+**Not**: $E[Y_i(1) - Y_i(0)]$ (average treatment effect)
+:::
+
+**Example**: Draft lottery and veteran earnings
+- Compliers: Drafted → served, Not drafted → didn't serve
+- Always-takers: Volunteered regardless
+- Never-takers: Avoided service regardless
+- IV = Effect for those whose service was affected by draft
+
+## Common Mistakes {#sec-iv-mistakes}
+
+::: {.callout-warning}
+## Pitfalls to Avoid
+
+**1. Using naive 2SLS standard errors**
+- Manual 2SLS gives wrong SEs!
+- Always use proper IV functions
+
+**2. Weak instruments**
+- First-stage F < 10 → unreliable estimates
+- Report first-stage results!
+
+**3. Invalid instruments**
+- Exogeneity cannot be tested directly
+- Requires strong economic reasoning
+- Use overidentification tests when possible
+
+**4. Misinterpreting IV**
+- IV ≠ ATE (it's LATE)
+- Local to compliers only
+- Different instruments → different LATEs
+
+**5. Forgetting reduced form**
+- Always report: First stage + Reduced form + IV
+- Helps assess instrument validity
+:::
+
+## Summary {#sec-iv-summary}
+
+::: {.callout-note}
+## Key Takeaways
+
+**Endogeneity**:
+- $Cov(X, \epsilon) \neq 0$ → OLS biased and inconsistent
+- Sources: Omitted variables, measurement error, simultaneity
+
+**Instrumental Variables**:
+- Must be exogenous: $Cov(Z, \epsilon) = 0$
+- Must be relevant: $Cov(Z, X) \neq 0$
+- Finding good instruments is hard!
+
+**2SLS Estimation**:
+- Stage 1: Regress $X$ on $Z$ (and other exogenous variables)
+- Stage 2: Regress $Y$ on $\hat{X}$
+- Use proper IV functions for correct SEs
+
+**Diagnostics**:
+- First-stage F > 10 (weak instruments)
+- Sargan-Hansen test (overidentification)
+- Hausman test (endogeneity)
+
+**Interpretation**:
+- IV estimates LATE (local average treatment effect)
+- Effect for compliers, not population average
+- Larger SEs than OLS (price of consistency)
+
+**Best Practices**:
+- Report first-stage results
+- Test for weak instruments
+- Provide economic justification for instruments
+- Consider LATE interpretation
+:::
+
+## Further Reading {#sec-iv-references}
+
+- @wooldridge2015introductory - Chapter 15
+- @angrist2009mostly - Chapters 4-6 (intuitive)
+- @imbens1994identification - LATE framework
+- @stock2005testing - Weak instruments
+- @murray2006testing - Weak instrument robust inference
+
+---
+
+::: {.callout-tip}
+## Next Chapter
+See @sec-panel for **Panel Data Models** and @sec-glm for **Limited Dependent Variables**.
+:::
