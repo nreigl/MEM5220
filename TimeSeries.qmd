@@ -1,145 +1,875 @@
 # Time Series Analysis {#sec-timeseries}
 
-::: {.callout-note}
-## Chapter Status
-This chapter has been partially converted to Quarto. Full conversion with interactive time series visualizations is in progress.
-
-For complete content, the original TimeSeries.Rmd is included via child chunk below.
-:::
-
 ```{r}
 #| label: setup-ts
 #| include: false
-# Packages: dynlm, forecast, urca, fUnitRoots loaded in before-chapter.R
+# Packages loaded in before-chapter.R
 ```
 
-## Introduction to Time Series
+::: {.callout-note}
+## Chapter Overview
+This chapter covers time series econometrics:
 
-Time series data has temporal ordering where observations are indexed by time $t$. This creates unique challenges:
-
-::: {.callout-important}
-## Time Series Challenges
-1. **Serial correlation**: Observations correlated over time
-2. **Non-stationarity**: Mean/variance change over time
-3. **Trends**: Deterministic or stochastic
-4. **Seasonality**: Periodic patterns
+- Time series objects in R (ts, zoo, xts)
+- Stationarity and unit root testing
+- ARIMA modeling and forecasting
+- Seasonal decomposition
+- Finite Distributed Lag (FDL) models
+- Vector Autoregression (VAR) models
 :::
 
-## Stationarity {#sec-stationarity}
+## Introduction to Time Series {#sec-ts-intro}
 
-A series is **weakly stationary** if:
+**Time series data**: Observations indexed by time $t = 1, 2, ..., T$
 
-1. Constant mean: $E(Y_t) = \mu$ for all $t$
-2. Constant variance: $\text{Var}(Y_t) = \sigma^2$ for all $t$
-3. Autocovariance depends only on lag: $\text{Cov}(Y_t, Y_{t-k}) = \gamma_k$
+$$
+\{Y_t\}_{t=1}^T = Y_1, Y_2, ..., Y_T
+$$
+
+::: {.callout-tip}
+## Time Series vs Cross-Sectional Data
+
+**Time series**: Same unit observed over time
+- Example: GDP of Estonia from 1995-2023
+- Key issue: **Serial correlation** (observations not independent)
+- Order matters!
+
+**Cross-sectional**: Different units at one time
+- Example: Wages of 1000 workers in 2023
+- Assumes independence across units
+- Order doesn't matter
+:::
+
+### Time Series Objects in R {#sec-ts-objects}
 
 ::: {.panel-tabset}
 
-## Stationary Series
+## ts Object
 
-- Mean-reverting
-- No trend or seasonality
-- Suitable for standard time series models
+Regular time series (equal spacing):
 
-## Non-Stationary Series
+```{r}
+#| label: ts-object-demo
+# Create monthly time series starting Jan 1996
+example_ts <- ts(
+  data = rnorm(48),  # 4 years of monthly data
+  start = c(1996, 1),
+  frequency = 12     # 12 months per year
+)
 
-- Trending mean or variance
-- Unit root processes
-- Requires differencing or detrending
+# Properties
+str(example_ts)
+frequency(example_ts)
+cycle(example_ts)[1:12]  # Which month?
+time(example_ts)[1:12]   # Decimal year
+```
+
+## zoo Object
+
+Irregular time series (flexible dates):
+
+```{r}
+#| label: zoo-object-demo
+library(zoo)
+
+# Irregular dates
+dates <- as.Date(c("2020-01-01", "2020-01-05", "2020-01-12", "2020-02-03"))
+values <- c(100, 102, 98, 105)
+
+z <- zoo(values, dates)
+z
+
+# Can handle gaps!
+```
+
+## xts Object
+
+Extended time series (most powerful):
+
+```{r}
+#| label: xts-object-demo
+library(xts)
+
+# xts = zoo + extra features
+x <- xts(values, dates)
+x
+
+# Subsetting by date
+x["2020-01"]  # All January 2020
+```
+
+:::
+
+**Which to use?**
+- **ts**: Regular data (monthly, quarterly, annual)
+- **zoo**: Irregular data with dates
+- **xts**: Advanced time series operations
+
+### Example: Estonian CPI {#sec-cpi-example}
+
+```{r}
+#| label: load-cpi
+#| eval: false
+library(eurostat)
+
+# Download monthly CPI from Eurostat
+cpi <- get_eurostat(
+  "prc_hicp_midx",
+  filters = list(geo = "EE", coicop = "CP00", unit = "I15")
+) %>%
+  filter(time >= as.Date("1996-01-01")) %>%
+  select(time, values) %>%
+  rename(cpi = values, Date = time)
+
+# Convert to ts object
+cpi_ts <- ts(cpi$cpi, start = c(1996, 1), frequency = 12)
+```
+
+```{r}
+#| label: fig-cpi
+#| fig-cap: "Estonian Consumer Price Index"
+#| eval: false
+#| fig-width: 8
+#| fig-height: 5
+plot(cpi_ts,
+  main = "Estonian CPI (1996-present)",
+  ylab = "Index (2015=100)",
+  xlab = "Year"
+)
+```
+
+## Stationarity {#sec-stationarity}
+
+### Definition {#sec-stationarity-def}
+
+A time series $\{Y_t\}$ is **weakly stationary** (or covariance stationary) if:
+
+1. **Constant mean**: $E(Y_t) = \mu$ for all $t$
+2. **Constant variance**: $\text{Var}(Y_t) = \sigma^2$ for all $t$
+3. **Autocovariance depends only on lag**: $\text{Cov}(Y_t, Y_{t-h}) = \gamma_h$ for all $t$
+
+::: {.callout-important}
+## Why Does Stationarity Matter?
+
+**Non-stationary data**:
+- Standard regression assumptions violated
+- Spurious regression problem
+- Invalid inference
+
+**Solution**: Transform to stationarity
+- Take differences: $\Delta Y_t = Y_t - Y_{t-1}$
+- Take logs: $\log(Y_t)$
+- Detrend: Remove deterministic trend
+:::
+
+### Examples {#sec-stationarity-examples}
+
+::: {.panel-tabset}
+
+## Stationary: White Noise
+
+```{r}
+#| label: fig-white-noise
+#| fig-cap: "White Noise (Stationary)"
+#| fig-width: 7
+#| fig-height: 4
+set.seed(123)
+wn <- ts(rnorm(200), frequency = 1)
+
+par(mfrow = c(1, 2))
+plot(wn, main = "White Noise", ylab = "Y_t")
+acf(wn, main = "ACF")
+```
+
+**Properties**:
+- Mean = 0 (constant)
+- Variance constant
+- No autocorrelation
+
+## Non-Stationary: Random Walk
+
+```{r}
+#| label: fig-random-walk
+#| fig-cap: "Random Walk (Non-Stationary)"
+#| fig-width: 7
+#| fig-height: 4
+set.seed(123)
+rw <- ts(cumsum(rnorm(200)), frequency = 1)
+
+par(mfrow = c(1, 2))
+plot(rw, main = "Random Walk", ylab = "Y_t")
+acf(rw, main = "ACF (slowly decaying)")
+```
+
+**Properties**:
+- $Y_t = Y_{t-1} + \epsilon_t$
+- Variance increases over time
+- High persistence (ACF decays slowly)
+
+## Non-Stationary: Trend
+
+```{r}
+#| label: fig-trend
+#| fig-cap: "Deterministic Trend (Non-Stationary)"
+#| fig-width: 7
+#| fig-height: 4
+t <- 1:200
+trend <- ts(10 + 0.5 * t + rnorm(200, sd = 5), frequency = 1)
+
+par(mfrow = c(1, 2))
+plot(trend, main = "Linear Trend", ylab = "Y_t")
+acf(trend, main = "ACF")
+```
+
+**Properties**:
+- $Y_t = \alpha + \beta t + \epsilon_t$
+- Mean increases over time
+- Solution: Detrend or difference
 
 :::
 
 ## Unit Root Testing {#sec-unit-root}
 
-Test if series has a unit root (non-stationary):
+### The Unit Root Problem {#sec-unit-root-problem}
+
+Consider the AR(1) model:
+
+$$
+Y_t = \rho Y_{t-1} + \epsilon_t
+$$
+
+- If $|\rho| < 1$: **Stationary** (mean-reverting)
+- If $\rho = 1$: **Unit root** (random walk, non-stationary)
+- If $|\rho| > 1$: **Explosive** (rare in economics)
+
+**Testing**: $H_0: \rho = 1$ (unit root) vs $H_1: |\rho| < 1$ (stationary)
+
+::: {.callout-warning}
+## Spurious Regression
+If $Y_t$ and $X_t$ both have unit roots but are **unrelated**, OLS regression of $Y_t$ on $X_t$ will show:
+- High R² (often > 0.7)
+- Significant t-statistics
+- But the relationship is **spurious**!
+
+**Solution**: Test for unit roots first, then difference if needed
+:::
+
+### Unit Root Tests {#sec-unit-root-tests}
 
 ::: {.panel-tabset}
 
-## Augmented Dickey-Fuller
+## Augmented Dickey-Fuller (ADF)
+
+Tests $H_0$: Unit root (non-stationary)
+
+$$
+\Delta Y_t = \alpha + \beta t + \gamma Y_{t-1} + \sum_{i=1}^p \delta_i \Delta Y_{t-i} + \epsilon_t
+$$
+
+Test $H_0: \gamma = 0$ vs $H_1: \gamma < 0$
 
 ```{r}
-#| label: adf-test
-#| eval: false
+#| label: adf-test-example
 library(urca)
+
+# Simulate random walk (has unit root)
+set.seed(123)
+y_rw <- cumsum(rnorm(100))
+
 # ADF test
-adf_test <- ur.df(y, type = "drift", lags = 4)
+adf_test <- ur.df(y_rw, type = "drift", lags = 4)
 summary(adf_test)
 ```
 
-## Phillips-Perron
+**Interpretation**:
+- Test statistic < critical value → Reject $H_0$ (stationary)
+- Test statistic > critical value → Cannot reject $H_0$ (unit root)
+
+## Phillips-Perron (PP)
+
+Non-parametric alternative to ADF:
 
 ```{r}
 #| label: pp-test
-#| eval: false
-PP.test(y)
+library(tseries)
+
+# PP test
+pp.test(y_rw)
 ```
 
-## KPSS
+**Advantages**:
+- Robust to heteroskedasticity
+- No need to specify lag length
+
+## KPSS Test
+
+**Reverses null hypothesis**: $H_0$: Stationary vs $H_1$: Unit root
 
 ```{r}
 #| label: kpss-test
-#| eval: false
-kpss.test(y)
+# KPSS test
+kpss.test(y_rw)
 ```
+
+**Strategy**: Use both ADF and KPSS
+- ADF fails to reject & KPSS rejects → unit root
+- ADF rejects & KPSS fails to reject → stationary
+- Both reject or both fail to reject → ambiguous (use more lags/tests)
 
 :::
 
-::: {.callout-tip}
-## Testing Strategy
-1. Visual inspection (plot series)
-2. ADF test (H₀: unit root)
-3. KPSS test (H₀: stationarity)
-4. If non-stationary: difference series
+### First Differences {#sec-differences}
+
+If $Y_t$ has a unit root, $\Delta Y_t = Y_t - Y_{t-1}$ is often stationary:
+
+```{r}
+#| label: differencing
+# Random walk (non-stationary)
+y_rw <- cumsum(rnorm(100))
+
+# First difference (stationary)
+dy_rw <- diff(y_rw)
+
+# Test differenced series
+adf.test(dy_rw)
+```
+
+::: {.callout-note}
+## I(d) Notation
+- **I(0)**: Integrated of order 0 = Stationary
+- **I(1)**: Integrated of order 1 = Needs 1 difference to be stationary
+- **I(2)**: Needs 2 differences (rare)
+
+Most economic time series are **I(1)**: GDP, prices, wages, stock prices
 :::
 
 ## ARIMA Models {#sec-arima}
 
-**AR(p)**: Autoregressive
+### ARIMA Components {#sec-arima-components}
+
+**ARIMA(p,d,q)**: AutoRegressive Integrated Moving Average
 
 $$
-Y_t = c + \phi_1 Y_{t-1} + \cdots + \phi_p Y_{t-p} + \epsilon_t
-$$ {#eq-ar}
+\phi(L)(1-L)^d Y_t = \theta(L) \epsilon_t
+$$
 
-**MA(q)**: Moving Average
+Where:
+- **AR(p)**: $Y_t = \phi_1 Y_{t-1} + \cdots + \phi_p Y_{t-p} + \epsilon_t$
+- **I(d)**: Differencing $d$ times
+- **MA(q)**: $\epsilon_t = \theta_1 \epsilon_{t-1} + \cdots + \theta_q \epsilon_{t-q}$
+
+::: {.panel-tabset}
+
+## AR(p) Models
+
+**Autoregressive**: $Y_t$ depends on its own past values
 
 $$
-Y_t = c + \epsilon_t + \theta_1 \epsilon_{t-1} + \cdots + \theta_q \epsilon_{t-q}
-$$ {#eq-ma}
+Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \cdots + \phi_p Y_{t-p} + \epsilon_t
+$$
 
-**ARIMA(p,d,q)**: Combined with d differences
+**AR(1) example**:
+```{r}
+#| label: ar1-example
+# Simulate AR(1): Y_t = 0.7*Y_{t-1} + ε_t
+set.seed(123)
+ar1 <- arima.sim(model = list(ar = 0.7), n = 200)
+
+par(mfrow = c(1, 2))
+plot(ar1, main = "AR(1) with φ=0.7")
+acf(ar1, main = "ACF (exponential decay)")
+```
+
+**Identifying AR(p)**:
+- **ACF**: Decays gradually
+- **PACF**: Cuts off after lag p
+
+## MA(q) Models
+
+**Moving Average**: $Y_t$ depends on past errors
+
+$$
+Y_t = \mu + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \cdots + \theta_q \epsilon_{t-q}
+$$
+
+**MA(1) example**:
+```{r}
+#| label: ma1-example
+# Simulate MA(1): Y_t = ε_t + 0.5*ε_{t-1}
+ma1 <- arima.sim(model = list(ma = 0.5), n = 200)
+
+par(mfrow = c(1, 2))
+plot(ma1, main = "MA(1) with θ=0.5")
+acf(ma1, main = "ACF (cuts off at lag 1)")
+```
+
+**Identifying MA(q)**:
+- **ACF**: Cuts off after lag q
+- **PACF**: Decays gradually
+
+## ARMA(p,q) Models
+
+Combination of AR and MA:
+
+$$
+Y_t = c + \phi_1 Y_{t-1} + \cdots + \phi_p Y_{t-p} + \epsilon_t + \theta_1 \epsilon_{t-1} + \cdots + \theta_q \epsilon_{t-q}
+$$
 
 ```{r}
-#| label: arima-example
+#| label: arma-example
+# ARMA(2,1)
+arma <- arima.sim(model = list(ar = c(0.5, 0.3), ma = 0.4), n = 200)
+
+plot(arma, main = "ARMA(2,1)")
+```
+
+:::
+
+### Model Identification {#sec-arima-id}
+
+**Box-Jenkins methodology**:
+
+1. **Check stationarity**: Unit root tests
+2. **Difference if needed**: Make stationary
+3. **Examine ACF/PACF**: Identify p, q
+4. **Estimate model**: Use `arima()` or `auto.arima()`
+5. **Diagnostic checking**: Residual tests
+6. **Forecasting**
+
+::: {.callout-tip}
+## ACF and PACF Patterns
+
+| Model  | ACF                    | PACF                   |
+|--------|------------------------|------------------------|
+| AR(p)  | Decays exponentially   | Cuts off after lag p   |
+| MA(q)  | Cuts off after lag q   | Decays exponentially   |
+| ARMA   | Decays gradually       | Decays gradually       |
+:::
+
+### Example: ARIMA Estimation {#sec-arima-estimation}
+
+```{r}
+#| label: arima-estimation-example
 #| eval: false
 library(forecast)
-# Fit ARIMA
-fit <- auto.arima(y)
+
+# Load data (e.g., quarterly GDP growth)
+gdp_growth <- diff(log(gdp)) * 100  # Percentage growth rate
+
+# Check stationarity
+adf.test(gdp_growth)
+
+# ACF and PACF
+par(mfrow = c(1, 2))
+acf(gdp_growth)
+pacf(gdp_growth)
+
+# Fit ARIMA model
+fit <- arima(gdp_growth, order = c(2, 0, 1))
+summary(fit)
+
+# Or use auto.arima (automatic selection)
+auto_fit <- auto.arima(gdp_growth, seasonal = FALSE)
+summary(auto_fit)
+
+# Diagnostic checking
+checkresiduals(fit)
+
 # Forecast
-forecast(fit, h = 12)
+forecast_values <- forecast(fit, h = 8)  # 8 quarters ahead
+plot(forecast_values)
 ```
+
+### Model Selection {#sec-arima-selection}
+
+::: {.panel-tabset}
+
+## AIC / BIC
+
+**Akaike Information Criterion**:
+$$AIC = -2\log(L) + 2k$$
+
+**Bayesian Information Criterion**:
+$$BIC = -2\log(L) + k\log(T)$$
+
+Where $L$ = likelihood, $k$ = # parameters, $T$ = sample size
+
+```{r}
+#| label: model-selection
+#| eval: false
+# Compare models
+model1 <- arima(y, order = c(1, 0, 0))
+model2 <- arima(y, order = c(2, 0, 0))
+model3 <- arima(y, order = c(1, 0, 1))
+
+AIC(model1, model2, model3)
+BIC(model1, model2, model3)
+
+# Choose lowest AIC/BIC
+```
+
+## auto.arima()
+
+Automatic model selection:
+
+```{r}
+#| label: auto-arima
+#| eval: false
+# Searches over different (p,d,q) combinations
+best_model <- auto.arima(
+  y,
+  max.p = 5,
+  max.q = 5,
+  max.d = 2,
+  seasonal = FALSE,
+  ic = "aicc"  # AICc (corrected AIC for small samples)
+)
+
+summary(best_model)
+```
+
+:::
+
+## Seasonal Decomposition {#sec-seasonal}
+
+### Seasonal Patterns {#sec-seasonal-patterns}
+
+Many time series have **seasonal patterns**: regular fluctuations within a year
+
+**Examples**:
+- Retail sales (high in December)
+- Ice cream sales (high in summer)
+- Flu cases (high in winter)
+
+**Decomposition**:
+$$
+Y_t = T_t + S_t + R_t
+$$
+
+Where:
+- $T_t$: Trend component
+- $S_t$: Seasonal component
+- $R_t$: Remainder (irregular)
+
+### STL Decomposition {#sec-stl}
+
+**STL**: Seasonal and Trend decomposition using Loess
+
+```{r}
+#| label: stl-example
+#| eval: false
+# Load monthly data
+data(AirPassengers)
+
+# STL decomposition
+stl_decomp <- stl(AirPassengers, s.window = "periodic")
+
+# Plot components
+plot(stl_decomp)
+
+# Extract components
+trend <- stl_decomp$time.series[, "trend"]
+seasonal <- stl_decomp$time.series[, "seasonal"]
+remainder <- stl_decomp$time.series[, "remainder"]
+```
+
+### Seasonal ARIMA {#sec-sarima}
+
+**SARIMA(p,d,q)(P,D,Q)s**: Seasonal ARIMA
+
+$$
+\phi(L)\Phi(L^s)(1-L)^d(1-L^s)^D Y_t = \theta(L)\Theta(L^s)\epsilon_t
+$$
+
+```{r}
+#| label: sarima-example
+#| eval: false
+# Seasonal ARIMA for monthly data
+sarima_fit <- arima(
+  y,
+  order = c(1, 1, 1),              # Non-seasonal (p,d,q)
+  seasonal = list(order = c(1, 1, 1), period = 12)  # Seasonal (P,D,Q)_s
+)
+
+# Or use auto.arima
+auto_sarima <- auto.arima(y, seasonal = TRUE)
+```
+
+## Finite Distributed Lag Models {#sec-fdl}
+
+### FDL Model {#sec-fdl-model}
+
+**Distributed lag**: Current $Y$ depends on current and past values of $X$
+
+$$
+Y_t = \alpha + \beta_0 X_t + \beta_1 X_{t-1} + \cdots + \beta_q X_{t-q} + \epsilon_t
+$$
+
+**Example**: Effect of advertising on sales
+- Today's sales affected by today's ad spending
+- But also last week's, last month's, etc.
+
+::: {.callout-note}
+## Impact Multipliers
+- **Impact multiplier**: $\beta_0$ (immediate effect)
+- **Lag-k multiplier**: $\beta_k$ (effect after k periods)
+- **Cumulative multiplier**: $\sum_{i=0}^q \beta_i$ (total long-run effect)
+- **Mean lag**: $\frac{\sum_{i=0}^q i\beta_i}{\sum_{i=0}^q \beta_i}$ (average delay)
+:::
+
+### Example: FDL Estimation {#sec-fdl-example}
+
+```{r}
+#| label: fdl-estimation
+#| eval: false
+library(dynlm)
+
+# Create lagged variables
+# Y_t = α + β0*X_t + β1*X_{t-1} + β2*X_{t-2} + ε_t
+
+fdl_model <- dynlm(Y ~ L(X, 0) + L(X, 1) + L(X, 2), data = ts_data)
+summary(fdl_model)
+
+# Or more compactly
+fdl_model <- dynlm(Y ~ L(X, 0:2), data = ts_data)
+
+# Test if lags are jointly significant
+library(car)
+linearHypothesis(fdl_model, c("L(X, 1) = 0", "L(X, 2) = 0"))
+```
+
+### Choosing Lag Length {#sec-lag-selection}
+
+::: {.panel-tabset}
+
+## Information Criteria
+
+```{r}
+#| label: lag-selection-ic
+#| eval: false
+# Try different lag lengths
+lag_0 <- dynlm(Y ~ L(X, 0), data = ts_data)
+lag_1 <- dynlm(Y ~ L(X, 0:1), data = ts_data)
+lag_2 <- dynlm(Y ~ L(X, 0:2), data = ts_data)
+lag_3 <- dynlm(Y ~ L(X, 0:3), data = ts_data)
+
+# Compare AIC
+AIC(lag_0, lag_1, lag_2, lag_3)
+```
+
+## F-Test
+
+```{r}
+#| label: lag-selection-f
+#| eval: false
+# Test if additional lag is significant
+restricted <- dynlm(Y ~ L(X, 0:2), data = ts_data)
+unrestricted <- dynlm(Y ~ L(X, 0:3), data = ts_data)
+
+anova(restricted, unrestricted)
+```
+
+:::
 
 ## Vector Autoregression (VAR) {#sec-var}
 
-For multivariate time series:
+### VAR Model {#sec-var-model}
+
+**VAR**: Multiple time series, each depending on lags of all series
 
 $$
-\mathbf{Y}_t = \mathbf{c} + \mathbf{\Phi}_1 \mathbf{Y}_{t-1} + \cdots + \mathbf{\Phi}_p \mathbf{Y}_{t-p} + \mathbf{\epsilon}_t
-$$ {#eq-var}
+\begin{bmatrix} Y_{1t} \\ Y_{2t} \end{bmatrix} =
+\begin{bmatrix} c_1 \\ c_2 \end{bmatrix} +
+\begin{bmatrix} \phi_{11} & \phi_{12} \\ \phi_{21} & \phi_{22} \end{bmatrix}
+\begin{bmatrix} Y_{1,t-1} \\ Y_{2,t-1} \end{bmatrix} +
+\begin{bmatrix} \epsilon_{1t} \\ \epsilon_{2t} \end{bmatrix}
+$$
+
+**Example**: GDP and unemployment
+- GDP affects unemployment
+- Unemployment affects GDP
+- Both depend on their own past values
+
+### VAR Estimation {#sec-var-estimation}
 
 ```{r}
 #| label: var-example
 #| eval: false
 library(vars)
-var_model <- VAR(data, p = 2, type = "const")
+
+# Combine variables into a ts object
+var_data <- cbind(gdp, unemp, inflation)
+
+# Select lag length
+VARselect(var_data, lag.max = 8, type = "both")
+
+# Estimate VAR(2)
+var_model <- VAR(var_data, p = 2, type = "both")
 summary(var_model)
+
+# Granger causality test
+causality(var_model, cause = "gdp")
+
+# Impulse response functions
+irf_gdp <- irf(var_model, impulse = "gdp", response = "unemp", n.ahead = 20)
+plot(irf_gdp)
+
+# Forecast
+var_forecast <- predict(var_model, n.ahead = 8)
+plot(var_forecast)
 ```
 
-## Detailed Content
+### Granger Causality {#sec-granger}
+
+**Question**: Does $X$ help forecast $Y$?
+
+**Granger causality test**: Does adding lags of $X$ improve forecast of $Y$?
 
 ::: {.callout-note}
-The complete Time Series chapter is being converted with plans for interactive visualizations using Observable JS. Current content includes the original R Markdown below.
+## "Granger Causality" ≠ Causality
+"X Granger-causes Y" means:
+- X helps **predict** Y
+- Does **NOT** mean X **causes** Y in causal sense
+- Could be reverse causality, confounders, etc.
 :::
 
 ```{r}
-#| child: "TimeSeries.Rmd"
+#| label: granger-test
+#| eval: false
+library(lmtest)
+
+# Does X Granger-cause Y?
+grangertest(Y ~ X, order = 4, data = ts_data)
+
+# Interpretation:
+# Small p-value → X Granger-causes Y (X helps predict Y)
+# Large p-value → X does not Granger-cause Y
 ```
+
+## Forecasting {#sec-forecasting}
+
+### Forecast Evaluation {#sec-forecast-eval}
+
+**Out-of-sample forecasting**:
+1. Split data: Training set + Test set
+2. Estimate model on training set
+3. Forecast test set
+4. Compare forecast to actual values
+
+**Forecast errors**: $e_t = Y_t - \hat{Y}_t$
+
+::: {.panel-tabset}
+
+## Accuracy Measures
+
+**Mean Absolute Error**:
+$$MAE = \frac{1}{h}\sum_{t=1}^h |e_t|$$
+
+**Root Mean Squared Error**:
+$$RMSE = \sqrt{\frac{1}{h}\sum_{t=1}^h e_t^2}$$
+
+**Mean Absolute Percentage Error**:
+$$MAPE = \frac{100}{h}\sum_{t=1}^h \left|\frac{e_t}{Y_t}\right|$$
+
+```{r}
+#| label: forecast-accuracy
+#| eval: false
+library(forecast)
+
+# Calculate accuracy
+accuracy(forecast_obj, test_data)
+```
+
+## Forecast Intervals
+
+95% prediction interval:
+$$\hat{Y}_{T+h} \pm 1.96 \times SE(\hat{Y}_{T+h})$$
+
+```{r}
+#| label: forecast-intervals
+#| eval: false
+# Forecast with intervals
+fc <- forecast(model, h = 12, level = c(80, 95))
+
+plot(fc)
+```
+
+:::
+
+### Exponential Smoothing {#sec-exp-smooth}
+
+**Simple exponential smoothing**:
+$$\hat{Y}_{T+1} = \alpha Y_T + (1-\alpha)\hat{Y}_T$$
+
+Where $0 < \alpha < 1$ (smoothing parameter)
+
+```{r}
+#| label: exp-smooth
+#| eval: false
+library(forecast)
+
+# Simple exponential smoothing
+ses_model <- ses(y, h = 10)
+plot(ses_model)
+
+# Holt's linear trend
+holt_model <- holt(y, h = 10)
+
+# Holt-Winters seasonal
+hw_model <- hw(y, seasonal = "additive", h = 12)
+```
+
+## Summary {#sec-ts-summary}
+
+::: {.callout-note}
+## Key Takeaways
+
+**Stationarity**:
+- Check for unit roots (ADF, PP, KPSS tests)
+- Difference non-stationary series
+- Most economic variables are I(1)
+
+**ARIMA Models**:
+- Identify (p,d,q) using ACF/PACF
+- Estimate with `arima()` or `auto.arima()`
+- Check residuals (white noise?)
+- Forecast future values
+
+**Seasonal Patterns**:
+- Decompose: Trend + Seasonal + Remainder
+- Use SARIMA for seasonal data
+- Remove seasonality before modeling
+
+**Distributed Lags**:
+- Current Y depends on past X values
+- Estimate with `dynlm`
+- Interpret impact/cumulative multipliers
+
+**VAR Models**:
+- Multiple interrelated time series
+- Granger causality tests
+- Impulse response functions
+- Multi-step forecasting
+
+**Best Practices**:
+- Always plot your data first!
+- Test for stationarity
+- Use information criteria (AIC/BIC)
+- Validate with out-of-sample forecasts
+- Report forecast intervals
+:::
+
+## Further Reading {#sec-ts-references}
+
+- @wooldridge2015introductory - Chapters 10-12, 18
+- @hamilton1994time - Classic time series reference
+- @hyndman2018forecasting - Modern forecasting (free online!)
+- @enders2014applied - Applied time series
+- @shumway2017time - R-based time series
+
+---
+
+::: {.callout-tip}
+## Next Chapter
+See @sec-panel for **Panel Data Models** combining cross-sectional and time dimensions.
+:::
